@@ -375,6 +375,56 @@ curl -X POST http://localhost:8080/api/v1/providers/filter \
   }'
 ```
 
+The filter request structure supports the following operators:
+
+- `EQUALS`: Exact match
+- `NOT_EQUALS`: Not equal to
+- `GREATER_THAN`: Greater than
+- `LESS_THAN`: Less than
+- `GREATER_THAN_OR_EQUAL`: Greater than or equal to
+- `LESS_THAN_OR_EQUAL`: Less than or equal to
+- `CONTAINS`: String contains
+- `STARTS_WITH`: String starts with
+- `ENDS_WITH`: String ends with
+- `IN`: Value in a list
+- `NOT_IN`: Value not in a list
+- `IS_NULL`: Field is null
+- `IS_NOT_NULL`: Field is not null
+
+Example with multiple filter types:
+
+```bash
+curl -X POST http://localhost:8080/api/v1/providers/filter \
+  -H "Content-Type: application/json" \
+  -d '{
+    "page": 0,
+    "size": 20,
+    "filters": [
+      {
+        "field": "name",
+        "operator": "CONTAINS",
+        "value": "Bank"
+      },
+      {
+        "field": "region",
+        "operator": "IN",
+        "value": ["Europe", "North America"]
+      },
+      {
+        "field": "createdAt",
+        "operator": "GREATER_THAN",
+        "value": "2023-01-01T00:00:00Z"
+      }
+    ],
+    "sorts": [
+      {
+        "field": "createdAt",
+        "direction": "DESC"
+      }
+    ]
+  }'
+```
+
 ## Getting Started
 
 ### Prerequisites
@@ -388,7 +438,7 @@ curl -X POST http://localhost:8080/api/v1/providers/filter \
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/firefly/common-platform-config-mgmt.git
+   git clone https://github.com/firefly-oss/common-platform-config-mgmt.git
    cd common-platform-config-mgmt
    ```
 
