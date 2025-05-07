@@ -15,6 +15,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -71,8 +72,7 @@ public class ProviderController {
             }
     )
     public ResponseEntity<Mono<PaginationResponse<ProviderDTO>>> filter(
-            @Parameter(description = "Filter criteria", required = true)
-            @RequestBody FilterRequest<ProviderDTO> filterRequest) {
+            @ParameterObject @ModelAttribute FilterRequest<ProviderDTO> filterRequest) {
         return ResponseEntity.ok(providerService.filter(filterRequest));
     }
 
@@ -166,14 +166,9 @@ public class ProviderController {
     public ResponseEntity<Mono<PaginationResponse<ProviderConfigDTO>>> filterConfigs(
             @Parameter(description = "ID of the provider", required = true)
             @PathVariable Long providerId,
-            @Parameter(description = "Filter criteria", required = true)
-            @RequestBody FilterRequest<ProviderConfigDTO> filterRequest) {
-        // Set the providerId in the filter request
-        if (filterRequest.getFilter() == null) {
-            filterRequest.setFilter(new ProviderConfigDTO());
-        }
-        filterRequest.getFilter().setProviderId(providerId);
-        
+            @ParameterObject @ModelAttribute FilterRequest<ProviderConfigDTO> filterRequest) {
+
+        filterRequest.getFilters().setProviderId(providerId);
         return ResponseEntity.ok(providerConfigService.filter(filterRequest));
     }
 
@@ -308,14 +303,9 @@ public class ProviderController {
     public ResponseEntity<Mono<PaginationResponse<ProviderProcessDTO>>> filterProcesses(
             @Parameter(description = "ID of the provider", required = true)
             @PathVariable Long providerId,
-            @Parameter(description = "Filter criteria", required = true)
-            @RequestBody FilterRequest<ProviderProcessDTO> filterRequest) {
-        // Set the providerId in the filter request
-        if (filterRequest.getFilter() == null) {
-            filterRequest.setFilter(new ProviderProcessDTO());
-        }
-        filterRequest.getFilter().setProviderId(providerId);
-        
+            @ParameterObject @ModelAttribute FilterRequest<ProviderProcessDTO> filterRequest) {
+
+        filterRequest.getFilters().setProviderId(providerId);
         return ResponseEntity.ok(providerProcessService.filter(filterRequest));
     }
 

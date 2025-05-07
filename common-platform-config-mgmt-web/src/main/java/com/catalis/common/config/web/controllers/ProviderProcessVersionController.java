@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -65,8 +66,7 @@ public class ProviderProcessVersionController {
             }
     )
     public ResponseEntity<Mono<PaginationResponse<ProviderProcessVersionDTO>>> filter(
-            @Parameter(description = "Filter criteria", required = true)
-            @RequestBody FilterRequest<ProviderProcessVersionDTO> filterRequest) {
+            @ParameterObject @ModelAttribute FilterRequest<ProviderProcessVersionDTO> filterRequest) {
         return ResponseEntity.ok(providerProcessVersionService.filter(filterRequest));
     }
 

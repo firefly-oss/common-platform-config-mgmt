@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -164,14 +165,9 @@ public class ProviderProcessController {
     public ResponseEntity<Mono<PaginationResponse<ProviderProcessVersionDTO>>> filterVersions(
             @Parameter(description = "ID of the process", required = true)
             @PathVariable Long processId,
-            @Parameter(description = "Filter criteria", required = true)
-            @RequestBody FilterRequest<ProviderProcessVersionDTO> filterRequest) {
-        // Set the processId in the filter request
-        if (filterRequest.getFilter() == null) {
-            filterRequest.setFilter(new ProviderProcessVersionDTO());
-        }
-        filterRequest.getFilter().setProviderProcessId(processId);
-        
+            @ParameterObject @ModelAttribute FilterRequest<ProviderProcessVersionDTO> filterRequest) {
+
+        filterRequest.getFilters().setProviderProcessId(processId);
         return ResponseEntity.ok(providerProcessVersionService.filter(filterRequest));
     }
 

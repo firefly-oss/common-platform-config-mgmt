@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -65,8 +66,7 @@ public class ProviderStatusController {
             }
     )
     public ResponseEntity<Mono<PaginationResponse<ProviderStatusDTO>>> filter(
-            @Parameter(description = "Filter criteria", required = true)
-            @RequestBody FilterRequest<ProviderStatusDTO> filterRequest) {
+            @ParameterObject @ModelAttribute FilterRequest<ProviderStatusDTO> filterRequest) {
         return ResponseEntity.ok(providerStatusService.filter(filterRequest));
     }
 
