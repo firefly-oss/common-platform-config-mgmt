@@ -5,8 +5,9 @@
 ![Java](https://img.shields.io/badge/Java-21-orange.svg)
 ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.1.0-brightgreen.svg)
 ![R2DBC](https://img.shields.io/badge/R2DBC-PostgreSQL-blue.svg)
+![Camunda](https://img.shields.io/badge/Camunda-8-orange.svg)
 
-A microservice component of the Firefly Platform for managing configuration and process definitions for a core banking platform, supporting both standalone operation and Banking as a Service (BaaS) modes.
+A microservice component of the Firefly Platform for managing configuration and process definitions for a core banking platform, supporting both standalone operation and Banking as a Service (BaaS) modes. This service provides a centralized configuration management system that enables the Firefly orchestration microservice to determine whether to operate standalone through payment gateways or use a Banking as a Service provider.
 
 ## Table of Contents
 
@@ -15,11 +16,21 @@ A microservice component of the Firefly Platform for managing configuration and 
 - [Architecture](#architecture)
 - [Data Model](#data-model)
 - [API Documentation](#api-documentation)
+  - [API Examples](#api-examples)
 - [Getting Started](#getting-started)
   - [Prerequisites](#prerequisites)
   - [Installation](#installation)
   - [Configuration](#configuration)
   - [Running the Application](#running-the-application)
+- [Step-by-Step Guide](#step-by-step-guide)
+  - [Setting Up Provider Types](#setting-up-provider-types)
+  - [Creating Provider Statuses](#creating-provider-statuses)
+  - [Configuring a Provider](#configuring-a-provider)
+  - [Managing Provider Configurations](#managing-provider-configurations)
+  - [Creating Process Statuses](#creating-process-statuses)
+  - [Defining Provider Processes](#defining-provider-processes)
+  - [Managing Process Versions](#managing-process-versions)
+  - [Validating and Deploying Processes](#validating-and-deploying-processes)
 - [Development](#development)
   - [Project Structure](#project-structure)
   - [Building](#building)
@@ -232,7 +243,6 @@ Base URL: `/api/v1`
 - `/api/v1/providers`: Provider management
 - `/api/v1/provider-process-statuses`: Process statuses management
 - `/api/v1/processes`: Process management
-- `/api/v1/process-versions`: Process versions management
 
 ### Nested Resources
 
@@ -241,6 +251,129 @@ Base URL: `/api/v1`
 - `/api/v1/processes/{processId}/versions`: Process versions
 
 For detailed API documentation, see the Swagger UI at `/swagger-ui.html` when the application is running.
+
+### API Examples
+
+#### Creating a Provider Type
+
+```bash
+curl -X POST http://localhost:8080/api/v1/provider-types \
+  -H "Content-Type: application/json" \
+  -d '{
+    "code": "BAAS",
+    "name": "Banking as a Service",
+    "description": "Banking as a Service providers",
+    "active": true
+  }'
+```
+
+#### Creating a Provider
+
+```bash
+curl -X POST http://localhost:8080/api/v1/providers \
+  -H "Content-Type: application/json" \
+  -d '{
+    "code": "TREEZOR",
+    "name": "Treezor",
+    "description": "Treezor BaaS provider",
+    "providerTypeId": 1,
+    "providerStatusId": 1,
+    "apiBaseUrl": "https://api.treezor.com",
+    "webhookUrl": "https://webhooks.mycompany.com/treezor",
+    "callbackUrl": "https://callbacks.mycompany.com/treezor",
+    "contactName": "John Doe",
+    "contactEmail": "john.doe@treezor.com",
+    "countryCode": "FR",
+    "region": "Europe",
+    "currencyCode": "EUR",
+    "requiresAuthentication": true,
+    "authenticationType": "OAUTH2",
+    "supportsWebhooks": true,
+    "active": true
+  }'
+```
+
+#### Adding a Configuration to a Provider
+
+```bash
+curl -X POST http://localhost:8080/api/v1/providers/1/configs \
+  -H "Content-Type: application/json" \
+  -d '{
+    "configGroup": "API_CREDENTIALS",
+    "key": "API_KEY",
+    "value": "your-api-key-here",
+    "valueType": "string",
+    "description": "API key for authentication",
+    "isSecret": true,
+    "isRequired": true,
+    "isEditable": true,
+    "active": true
+  }'
+```
+
+#### Creating a Process for a Provider
+
+```bash
+curl -X POST http://localhost:8080/api/v1/processes \
+  -H "Content-Type: application/json" \
+  -d '{
+    "code": "PAYMENT_PROCESS",
+    "name": "Payment Processing",
+    "description": "Process for handling payments",
+    "providerId": 1,
+    "processType": "PAYMENT",
+    "processCategory": "CORE",
+    "isCommon": false,
+    "priority": 10,
+    "estimatedDurationSeconds": 60,
+    "tags": "payment,core",
+    "active": true
+  }'
+```
+
+#### Adding a Version to a Process
+
+```bash
+curl -X POST http://localhost:8080/api/v1/processes/1/versions \
+  -H "Content-Type: application/json" \
+  -d '{
+    "version": "1.0.0",
+    "bpmnXml": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<bpmn:definitions xmlns:bpmn=\"http://www.omg.org/spec/BPMN/20100524/MODEL\" id=\"Definitions_1\" targetNamespace=\"http://bpmn.io/schema/bpmn\">\n  <bpmn:process id=\"payment-process\" name=\"Payment Process\" isExecutable=\"true\">\n    <!-- BPMN content here -->\n  </bpmn:process>\n</bpmn:definitions>",
+    "providerProcessStatusId": 1,
+    "notes": "Initial version",
+    "isCurrent": true,
+    "active": true
+  }'
+```
+
+#### Filtering Providers
+
+```bash
+curl -X POST http://localhost:8080/api/v1/providers/filter \
+  -H "Content-Type: application/json" \
+  -d '{
+    "page": 0,
+    "size": 10,
+    "filters": [
+      {
+        "field": "providerTypeId",
+        "operator": "EQUALS",
+        "value": 1
+      },
+      {
+        "field": "active",
+        "operator": "EQUALS",
+        "value": true
+      }
+    ],
+    "sorts": [
+      {
+        "field": "name",
+        "direction": "ASC"
+      }
+    ]
+  }'
+```
 
 ## Getting Started
 
@@ -306,6 +439,304 @@ docker run -p 8080:8080 common-platform-config-mgmt
 ```bash
 docker-compose up
 ```
+
+## Step-by-Step Guide
+
+This section provides a comprehensive guide on how to use the Config Management microservice to set up providers and their processes.
+
+### Setting Up Provider Types
+
+Provider types categorize different kinds of providers (e.g., BaaS, Payment Gateway, CRM).
+
+1. **Create a Provider Type**:
+
+```bash
+curl -X POST http://localhost:8080/api/v1/provider-types \
+  -H "Content-Type: application/json" \
+  -d '{
+    "code": "BAAS",
+    "name": "Banking as a Service",
+    "description": "Banking as a Service providers",
+    "active": true
+  }'
+```
+
+2. **Verify Provider Type Creation**:
+
+```bash
+curl -X GET http://localhost:8080/api/v1/provider-types/1
+```
+
+### Creating Provider Statuses
+
+Provider statuses define the operational state of providers (e.g., Active, Inactive, Maintenance).
+
+1. **Create Provider Statuses**:
+
+```bash
+# Create Active status
+curl -X POST http://localhost:8080/api/v1/provider-statuses \
+  -H "Content-Type: application/json" \
+  -d '{
+    "code": "ACTIVE",
+    "name": "Active",
+    "description": "Provider is active and operational",
+    "active": true
+  }'
+
+# Create Maintenance status
+curl -X POST http://localhost:8080/api/v1/provider-statuses \
+  -H "Content-Type: application/json" \
+  -d '{
+    "code": "MAINTENANCE",
+    "name": "Maintenance",
+    "description": "Provider is under maintenance",
+    "active": true
+  }'
+```
+
+### Configuring a Provider
+
+Providers represent external services like BaaS providers or payment gateways.
+
+1. **Create a Provider**:
+
+```bash
+curl -X POST http://localhost:8080/api/v1/providers \
+  -H "Content-Type: application/json" \
+  -d '{
+    "code": "TREEZOR",
+    "name": "Treezor",
+    "description": "Treezor BaaS provider",
+    "providerTypeId": 1,
+    "providerStatusId": 1,
+    "apiBaseUrl": "https://api.treezor.com",
+    "webhookUrl": "https://webhooks.mycompany.com/treezor",
+    "callbackUrl": "https://callbacks.mycompany.com/treezor",
+    "contactName": "John Doe",
+    "contactEmail": "john.doe@treezor.com",
+    "countryCode": "FR",
+    "region": "Europe",
+    "currencyCode": "EUR",
+    "requiresAuthentication": true,
+    "authenticationType": "OAUTH2",
+    "supportsWebhooks": true,
+    "active": true
+  }'
+```
+
+2. **Verify Provider Creation**:
+
+```bash
+curl -X GET http://localhost:8080/api/v1/providers/1
+```
+
+### Managing Provider Configurations
+
+Provider configurations store settings and credentials for each provider.
+
+1. **Add API Credentials Configuration**:
+
+```bash
+curl -X POST http://localhost:8080/api/v1/providers/1/configs \
+  -H "Content-Type: application/json" \
+  -d '{
+    "configGroup": "API_CREDENTIALS",
+    "key": "API_KEY",
+    "value": "your-api-key-here",
+    "valueType": "string",
+    "description": "API key for authentication",
+    "isSecret": true,
+    "isRequired": true,
+    "isEditable": true,
+    "active": true
+  }'
+```
+
+2. **Add API Secret Configuration**:
+
+```bash
+curl -X POST http://localhost:8080/api/v1/providers/1/configs \
+  -H "Content-Type: application/json" \
+  -d '{
+    "configGroup": "API_CREDENTIALS",
+    "key": "API_SECRET",
+    "value": "your-api-secret-here",
+    "valueType": "string",
+    "description": "API secret for authentication",
+    "isSecret": true,
+    "isRequired": true,
+    "isEditable": true,
+    "active": true
+  }'
+```
+
+3. **Add Environment Configuration**:
+
+```bash
+curl -X POST http://localhost:8080/api/v1/providers/1/configs \
+  -H "Content-Type: application/json" \
+  -d '{
+    "configGroup": "ENVIRONMENT",
+    "key": "ENVIRONMENT",
+    "value": "sandbox",
+    "valueType": "string",
+    "description": "Environment (sandbox or production)",
+    "isSecret": false,
+    "isRequired": true,
+    "isEditable": true,
+    "active": true
+  }'
+```
+
+4. **List Provider Configurations**:
+
+```bash
+curl -X GET http://localhost:8080/api/v1/providers/1/configs
+```
+
+### Creating Process Statuses
+
+Process statuses define the lifecycle state of BPMN processes (e.g., Draft, Published, Deprecated).
+
+1. **Create Process Statuses**:
+
+```bash
+# Create Draft status
+curl -X POST http://localhost:8080/api/v1/provider-process-statuses \
+  -H "Content-Type: application/json" \
+  -d '{
+    "code": "DRAFT",
+    "name": "Draft",
+    "description": "Process is in draft state",
+    "active": true
+  }'
+
+# Create Published status
+curl -X POST http://localhost:8080/api/v1/provider-process-statuses \
+  -H "Content-Type: application/json" \
+  -d '{
+    "code": "PUBLISHED",
+    "name": "Published",
+    "description": "Process is published and ready for production",
+    "active": true
+  }'
+```
+
+### Defining Provider Processes
+
+Provider processes define the business processes that can be executed for a provider.
+
+1. **Create a Process**:
+
+```bash
+curl -X POST http://localhost:8080/api/v1/processes \
+  -H "Content-Type: application/json" \
+  -d '{
+    "code": "PAYMENT_PROCESS",
+    "name": "Payment Processing",
+    "description": "Process for handling payments",
+    "providerId": 1,
+    "processType": "PAYMENT",
+    "processCategory": "CORE",
+    "isCommon": false,
+    "priority": 10,
+    "estimatedDurationSeconds": 60,
+    "tags": "payment,core",
+    "active": true
+  }'
+```
+
+2. **Create a Common Process** (shared across providers):
+
+```bash
+curl -X POST http://localhost:8080/api/v1/processes \
+  -H "Content-Type: application/json" \
+  -d '{
+    "code": "CUSTOMER_ONBOARDING",
+    "name": "Customer Onboarding",
+    "description": "Common process for customer onboarding",
+    "providerId": 1,
+    "processType": "ONBOARDING",
+    "processCategory": "CUSTOMER",
+    "isCommon": true,
+    "priority": 5,
+    "estimatedDurationSeconds": 300,
+    "tags": "onboarding,customer",
+    "active": true
+  }'
+```
+
+### Managing Process Versions
+
+Process versions store the actual BPMN XML definitions for each process.
+
+1. **Create a Process Version**:
+
+```bash
+curl -X POST http://localhost:8080/api/v1/processes/1/versions \
+  -H "Content-Type: application/json" \
+  -d '{
+    "version": "1.0.0",
+    "bpmnXml": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<bpmn:definitions xmlns:bpmn=\"http://www.omg.org/spec/BPMN/20100524/MODEL\" id=\"Definitions_1\" targetNamespace=\"http://bpmn.io/schema/bpmn\">\n  <bpmn:process id=\"payment-process\" name=\"Payment Process\" isExecutable=\"true\">\n    <!-- BPMN content here -->\n  </bpmn:process>\n</bpmn:definitions>",
+    "providerProcessStatusId": 1,
+    "notes": "Initial version",
+    "isCurrent": true,
+    "active": true
+  }'
+```
+
+2. **Update a Process Version Status** (e.g., from Draft to Published):
+
+```bash
+curl -X PUT http://localhost:8080/api/v1/processes/1/versions/1 \
+  -H "Content-Type: application/json" \
+  -d '{
+    "version": "1.0.0",
+    "bpmnXml": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<bpmn:definitions xmlns:bpmn=\"http://www.omg.org/spec/BPMN/20100524/MODEL\" id=\"Definitions_1\" targetNamespace=\"http://bpmn.io/schema/bpmn\">\n  <bpmn:process id=\"payment-process\" name=\"Payment Process\" isExecutable=\"true\">\n    <!-- BPMN content here -->\n  </bpmn:process>\n</bpmn:definitions>",
+    "providerProcessStatusId": 2,
+    "notes": "Initial version",
+    "changelog": "Published for production use",
+    "isCurrent": true,
+    "active": true
+  }'
+```
+
+### Validating and Deploying Processes
+
+The microservice integrates with Camunda 8 for BPMN process validation and deployment.
+
+1. **Validate a BPMN Process**:
+
+The validation happens automatically when creating or updating a process version. The service checks for:
+
+- Valid BPMN 2.0 XML syntax
+- Process executable flag is set to true
+- Process ID matches the expected format
+- Required elements are present
+
+2. **Deploy a Process to Camunda**:
+
+```bash
+curl -X PUT http://localhost:8080/api/v1/processes/1/versions/1/deploy \
+  -H "Content-Type: application/json"
+```
+
+This endpoint will:
+
+- Validate the BPMN process
+- Deploy it to the configured Camunda engine
+- Update the process version with deployment information
+- Set the `isDeployed` flag to true
+- Store the Camunda deployment ID
+
+3. **Check Deployment Status**:
+
+```bash
+curl -X GET http://localhost:8080/api/v1/processes/1/versions/1
+```
+
+The response will include deployment information if the process has been deployed.
 
 ## Development
 
