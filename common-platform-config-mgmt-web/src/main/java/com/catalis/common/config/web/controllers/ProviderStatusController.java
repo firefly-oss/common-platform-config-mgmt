@@ -38,6 +38,7 @@ public class ProviderStatusController {
      */
     @GetMapping("/{id}")
     @Operation(
+            operationId = "getProviderStatusById",
             summary = "Get a provider status by ID",
             description = "Returns a provider status based on the ID",
             responses = {
@@ -59,6 +60,7 @@ public class ProviderStatusController {
      */
     @PostMapping("/filter")
     @Operation(
+            operationId = "filterProviderStatuses",
             summary = "Filter provider statuses",
             description = "Returns a filtered list of provider statuses based on criteria",
             responses = {
@@ -78,6 +80,7 @@ public class ProviderStatusController {
      */
     @PostMapping
     @Operation(
+            operationId = "createProviderStatus",
             summary = "Create a new provider status",
             description = "Creates a new provider status and returns it",
             responses = {
@@ -102,6 +105,7 @@ public class ProviderStatusController {
      */
     @PutMapping("/{id}")
     @Operation(
+            operationId = "updateProviderStatus",
             summary = "Update an existing provider status",
             description = "Updates an existing provider status and returns it",
             responses = {
@@ -127,6 +131,7 @@ public class ProviderStatusController {
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @Operation(
+            operationId = "deleteProviderStatus",
             summary = "Delete a provider status",
             description = "Deletes a provider status",
             responses = {

@@ -38,6 +38,7 @@ public class ProviderTypeController {
      */
     @GetMapping("/{id}")
     @Operation(
+            operationId = "getProviderTypeById",
             summary = "Get a provider type by ID",
             description = "Returns a provider type based on the ID",
             responses = {
@@ -59,6 +60,7 @@ public class ProviderTypeController {
      */
     @PostMapping("/filter")
     @Operation(
+            operationId = "filterProviderTypes",
             summary = "Filter provider types",
             description = "Returns a filtered list of provider types based on criteria",
             responses = {
@@ -78,6 +80,7 @@ public class ProviderTypeController {
      */
     @PostMapping
     @Operation(
+            operationId = "createProviderType",
             summary = "Create a new provider type",
             description = "Creates a new provider type and returns it",
             responses = {
@@ -102,6 +105,7 @@ public class ProviderTypeController {
      */
     @PutMapping("/{id}")
     @Operation(
+            operationId = "updateProviderType",
             summary = "Update an existing provider type",
             description = "Updates an existing provider type and returns it",
             responses = {
@@ -127,6 +131,7 @@ public class ProviderTypeController {
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @Operation(
+            operationId = "deleteProviderType",
             summary = "Delete a provider type",
             description = "Deletes a provider type",
             responses = {

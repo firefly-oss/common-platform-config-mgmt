@@ -44,6 +44,7 @@ public class ProviderController {
      */
     @GetMapping("/{id}")
     @Operation(
+            operationId = "getProviderById",
             summary = "Get a provider by ID",
             description = "Returns a provider based on the ID",
             responses = {
@@ -65,6 +66,7 @@ public class ProviderController {
      */
     @PostMapping("/filter")
     @Operation(
+            operationId = "filterProviders",
             summary = "Filter providers",
             description = "Returns a filtered list of providers based on criteria",
             responses = {
@@ -84,6 +86,7 @@ public class ProviderController {
      */
     @PostMapping
     @Operation(
+            operationId = "createProvider",
             summary = "Create a new provider",
             description = "Creates a new provider and returns it",
             responses = {
@@ -108,6 +111,7 @@ public class ProviderController {
      */
     @PutMapping("/{id}")
     @Operation(
+            operationId = "updateProvider",
             summary = "Update an existing provider",
             description = "Updates an existing provider and returns it",
             responses = {
@@ -133,6 +137,7 @@ public class ProviderController {
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @Operation(
+            operationId = "deleteProvider",
             summary = "Delete a provider",
             description = "Deletes a provider",
             responses = {
@@ -157,6 +162,7 @@ public class ProviderController {
      */
     @PostMapping("/{providerId}/configs/filter")
     @Operation(
+            operationId = "filterProviderConfigs",
             summary = "Filter configurations for a provider",
             description = "Returns a filtered list of configurations for a specific provider",
             responses = {
@@ -181,6 +187,7 @@ public class ProviderController {
      */
     @PostMapping("/{providerId}/configs")
     @Operation(
+            operationId = "createProviderConfig",
             summary = "Create a new configuration for a provider",
             description = "Creates a new configuration for a specific provider and returns it",
             responses = {
@@ -209,6 +216,7 @@ public class ProviderController {
      */
     @GetMapping("/{providerId}/configs/{id}")
     @Operation(
+            operationId = "getProviderConfigById",
             summary = "Get a configuration by ID for a provider",
             description = "Returns a configuration for a specific provider based on the ID",
             responses = {
@@ -235,6 +243,7 @@ public class ProviderController {
      */
     @PutMapping("/{providerId}/configs/{id}")
     @Operation(
+            operationId = "updateProviderConfig",
             summary = "Update a configuration for a provider",
             description = "Updates a configuration for a specific provider and returns it",
             responses = {
@@ -264,6 +273,7 @@ public class ProviderController {
     @DeleteMapping("/{providerId}/configs/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @Operation(
+            operationId = "deleteProviderConfig",
             summary = "Delete a configuration for a provider",
             description = "Deletes a configuration for a specific provider",
             responses = {
@@ -294,6 +304,7 @@ public class ProviderController {
      */
     @PostMapping("/{providerId}/processes/filter")
     @Operation(
+            operationId = "filterProviderProcesses",
             summary = "Filter processes for a provider",
             description = "Returns a filtered list of processes for a specific provider",
             responses = {
@@ -318,6 +329,7 @@ public class ProviderController {
      */
     @PostMapping("/{providerId}/processes")
     @Operation(
+            operationId = "createProviderProcess",
             summary = "Create a new process for a provider",
             description = "Creates a new process for a specific provider and returns it",
             responses = {
@@ -346,6 +358,7 @@ public class ProviderController {
      */
     @GetMapping("/{providerId}/processes/{id}")
     @Operation(
+            operationId = "getProviderProcessById",
             summary = "Get a process by ID for a provider",
             description = "Returns a process for a specific provider based on the ID",
             responses = {
@@ -372,6 +385,7 @@ public class ProviderController {
      */
     @PutMapping("/{providerId}/processes/{id}")
     @Operation(
+            operationId = "updateProviderProcess",
             summary = "Update a process for a provider",
             description = "Updates a process for a specific provider and returns it",
             responses = {
@@ -401,6 +415,7 @@ public class ProviderController {
     @DeleteMapping("/{providerId}/processes/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @Operation(
+            operationId = "deleteProviderProcess",
             summary = "Delete a process for a provider",
             description = "Deletes a process for a specific provider",
             responses = {

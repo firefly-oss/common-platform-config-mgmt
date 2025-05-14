@@ -38,6 +38,7 @@ public class ProviderProcessVersionController {
      */
     @GetMapping("/{id}")
     @Operation(
+            operationId = "getProviderProcessVersionById",
             summary = "Get a provider process version by ID",
             description = "Returns a provider process version based on the ID",
             responses = {
@@ -59,6 +60,7 @@ public class ProviderProcessVersionController {
      */
     @PostMapping("/filter")
     @Operation(
+            operationId = "filterProviderProcessVersions",
             summary = "Filter provider process versions",
             description = "Returns a filtered list of provider process versions based on criteria",
             responses = {
@@ -78,6 +80,7 @@ public class ProviderProcessVersionController {
      */
     @PostMapping
     @Operation(
+            operationId = "createProviderProcessVersion",
             summary = "Create a new provider process version",
             description = "Creates a new provider process version and returns it",
             responses = {
@@ -102,6 +105,7 @@ public class ProviderProcessVersionController {
      */
     @PutMapping("/{id}")
     @Operation(
+            operationId = "updateProviderProcessVersion",
             summary = "Update an existing provider process version",
             description = "Updates an existing provider process version and returns it",
             responses = {
@@ -127,6 +131,7 @@ public class ProviderProcessVersionController {
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @Operation(
+            operationId = "deleteProviderProcessVersion",
             summary = "Delete a provider process version",
             description = "Deletes a provider process version",
             responses = {

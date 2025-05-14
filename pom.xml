@@ -18,6 +18,7 @@
         <module>common-platform-config-mgmt-web</module>
         <module>common-platform-config-mgmt-interfaces</module>
         <module>common-platform-config-mgmt-models</module>
+        <module>common-platform-config-mgmt-sdk</module>
     </modules>
 
     <properties>

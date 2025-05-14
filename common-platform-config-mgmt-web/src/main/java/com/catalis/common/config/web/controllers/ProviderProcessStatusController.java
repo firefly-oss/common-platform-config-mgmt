@@ -38,6 +38,7 @@ public class ProviderProcessStatusController {
      */
     @GetMapping("/{id}")
     @Operation(
+            operationId = "getProviderProcessStatusById",
             summary = "Get a provider process status by ID",
             description = "Returns a provider process status based on the ID",
             responses = {
@@ -59,6 +60,7 @@ public class ProviderProcessStatusController {
      */
     @PostMapping("/filter")
     @Operation(
+            operationId = "filterProviderProcessStatuses",
             summary = "Filter provider process statuses",
             description = "Returns a filtered list of provider process statuses based on criteria",
             responses = {
@@ -78,6 +80,7 @@ public class ProviderProcessStatusController {
      */
     @PostMapping
     @Operation(
+            operationId = "createProviderProcessStatus",
             summary = "Create a new provider process status",
             description = "Creates a new provider process status and returns it",
             responses = {
