@@ -23,7 +23,6 @@ import java.time.LocalDateTime;
 @Schema(description = "Provider Process information")
 public class ProviderProcessDTO {
     
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Schema(description = "Provider process ID")
     private Long id;
     
