@@ -68,7 +68,16 @@ public class ProviderProcessVersionController {
             }
     )
     public ResponseEntity<Mono<PaginationResponse<ProviderProcessVersionDTO>>> filter(
-            @ParameterObject @ModelAttribute FilterRequest<ProviderProcessVersionDTO> filterRequest) {
+            @RequestBody FilterRequest<ProviderProcessVersionDTO> filterRequest) {
+        // Handle case where both providerProcessId and providerProcess.id are provided
+        if (filterRequest.getFilters() != null) {
+            ProviderProcessVersionDTO filters = filterRequest.getFilters();
+            if (filters.getProviderProcessId() != null && filters.getProviderProcess() != null && filters.getProviderProcess().getId() != null) {
+                // If both are provided, prioritize providerProcessId and set providerProcess to null
+                // to avoid encoding issues with nested objects
+                filters.setProviderProcess(null);
+            }
+        }
         return ResponseEntity.ok(providerProcessVersionService.filter(filterRequest));
     }
 

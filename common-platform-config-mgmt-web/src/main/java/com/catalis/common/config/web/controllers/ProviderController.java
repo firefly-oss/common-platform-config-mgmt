@@ -314,7 +314,7 @@ public class ProviderController {
     public ResponseEntity<Mono<PaginationResponse<ProviderProcessDTO>>> filterProcesses(
             @Parameter(description = "ID of the provider", required = true)
             @PathVariable Long providerId,
-            @ParameterObject @ModelAttribute FilterRequest<ProviderProcessDTO> filterRequest) {
+            @RequestBody FilterRequest<ProviderProcessDTO> filterRequest) {
 
         filterRequest.getFilters().setProviderId(providerId);
         return ResponseEntity.ok(providerProcessService.filter(filterRequest));

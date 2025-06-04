@@ -2702,213 +2702,6 @@ paths:
       description: Returns a filtered list of provider process versions based on criteria
       operationId: filterProviderProcessVersions_1
       parameters:
-        - name: pagination.pageNumber
-          in: query
-          description: Page number (0-based)
-          required: false
-          schema:
-            type: integer
-            format: int32
-            default: 0
-        - name: pagination.pageSize
-          in: query
-          description: Number of items per page
-          required: false
-          schema:
-            type: integer
-            format: int32
-            default: 10
-        - name: pagination.sortBy
-          in: query
-          description: Field to sort by
-          required: false
-          schema:
-            type: string
-        - name: pagination.sortDirection
-          in: query
-          description: Sort direction (ASC or DESC)
-          required: false
-          schema:
-            type: string
-            default: DESC
-        - name: options.caseInsensitiveStrings
-          in: query
-          description: Enable case-insensitive string filtering
-          required: false
-          schema:
-            type: boolean
-            default: false
-        - name: options.includeInheritedFields
-          in: query
-          description: Include fields from parent classes
-          required: false
-          schema:
-            type: boolean
-            default: false
-        - name: filters.providerProcessId
-          in: query
-          description: Exact filter for provider process id
-          required: false
-          schema:
-            type: integer
-            format: int32
-        - name: filters.providerProcess
-          in: query
-          description: Exact filter for provider process
-          required: false
-          schema:
-            type: string
-        - name: filters.version
-          in: query
-          description: Exact filter for version
-          required: false
-          schema:
-            type: string
-        - name: filters.bpmnXml
-          in: query
-          description: Exact filter for bpmn xml
-          required: false
-          schema:
-            type: string
-        - name: filters.bpmnDiagramXml
-          in: query
-          description: Exact filter for bpmn diagram xml
-          required: false
-          schema:
-            type: string
-        - name: filters.providerProcessStatusId
-          in: query
-          description: Exact filter for provider process status id
-          required: false
-          schema:
-            type: integer
-            format: int32
-        - name: filters.providerProcessStatus
-          in: query
-          description: Exact filter for provider process status
-          required: false
-          schema:
-            type: string
-        - name: filters.notes
-          in: query
-          description: Exact filter for notes
-          required: false
-          schema:
-            type: string
-        - name: filters.changelog
-          in: query
-          description: Exact filter for changelog
-          required: false
-          schema:
-            type: string
-        - name: filters.deployedBy
-          in: query
-          description: Exact filter for deployed by
-          required: false
-          schema:
-            type: string
-        - name: filters.deployedAt
-          in: query
-          description: Exact filter for deployed at
-          required: false
-          schema:
-            type: string
-            format: date-time
-        - name: 'rangeFilters.ranges[deployedAt].from'
-          in: query
-          description: Filter deployed at from value
-          required: false
-          schema:
-            type: string
-            format: date-time
-        - name: 'rangeFilters.ranges[deployedAt].to'
-          in: query
-          description: Filter deployed at to value
-          required: false
-          schema:
-            type: string
-            format: date-time
-        - name: filters.isCurrent
-          in: query
-          description: Exact filter for is current
-          required: false
-          schema:
-            type: boolean
-        - name: filters.isDeployed
-          in: query
-          description: Exact filter for is deployed
-          required: false
-          schema:
-            type: boolean
-        - name: filters.active
-          in: query
-          description: Exact filter for active
-          required: false
-          schema:
-            type: boolean
-        - name: filters.versionNumber
-          in: query
-          description: Exact filter for version number
-          required: false
-          schema:
-            type: integer
-            format: int32
-        - name: 'rangeFilters.ranges[versionNumber].from'
-          in: query
-          description: Filter version number from value
-          required: false
-          schema:
-            type: integer
-            format: int32
-        - name: 'rangeFilters.ranges[versionNumber].to'
-          in: query
-          description: Filter version number to value
-          required: false
-          schema:
-            type: integer
-            format: int32
-        - name: filters.createdAt
-          in: query
-          description: Exact filter for created at
-          required: false
-          schema:
-            type: string
-            format: date-time
-        - name: 'rangeFilters.ranges[createdAt].from'
-          in: query
-          description: Filter created at from value
-          required: false
-          schema:
-            type: string
-            format: date-time
-        - name: 'rangeFilters.ranges[createdAt].to'
-          in: query
-          description: Filter created at to value
-          required: false
-          schema:
-            type: string
-            format: date-time
-        - name: filters.updatedAt
-          in: query
-          description: Exact filter for updated at
-          required: false
-          schema:
-            type: string
-            format: date-time
-        - name: 'rangeFilters.ranges[updatedAt].from'
-          in: query
-          description: Filter updated at from value
-          required: false
-          schema:
-            type: string
-            format: date-time
-        - name: 'rangeFilters.ranges[updatedAt].to'
-          in: query
-          description: Filter updated at to value
-          required: false
-          schema:
-            type: string
-            format: date-time
         - name: X-Idempotency-Key
           in: header
           description: >-
@@ -2917,6 +2710,12 @@ paths:
           required: false
           schema:
             type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FilterRequestProviderProcessVersionDTO'
+        required: true
       responses:
         '200':
           description: Successful operation
@@ -3737,3 +3536,17 @@ components:
       description: >-
         Represents a paginated response containing a list of items and
         pagination metadata.
+    FilterRequestProviderProcessVersionDTO:
+      required:
+        - pagination
+      type: object
+      properties:
+        filters:
+          $ref: '#/components/schemas/ProviderProcessVersionDTO'
+        rangeFilters:
+          $ref: '#/components/schemas/RangeFilter'
+        pagination:
+          $ref: '#/components/schemas/PaginationRequest'
+        options:
+          $ref: '#/components/schemas/FilterOptions'
+      description: Generic filter request that includes both filter criteria and pagination
