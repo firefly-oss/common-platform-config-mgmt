@@ -13,3 +13,13 @@ jobs:
       jar-path: "common-platform-config-mgmt-web/target/common-platform-config-mgmt.jar"
     secrets:
       PAT_GITHUB_PACKAGE: ${{ secrets.PAT_GITHUB_PACKAGE }}
+  docker-publish:
+    needs: [ build-jar ]
+    uses: firefly-oss/cicd/.github/workflows/docker-publish.yaml@main
+    with:
+      dockerfile-path: "./Dockerfile"
+      image-name: "k8-infra-dev-repo"
+      docker-image-tag: "common-platform-config-mgmt-latest"
+    secrets:
+      REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
+      REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
