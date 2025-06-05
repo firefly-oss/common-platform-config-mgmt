@@ -77,8 +77,8 @@ public class Provider {
     @Column("technical_contact_phone")
     private String technicalContactPhone;
 
-    @Column("country_code")
-    private String countryCode;
+    @Column("country_id")
+    private Long countryId;
 
     @Column("region")
     private String region;

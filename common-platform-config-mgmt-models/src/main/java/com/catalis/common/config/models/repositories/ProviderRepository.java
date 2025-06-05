@@ -16,7 +16,7 @@ public interface ProviderRepository extends BaseRepository<Provider, Long> {
 
     Flux<Provider> findByProviderStatusId(Long providerStatusId);
 
-    Flux<Provider> findByCountryCode(String countryCode);
+    Flux<Provider> findByCountryId(Long countryId);
 
     Flux<Provider> findByRegion(String region);
 }

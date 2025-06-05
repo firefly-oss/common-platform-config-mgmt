@@ -95,8 +95,8 @@ public class ProviderDTO {
     @Schema(description = "Phone number of the technical contact person", example = "+33987654321")
     private String technicalContactPhone;
     
-    @Schema(description = "ISO country code where the provider operates", example = "FR")
-    private String countryCode;
+    @Schema(description = "Country ID", example = "FR")
+    private Long countryId;
     
     @Schema(description = "Region where the provider operates", example = "Europe")
     private String region;
