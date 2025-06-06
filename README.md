@@ -84,6 +84,12 @@ The core entities in the system are:
 - **ProviderProcessStatus**: Status of processes (Draft, Published, etc.)
 - **ProviderProcess**: Process definitions for providers
 - **ProviderProcessVersion**: Versioned BPMN process definitions
+- **ProviderMappingStatus**: Status of provider mappings (Active, Inactive, etc.)
+- **ProviderMapType**: Types of provider mappings
+- **ProviderMapping**: Mappings between providers
+- **ProviderContractsStatus**: Status of provider contracts (Active, Expired, etc.)
+- **ProviderContract**: Contracts associated with providers
+- **ProviderContractMapping**: Mappings between internal contracts and provider contracts
 
 ### Entity Relationship Diagram
 
@@ -95,6 +101,13 @@ erDiagram
     Provider ||--o{ ProviderProcess : "has many"
     ProviderProcessStatus ||--o{ ProviderProcessVersion : "has many"
     ProviderProcess ||--o{ ProviderProcessVersion : "has many"
+    Provider ||--o{ ProviderMapping : "has many"
+    Provider ||--o{ ProviderMapping : "has many as internal"
+    ProviderMapType ||--o{ ProviderMapping : "has many"
+    ProviderMappingStatus ||--o{ ProviderMapping : "has many"
+    ProviderContractsStatus ||--o{ ProviderContract : "has many"
+    Provider ||--o{ ProviderContract : "has many"
+    ProviderContract ||--o{ ProviderContractMapping : "has many"
 
     ProviderType {
         Long id PK
@@ -137,7 +150,7 @@ erDiagram
         String technicalContactName
         String technicalContactEmail
         String technicalContactPhone
-        String countryCode
+        Long countryId
         String region
         String timezone
         String currencyCode
@@ -225,6 +238,76 @@ erDiagram
         String deploymentId
         Boolean active
         Long versionNumber
+        LocalDateTime createdAt
+        LocalDateTime updatedAt
+    }
+
+    ProviderMappingStatus {
+        Long id PK
+        String code
+        String name
+        String description
+        Boolean active
+        Long version
+        LocalDateTime createdAt
+        LocalDateTime updatedAt
+    }
+
+    ProviderMapType {
+        Long id PK
+        String code
+        String name
+        String description
+        Boolean active
+        Long version
+        LocalDateTime createdAt
+        LocalDateTime updatedAt
+    }
+
+    ProviderMapping {
+        Long id PK
+        Long providerMapTypeId FK
+        Long providerMappingStatusId FK
+        Long providerId FK
+        Long internalProviderId FK
+        Boolean active
+        Long version
+        LocalDateTime createdAt
+        LocalDateTime updatedAt
+    }
+
+    ProviderContractsStatus {
+        Long id PK
+        String code
+        String name
+        String description
+        Boolean active
+        Long version
+        LocalDateTime createdAt
+        LocalDateTime updatedAt
+    }
+
+    ProviderContract {
+        Long id PK
+        Long contractId
+        Long contractTypeId
+        Long providerId FK
+        Long providerContractStatusId FK
+        String description
+        LocalDateTime startDate
+        LocalDateTime endDate
+        Boolean active
+        Long version
+        LocalDateTime createdAt
+        LocalDateTime updatedAt
+    }
+
+    ProviderContractMapping {
+        Long id PK
+        Long internalContractId
+        Long providerContractId FK
+        Boolean active
+        Long version
         LocalDateTime createdAt
         LocalDateTime updatedAt
     }
