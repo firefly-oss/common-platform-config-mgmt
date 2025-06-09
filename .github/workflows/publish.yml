@@ -19,7 +19,7 @@ jobs:
     with:
       dockerfile-path: "./Dockerfile"
       image-name: "k8-infra-dev-repo"
-      docker-image-tag: "common-platform-config-mgmt-latest"
+      docker-image-tag: "common-platform-config-mgmt-1.0.0-SNAPSHOT"
     secrets:
       REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
       REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
