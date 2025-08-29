@@ -43,7 +43,7 @@ springdoc:
     operationsSorter: method
     docExpansion: none
     filter: true
-  packages-to-scan: com.catalis.common.config.web.controllers
+  packages-to-scan: com.firefly.common.config.web.controllers
   paths-to-match: /api/**
 
 management:
@@ -72,12 +72,12 @@ firefly:
     auto-start-plugins: true
     plugins-directory: disabled
     classpath-scan-packages:
-      - com.catalis.plugins
-      - com.catalis.common.config.core.extensions.plugins
+      - com.firefly.plugins
+      - com.firefly.common.config.core.extensions.plugins
     allowed-packages:
-      - com.catalis.common.config.interfaces
-      - com.catalis.core.plugin.api
-      - com.catalis.plugin
+      - com.firefly.common.config.interfaces
+      - com.firefly.core.plugin.api
+      - com.firefly.plugin
     event-bus:
       type: in-memory
       distributed-events: false
@@ -97,7 +97,7 @@ spring:
 logging:
   level:
     root: INFO
-    com.catalis: DEBUG
+    com.firefly: DEBUG
     org.springframework.r2dbc: DEBUG
     org.flywaydb: DEBUG
 
@@ -110,7 +110,7 @@ spring:
 logging:
   level:
     root: INFO
-    com.catalis: DEBUG
+    com.firefly: DEBUG
     org.springframework.r2dbc: INFO
 
 springdoc:
@@ -128,7 +128,7 @@ spring:
 logging:
   level:
     root: WARN
-    com.catalis: INFO
+    com.firefly: INFO
     org.springframework: WARN
 
 springdoc:
