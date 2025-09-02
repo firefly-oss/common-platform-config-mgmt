@@ -12,6 +12,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 /**
  * DTO for Provider Process entity
@@ -24,7 +25,7 @@ import java.time.LocalDateTime;
 public class ProviderProcessDTO {
     
     @Schema(description = "Provider process ID")
-    private Long id;
+    private UUID id;
     
     @NotBlank(message = "Code is required")
     @Size(min = 2, max = 50, message = "Code must be between 2 and 50 characters")
@@ -42,7 +43,7 @@ public class ProviderProcessDTO {
     @NotNull(message = "Provider ID is required")
     @FilterableId
     @Schema(description = "ID of the provider")
-    private Long providerId;
+    private UUID providerId;
     
     @Schema(description = "Provider information")
     private ProviderDTO provider;

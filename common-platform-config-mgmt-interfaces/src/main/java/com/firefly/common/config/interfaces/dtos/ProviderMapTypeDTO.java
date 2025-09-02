@@ -12,6 +12,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 /**
  * DTO for ProviderMapType entity
@@ -25,7 +26,7 @@ public class ProviderMapTypeDTO {
 
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Schema(description = "Provider Map Type ID")
-    private Long id;
+    private UUID id;
 
     @NotBlank(message = "Code is required")
     @Size(min = 2, max = 50, message = "Code must be between 2 and 50 characters")
@@ -43,7 +44,7 @@ public class ProviderMapTypeDTO {
     @NotNull(message = "Provider mapping status ID is required")
     @FilterableId
     @Schema(description = "ID of the provider mapping status")
-    private Long providerMappingStatusId;
+    private UUID providerMappingStatusId;
 
     @Schema(description = "Provider mapping status information")
     private ProviderMappingStatusDTO providerMappingStatus;

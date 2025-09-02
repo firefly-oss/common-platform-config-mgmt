@@ -12,6 +12,7 @@ import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 /**
  * Entity representing a BPMN process specific to a provider
@@ -24,7 +25,7 @@ import java.time.LocalDateTime;
 public class ProviderProcess {
 
     @Id
-    private Long id;
+    private UUID id;
 
     @Column("code")
     private String code;
@@ -36,7 +37,7 @@ public class ProviderProcess {
     private String description;
 
     @Column("provider_id")
-    private Long providerId;
+    private UUID providerId;
 
     @Column("process_type")
     private String processType;

@@ -12,6 +12,7 @@ import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 /**
  * Entity representing a version of a provider process
@@ -24,10 +25,10 @@ import java.time.LocalDateTime;
 public class ProviderProcessVersion {
 
     @Id
-    private Long id;
+    private UUID id;
 
     @Column("provider_process_id")
-    private Long providerProcessId;
+    private UUID providerProcessId;
 
     @Column("version")
     private String version;
@@ -39,7 +40,7 @@ public class ProviderProcessVersion {
     private String bpmnDiagramXml;
 
     @Column("provider_process_status_id")
-    private Long providerProcessStatusId;
+    private UUID providerProcessStatusId;
 
     @Column("notes")
     private String notes;

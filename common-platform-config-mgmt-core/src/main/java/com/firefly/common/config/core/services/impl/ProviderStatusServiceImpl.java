@@ -11,6 +11,7 @@ import com.firefly.common.core.queries.PaginationResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
+import java.util.UUID;
 
 /**
  * Implementation of the ProviderStatusService interface
@@ -25,7 +26,7 @@ public class ProviderStatusServiceImpl implements ProviderStatusService {
     private ProviderStatusMapper mapper;
 
     @Override
-    public Mono<ProviderStatusDTO> getById(Long id) {
+    public Mono<ProviderStatusDTO> getById(UUID id) {
         return repository.findById(id)
                 .switchIfEmpty(Mono.error(new RuntimeException("Provider status not found with id: " + id)))
                 .map(mapper::toDTO);
@@ -53,7 +54,7 @@ public class ProviderStatusServiceImpl implements ProviderStatusService {
     }
 
     @Override
-    public Mono<ProviderStatusDTO> update(Long id, ProviderStatusDTO providerStatusDTO) {
+    public Mono<ProviderStatusDTO> update(UUID id, ProviderStatusDTO providerStatusDTO) {
         return repository.findById(id)
                 .switchIfEmpty(Mono.error(new RuntimeException("Provider status not found with id: " + id)))
                 .flatMap(existingEntity -> {
@@ -73,7 +74,7 @@ public class ProviderStatusServiceImpl implements ProviderStatusService {
     }
 
     @Override
-    public Mono<Void> delete(Long id) {
+    public Mono<Void> delete(UUID id) {
         return repository.findById(id)
                 .switchIfEmpty(Mono.error(new RuntimeException("Provider status not found with id: " + id)))
                 .flatMap(entity -> repository.delete(entity));

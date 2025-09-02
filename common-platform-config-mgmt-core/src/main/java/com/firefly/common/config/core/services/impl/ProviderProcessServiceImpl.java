@@ -11,6 +11,7 @@ import com.firefly.common.core.queries.PaginationResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
+import java.util.UUID;
 
 /**
  * Implementation of the ProviderProcessService interface
@@ -25,7 +26,7 @@ public class ProviderProcessServiceImpl implements ProviderProcessService {
     private ProviderProcessMapper mapper;
 
     @Override
-    public Mono<ProviderProcessDTO> getById(Long id) {
+    public Mono<ProviderProcessDTO> getById(UUID id) {
         return repository.findById(id)
                 .switchIfEmpty(Mono.error(new RuntimeException("Provider process not found with id: " + id)))
                 .map(mapper::toDTO);
@@ -53,7 +54,7 @@ public class ProviderProcessServiceImpl implements ProviderProcessService {
     }
 
     @Override
-    public Mono<ProviderProcessDTO> update(Long id, ProviderProcessDTO providerProcessDTO) {
+    public Mono<ProviderProcessDTO> update(UUID id, ProviderProcessDTO providerProcessDTO) {
         return repository.findById(id)
                 .switchIfEmpty(Mono.error(new RuntimeException("Provider process not found with id: " + id)))
                 .flatMap(existingEntity -> {
@@ -73,7 +74,7 @@ public class ProviderProcessServiceImpl implements ProviderProcessService {
     }
 
     @Override
-    public Mono<Void> delete(Long id) {
+    public Mono<Void> delete(UUID id) {
         return repository.findById(id)
                 .switchIfEmpty(Mono.error(new RuntimeException("Provider process not found with id: " + id)))
                 .flatMap(entity -> repository.delete(entity));

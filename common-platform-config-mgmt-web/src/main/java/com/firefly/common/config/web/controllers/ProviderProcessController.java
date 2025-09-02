@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
 import jakarta.validation.Valid;
+import java.util.UUID;
 
 /**
  * REST controller for managing provider processes and their versions
@@ -51,7 +52,7 @@ public class ProviderProcessController {
     )
     public ResponseEntity<Mono<ProviderProcessDTO>> getById(
             @Parameter(description = "ID of the provider process to retrieve", required = true)
-            @PathVariable Long id) {
+            @PathVariable UUID id) {
         return ResponseEntity.ok(providerProcessService.getById(id));
     }
 
@@ -120,7 +121,7 @@ public class ProviderProcessController {
     )
     public ResponseEntity<Mono<ProviderProcessDTO>> update(
             @Parameter(description = "ID of the provider process to update", required = true)
-            @PathVariable Long id,
+            @PathVariable UUID id,
             @Parameter(description = "Provider process to update", required = true)
             @Valid @RequestBody ProviderProcessDTO providerProcessDTO) {
         return ResponseEntity.ok(providerProcessService.update(id, providerProcessDTO));
@@ -145,7 +146,7 @@ public class ProviderProcessController {
     )
     public Mono<ResponseEntity<Void>> delete(
             @Parameter(description = "ID of the provider process to delete", required = true)
-            @PathVariable Long id) {
+            @PathVariable UUID id) {
         return providerProcessService.delete(id)
                 .then(Mono.just(ResponseEntity.noContent().<Void>build()));
     }
@@ -170,7 +171,7 @@ public class ProviderProcessController {
     )
     public ResponseEntity<Mono<PaginationResponse<ProviderProcessVersionDTO>>> filterVersions(
             @Parameter(description = "ID of the process", required = true)
-            @PathVariable Long processId,
+            @PathVariable UUID processId,
             @ParameterObject @ModelAttribute FilterRequest<ProviderProcessVersionDTO> filterRequest) {
 
         filterRequest.getFilters().setProviderProcessId(processId);
@@ -197,7 +198,7 @@ public class ProviderProcessController {
     )
     public ResponseEntity<Mono<ProviderProcessVersionDTO>> createVersion(
             @Parameter(description = "ID of the process", required = true)
-            @PathVariable Long processId,
+            @PathVariable UUID processId,
             @Parameter(description = "Version to create", required = true)
             @Valid @RequestBody ProviderProcessVersionDTO versionDTO) {
         versionDTO.setProviderProcessId(processId);
@@ -225,9 +226,9 @@ public class ProviderProcessController {
     )
     public ResponseEntity<Mono<ProviderProcessVersionDTO>> getVersionById(
             @Parameter(description = "ID of the process", required = true)
-            @PathVariable Long processId,
+            @PathVariable UUID processId,
             @Parameter(description = "ID of the version to retrieve", required = true)
-            @PathVariable Long id) {
+            @PathVariable UUID id) {
         return ResponseEntity.ok(providerProcessVersionService.getById(id)
                 .filter(version -> version.getProviderProcessId().equals(processId)));
     }
@@ -253,9 +254,9 @@ public class ProviderProcessController {
     )
     public ResponseEntity<Mono<ProviderProcessVersionDTO>> updateVersion(
             @Parameter(description = "ID of the process", required = true)
-            @PathVariable Long processId,
+            @PathVariable UUID processId,
             @Parameter(description = "ID of the version to update", required = true)
-            @PathVariable Long id,
+            @PathVariable UUID id,
             @Parameter(description = "Version to update", required = true)
             @Valid @RequestBody ProviderProcessVersionDTO versionDTO) {
         versionDTO.setProviderProcessId(processId);
@@ -282,9 +283,9 @@ public class ProviderProcessController {
     )
     public Mono<ResponseEntity<Void>> deleteVersion(
             @Parameter(description = "ID of the process", required = true)
-            @PathVariable Long processId,
+            @PathVariable UUID processId,
             @Parameter(description = "ID of the version to delete", required = true)
-            @PathVariable Long id) {
+            @PathVariable UUID id) {
         return providerProcessVersionService.getById(id)
                 .filter(version -> version.getProviderProcessId().equals(processId))
                 .flatMap(version -> providerProcessVersionService.delete(id))

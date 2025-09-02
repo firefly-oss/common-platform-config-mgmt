@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
 import jakarta.validation.Valid;
+import java.util.UUID;
 
 /**
  * REST controller for managing providers and their nested resources
@@ -54,7 +55,7 @@ public class ProviderController {
     )
     public ResponseEntity<Mono<ProviderDTO>> getById(
             @Parameter(description = "ID of the provider to retrieve", required = true)
-            @PathVariable Long id) {
+            @PathVariable UUID id) {
         return ResponseEntity.ok(providerService.getById(id));
     }
 
@@ -122,7 +123,7 @@ public class ProviderController {
     )
     public ResponseEntity<Mono<ProviderDTO>> update(
             @Parameter(description = "ID of the provider to update", required = true)
-            @PathVariable Long id,
+            @PathVariable UUID id,
             @Parameter(description = "Provider to update", required = true)
             @Valid @RequestBody ProviderDTO providerDTO) {
         return ResponseEntity.ok(providerService.update(id, providerDTO));
@@ -147,7 +148,7 @@ public class ProviderController {
     )
     public Mono<ResponseEntity<Void>> delete(
             @Parameter(description = "ID of the provider to delete", required = true)
-            @PathVariable Long id) {
+            @PathVariable UUID id) {
         return providerService.delete(id)
                 .then(Mono.just(ResponseEntity.noContent().<Void>build()));
     }
@@ -171,7 +172,7 @@ public class ProviderController {
     )
     public ResponseEntity<Mono<PaginationResponse<ProviderConfigDTO>>> filterConfigs(
             @Parameter(description = "ID of the provider", required = true)
-            @PathVariable Long providerId,
+            @PathVariable UUID providerId,
             @ParameterObject @ModelAttribute FilterRequest<ProviderConfigDTO> filterRequest) {
 
         filterRequest.getFilters().setProviderId(providerId);
@@ -198,7 +199,7 @@ public class ProviderController {
     )
     public ResponseEntity<Mono<ProviderConfigDTO>> createConfig(
             @Parameter(description = "ID of the provider", required = true)
-            @PathVariable Long providerId,
+            @PathVariable UUID providerId,
             @Parameter(description = "Configuration to create", required = true)
             @Valid @RequestBody ProviderConfigDTO providerConfigDTO) {
         providerConfigDTO.setProviderId(providerId);
@@ -226,9 +227,9 @@ public class ProviderController {
     )
     public ResponseEntity<Mono<ProviderConfigDTO>> getConfigById(
             @Parameter(description = "ID of the provider", required = true)
-            @PathVariable Long providerId,
+            @PathVariable UUID providerId,
             @Parameter(description = "ID of the configuration to retrieve", required = true)
-            @PathVariable Long id) {
+            @PathVariable UUID id) {
         return ResponseEntity.ok(providerConfigService.getById(id)
                 .filter(config -> config.getProviderId().equals(providerId)));
     }
@@ -254,9 +255,9 @@ public class ProviderController {
     )
     public ResponseEntity<Mono<ProviderConfigDTO>> updateConfig(
             @Parameter(description = "ID of the provider", required = true)
-            @PathVariable Long providerId,
+            @PathVariable UUID providerId,
             @Parameter(description = "ID of the configuration to update", required = true)
-            @PathVariable Long id,
+            @PathVariable UUID id,
             @Parameter(description = "Configuration to update", required = true)
             @Valid @RequestBody ProviderConfigDTO providerConfigDTO) {
         providerConfigDTO.setProviderId(providerId);
@@ -283,9 +284,9 @@ public class ProviderController {
     )
     public Mono<ResponseEntity<Void>> deleteConfig(
             @Parameter(description = "ID of the provider", required = true)
-            @PathVariable Long providerId,
+            @PathVariable UUID providerId,
             @Parameter(description = "ID of the configuration to delete", required = true)
-            @PathVariable Long id) {
+            @PathVariable UUID id) {
         return providerConfigService.getById(id)
                 .filter(config -> config.getProviderId().equals(providerId))
                 .flatMap(config -> providerConfigService.delete(id))
@@ -313,7 +314,7 @@ public class ProviderController {
     )
     public ResponseEntity<Mono<PaginationResponse<ProviderProcessDTO>>> filterProcesses(
             @Parameter(description = "ID of the provider", required = true)
-            @PathVariable Long providerId,
+            @PathVariable UUID providerId,
             @RequestBody FilterRequest<ProviderProcessDTO> filterRequest) {
 
         filterRequest.getFilters().setProviderId(providerId);
@@ -340,7 +341,7 @@ public class ProviderController {
     )
     public ResponseEntity<Mono<ProviderProcessDTO>> createProcess(
             @Parameter(description = "ID of the provider", required = true)
-            @PathVariable Long providerId,
+            @PathVariable UUID providerId,
             @Parameter(description = "Process to create", required = true)
             @Valid @RequestBody ProviderProcessDTO providerProcessDTO) {
         providerProcessDTO.setProviderId(providerId);
@@ -368,9 +369,9 @@ public class ProviderController {
     )
     public ResponseEntity<Mono<ProviderProcessDTO>> getProcessById(
             @Parameter(description = "ID of the provider", required = true)
-            @PathVariable Long providerId,
+            @PathVariable UUID providerId,
             @Parameter(description = "ID of the process to retrieve", required = true)
-            @PathVariable Long id) {
+            @PathVariable UUID id) {
         return ResponseEntity.ok(providerProcessService.getById(id)
                 .filter(process -> process.getProviderId().equals(providerId)));
     }
@@ -396,9 +397,9 @@ public class ProviderController {
     )
     public ResponseEntity<Mono<ProviderProcessDTO>> updateProcess(
             @Parameter(description = "ID of the provider", required = true)
-            @PathVariable Long providerId,
+            @PathVariable UUID providerId,
             @Parameter(description = "ID of the process to update", required = true)
-            @PathVariable Long id,
+            @PathVariable UUID id,
             @Parameter(description = "Process to update", required = true)
             @Valid @RequestBody ProviderProcessDTO providerProcessDTO) {
         providerProcessDTO.setProviderId(providerId);
@@ -425,9 +426,9 @@ public class ProviderController {
     )
     public Mono<ResponseEntity<Void>> deleteProcess(
             @Parameter(description = "ID of the provider", required = true)
-            @PathVariable Long providerId,
+            @PathVariable UUID providerId,
             @Parameter(description = "ID of the process to delete", required = true)
-            @PathVariable Long id) {
+            @PathVariable UUID id) {
         return providerProcessService.getById(id)
                 .filter(process -> process.getProviderId().equals(providerId))
                 .flatMap(process -> providerProcessService.delete(id))

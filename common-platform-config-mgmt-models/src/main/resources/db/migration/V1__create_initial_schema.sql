@@ -1,6 +1,11 @@
 -- Provider Types Table
+-- UUID Strategy: All primary keys use UUID type for the following benefits:
+-- 1. Globally unique identifiers that avoid conflicts when merging data
+-- 2. Better distribution in distributed systems
+-- 3. No need for sequence coordination across multiple database instances
+-- 4. Enhanced security by making IDs non-sequential and harder to guess
 CREATE TABLE provider_types (
-    id BIGSERIAL PRIMARY KEY,
+    id UUID PRIMARY KEY,
     code VARCHAR(50) NOT NULL UNIQUE,
     name VARCHAR(100) NOT NULL,
     description TEXT,
@@ -11,8 +16,9 @@ CREATE TABLE provider_types (
 );
 
 -- Provider Statuses Table
+-- Follows the same UUID pattern for consistency across all entities
 CREATE TABLE provider_statuses (
-    id BIGSERIAL PRIMARY KEY,
+    id UUID PRIMARY KEY,
     code VARCHAR(50) NOT NULL UNIQUE,
     name VARCHAR(100) NOT NULL,
     description TEXT,
@@ -23,13 +29,15 @@ CREATE TABLE provider_statuses (
 );
 
 -- Providers Table
+-- Foreign Key Strategy: All foreign keys reference UUID primary keys
+-- This maintains referential integrity while supporting distributed architectures
 CREATE TABLE providers (
-    id BIGSERIAL PRIMARY KEY,
+    id UUID PRIMARY KEY,
     code VARCHAR(50) NOT NULL UNIQUE,
     name VARCHAR(100) NOT NULL,
     description TEXT,
-    provider_type_id BIGINT NOT NULL REFERENCES provider_types(id),
-    provider_status_id BIGINT NOT NULL REFERENCES provider_statuses(id),
+    provider_type_id UUID NOT NULL REFERENCES provider_types(id),
+    provider_status_id UUID NOT NULL REFERENCES provider_statuses(id),
     api_base_url VARCHAR(255),
     webhook_url VARCHAR(255),
     callback_url VARCHAR(255),
@@ -62,8 +70,8 @@ CREATE TABLE providers (
 
 -- Provider Configs Table
 CREATE TABLE provider_configs (
-    id BIGSERIAL PRIMARY KEY,
-    provider_id BIGINT NOT NULL REFERENCES providers(id),
+    id UUID PRIMARY KEY,
+    provider_id UUID NOT NULL REFERENCES providers(id),
     config_group VARCHAR(100),
     key VARCHAR(100) NOT NULL,
     value TEXT NOT NULL,
@@ -88,7 +96,7 @@ CREATE TABLE provider_configs (
 
 -- Provider Process Statuses Table
 CREATE TABLE provider_process_statuses (
-    id BIGSERIAL PRIMARY KEY,
+    id UUID PRIMARY KEY,
     code VARCHAR(50) NOT NULL UNIQUE,
     name VARCHAR(100) NOT NULL,
     description TEXT,
@@ -100,11 +108,11 @@ CREATE TABLE provider_process_statuses (
 
 -- Provider Processes Table
 CREATE TABLE provider_processes (
-    id BIGSERIAL PRIMARY KEY,
+    id UUID PRIMARY KEY,
     code VARCHAR(50) NOT NULL UNIQUE,
     name VARCHAR(100) NOT NULL,
     description TEXT,
-    provider_id BIGINT NOT NULL REFERENCES providers(id),
+    provider_id UUID NOT NULL REFERENCES providers(id),
     process_type VARCHAR(100) NOT NULL,
     process_category VARCHAR(100),
     is_common BOOLEAN NOT NULL DEFAULT FALSE,
@@ -120,12 +128,12 @@ CREATE TABLE provider_processes (
 
 -- Provider Process Versions Table
 CREATE TABLE provider_process_versions (
-    id BIGSERIAL PRIMARY KEY,
-    provider_process_id BIGINT NOT NULL REFERENCES provider_processes(id),
+    id UUID PRIMARY KEY,
+    provider_process_id UUID NOT NULL REFERENCES provider_processes(id),
     version VARCHAR(20) NOT NULL,
     bpmn_xml TEXT NOT NULL,
     bpmn_diagram_xml TEXT,
-    provider_process_status_id BIGINT NOT NULL REFERENCES provider_process_statuses(id),
+    provider_process_status_id UUID NOT NULL REFERENCES provider_process_statuses(id),
     notes TEXT,
     changelog TEXT,
     deployed_by VARCHAR(100),

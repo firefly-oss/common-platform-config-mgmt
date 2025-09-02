@@ -4,6 +4,7 @@ import com.firefly.common.config.interfaces.dtos.ProviderMappingStatusDTO;
 import com.firefly.common.core.filters.FilterRequest;
 import com.firefly.common.core.queries.PaginationResponse;
 import reactor.core.publisher.Mono;
+import java.util.UUID;
 
 /**
  * Service interface for managing provider mapping statuses
@@ -15,7 +16,7 @@ public interface ProviderMappingStatusService {
      * @param id Provider mapping status ID
      * @return Provider mapping status DTO
      */
-    Mono<ProviderMappingStatusDTO> getById(Long id);
+    Mono<ProviderMappingStatusDTO> getById(UUID id);
 
     /**
      * Filter provider mapping statuses based on criteria
@@ -37,12 +38,12 @@ public interface ProviderMappingStatusService {
      * @param providerMappingStatusDTO Provider mapping status DTO
      * @return Updated provider mapping status DTO
      */
-    Mono<ProviderMappingStatusDTO> update(Long id, ProviderMappingStatusDTO providerMappingStatusDTO);
+    Mono<ProviderMappingStatusDTO> update(UUID id, ProviderMappingStatusDTO providerMappingStatusDTO);
 
     /**
      * Delete a provider mapping status
      * @param id Provider mapping status ID
      * @return Void
      */
-    Mono<Void> delete(Long id);
+    Mono<Void> delete(UUID id);
 }

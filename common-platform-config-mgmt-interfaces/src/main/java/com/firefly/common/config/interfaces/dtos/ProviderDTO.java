@@ -15,6 +15,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 /**
  * DTO for Provider entity
@@ -28,7 +29,7 @@ public class ProviderDTO {
 
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Schema(description = "Provider ID")
-    private Long id;
+    private UUID id;
 
     @NotBlank(message = "Code is required")
     @Size(min = 2, max = 50, message = "Code must be between 2 and 50 characters")
@@ -46,7 +47,7 @@ public class ProviderDTO {
     @NotNull(message = "Provider type ID is required")
     @FilterableId
     @Schema(description = "ID of the provider type")
-    private Long providerTypeId;
+    private UUID providerTypeId;
 
     @Schema(description = "Provider type information")
     private ProviderTypeDTO providerType;
@@ -54,7 +55,7 @@ public class ProviderDTO {
     @NotNull(message = "Provider status ID is required")
     @FilterableId
     @Schema(description = "ID of the provider status")
-    private Long providerStatusId;
+    private UUID providerStatusId;
 
     @Schema(description = "Provider status information")
     private ProviderStatusDTO providerStatus;
@@ -101,7 +102,7 @@ public class ProviderDTO {
     private String technicalContactPhone;
 
     @Schema(description = "Country ID", example = "FR")
-    private Long countryId;
+    private UUID countryId;
 
     @Schema(description = "Region where the provider operates", example = "Europe")
     private String region;

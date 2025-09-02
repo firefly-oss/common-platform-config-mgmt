@@ -91,6 +91,140 @@ The core entities in the system are:
 - **ProviderContract**: Contracts associated with providers
 - **ProviderContractMapping**: Mappings between internal contracts and provider contracts
 
+### UUID Strategy
+
+This system uses UUIDs (Universally Unique Identifiers) as primary keys for all entities. This design choice provides several benefits and is consistently implemented across the database schema, API layer, and application code.
+
+#### Benefits of UUID Primary Keys
+
+1. **Global Uniqueness**: UUIDs are globally unique, eliminating ID conflicts when merging data from different environments or database instances
+2. **Distributed Systems Support**: No need for centralized sequence coordination across multiple database instances
+3. **Enhanced Security**: Non-sequential IDs make it harder to guess valid identifiers
+4. **Better Distribution**: UUIDs provide better distribution in sharded or partitioned databases
+5. **Environment Independence**: Data can be safely moved between development, staging, and production environments
+6. **Microservices Friendly**: Each service can generate its own IDs without coordination
+
+#### UUID Implementation Across Layers
+
+##### Database Layer
+The system uses PostgreSQL's `uuid-ossp` extension with the `uuid_generate_v4()` function:
+
+```sql
+-- Enable UUID extension (automatically included in migrations)
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+-- All tables use UUID primary keys
+CREATE TABLE provider_types (
+    id UUID PRIMARY KEY,
+    code VARCHAR(50) NOT NULL UNIQUE,
+    -- other columns...
+);
+
+-- Generate UUIDs for new records
+INSERT INTO provider_types (id, code, name, description, active)
+VALUES (uuid_generate_v4(), 'BAAS', 'Banking as a Service', 'Description', true);
+```
+
+##### Application Layer
+Java entities use `java.util.UUID` type:
+
+```java
+@Entity
+@Table("providers")
+public class Provider {
+    @Id
+    private UUID id;
+
+    @Column("provider_type_id")
+    private UUID providerTypeId;
+
+    // other fields...
+}
+```
+
+##### API Layer
+All REST endpoints use UUID format for entity identifiers:
+
+```bash
+# API endpoint examples
+GET /api/v1/providers/550e8400-e29b-41d4-a716-446655440000
+POST /api/v1/provider-configs
+{
+  "providerId": "550e8400-e29b-41d4-a716-446655440000",
+  "key": "API_KEY",
+  "value": "secret-value"
+}
+```
+
+#### Foreign Key Relationships
+
+All foreign key relationships use UUIDs to maintain referential integrity:
+
+```sql
+-- Foreign keys reference UUID primary keys
+CREATE TABLE providers (
+    id UUID PRIMARY KEY,
+    provider_type_id UUID NOT NULL REFERENCES provider_types(id),
+    provider_status_id UUID NOT NULL REFERENCES provider_statuses(id),
+    -- other columns...
+);
+```
+
+#### Exception: Country IDs
+
+Country IDs are the only exception to the UUID strategy and use sequential integer identifiers:
+
+```sql
+-- Country IDs use BIGINT for simplicity and performance
+ALTER TABLE providers ADD COLUMN countryId BIGINT;
+```
+
+This design choice was made for:
+- **Performance**: Faster lookups for geographical data
+- **Simplicity**: Easier integration with external geographical services
+- **Compatibility**: Standard practice for country/region identifiers
+
+#### UUID Best Practices
+
+##### Development Guidelines
+- **Always use `java.util.UUID`** type in Java entities and DTOs
+- **Repository methods** should accept and return UUID parameters
+- **REST APIs** must accept UUID strings in standard format: `550e8400-e29b-41d4-a716-446655440000`
+- **Validate UUID format** in API endpoints before database operations
+- **Use SELECT statements** in migrations for foreign key references
+
+##### Testing Considerations
+```java
+// Good: Generate proper UUIDs for tests
+UUID providerId = UUID.randomUUID();
+Provider provider = Provider.builder()
+    .id(providerId)
+    .code("TEST_PROVIDER")
+    .build();
+
+// For consistent test data, use fixed UUIDs
+public static final UUID BAAS_PROVIDER_TYPE_ID =
+    UUID.fromString("550e8400-e29b-41d4-a716-446655440000");
+```
+
+##### API Usage Examples
+```bash
+# Correct API usage
+GET /api/v1/providers/550e8400-e29b-41d4-a716-446655440000
+PUT /api/v1/providers/550e8400-e29b-41d4-a716-446655440000
+DELETE /api/v1/providers/550e8400-e29b-41d4-a716-446655440000
+
+# Request body with UUIDs
+POST /api/v1/provider-configs
+{
+  "providerId": "550e8400-e29b-41d4-a716-446655440000",
+  "key": "API_KEY",
+  "value": "secret-value"
+}
+```
+
+For comprehensive UUID implementation details, see [UUID Best Practices Guide](docs/UUID_BEST_PRACTICES.md).
+
 ### Entity Relationship Diagram
 
 ```mermaid
@@ -110,34 +244,34 @@ erDiagram
     ProviderContract ||--o{ ProviderContractMapping : "has many"
 
     ProviderType {
-        Long id PK
-        String code
+        UUID id PK "Primary Key (UUID)"
+        String code "Unique identifier code"
         String name
         String description
         Boolean active
-        Long version
+        Long version "Optimistic locking"
         LocalDateTime createdAt
         LocalDateTime updatedAt
     }
 
     ProviderStatus {
-        Long id PK
-        String code
+        UUID id PK "Primary Key (UUID)"
+        String code "Unique identifier code"
         String name
         String description
         Boolean active
-        Long version
+        Long version "Optimistic locking"
         LocalDateTime createdAt
         LocalDateTime updatedAt
     }
 
     Provider {
-        Long id PK
-        String code
+        UUID id PK "Primary Key (UUID)"
+        String code "Unique identifier code"
         String name
         String description
-        Long providerTypeId FK
-        Long providerStatusId FK
+        UUID providerTypeId FK "Foreign Key (UUID)"
+        UUID providerStatusId FK "Foreign Key (UUID)"
         String apiBaseUrl
         String webhookUrl
         String callbackUrl
@@ -150,7 +284,7 @@ erDiagram
         String technicalContactName
         String technicalContactEmail
         String technicalContactPhone
-        Long countryId
+        Long countryId "Country ID (sequential integer)"
         String region
         String timezone
         String currencyCode
@@ -163,14 +297,14 @@ erDiagram
         Boolean supportsPolling
         Integer pollingIntervalSeconds
         Boolean active
-        Long version
+        Long version "Optimistic locking"
         LocalDateTime createdAt
         LocalDateTime updatedAt
     }
 
     ProviderConfig {
-        Long id PK
-        Long providerId FK
+        UUID id PK "Primary Key (UUID)"
+        UUID providerId FK "Foreign Key (UUID)"
         String configGroup
         String key
         String value
@@ -187,28 +321,28 @@ erDiagram
         String metadata
         Integer orderIndex
         Boolean active
-        Long version
+        Long version "Optimistic locking"
         LocalDateTime createdAt
         LocalDateTime updatedAt
     }
 
     ProviderProcessStatus {
-        Long id PK
-        String code
+        UUID id PK "Primary Key (UUID)"
+        String code "Unique identifier code"
         String name
         String description
         Boolean active
-        Long version
+        Long version "Optimistic locking"
         LocalDateTime createdAt
         LocalDateTime updatedAt
     }
 
     ProviderProcess {
-        Long id PK
-        String code
+        UUID id PK "Primary Key (UUID)"
+        String code "Unique identifier code"
         String name
         String description
-        Long providerId FK
+        UUID providerId FK "Foreign Key (UUID)"
         String processType
         String processCategory
         Boolean isCommon
@@ -217,18 +351,18 @@ erDiagram
         String tags
         String metadata
         Boolean active
-        Long version
+        Long version "Optimistic locking"
         LocalDateTime createdAt
         LocalDateTime updatedAt
     }
 
     ProviderProcessVersion {
-        Long id PK
-        Long providerProcessId FK
+        UUID id PK "Primary Key (UUID)"
+        UUID providerProcessId FK "Foreign Key (UUID)"
         String version
         String bpmnXml
         String bpmnDiagramXml
-        Long providerProcessStatusId FK
+        UUID providerProcessStatusId FK "Foreign Key (UUID)"
         String notes
         String changelog
         String deployedBy
@@ -237,77 +371,77 @@ erDiagram
         Boolean isDeployed
         String deploymentId
         Boolean active
-        Long versionNumber
+        Long versionNumber "Optimistic locking"
         LocalDateTime createdAt
         LocalDateTime updatedAt
     }
 
     ProviderMappingStatus {
-        Long id PK
-        String code
+        UUID id PK "Primary Key (UUID)"
+        String code "Unique identifier code"
         String name
         String description
         Boolean active
-        Long version
+        Long version "Optimistic locking"
         LocalDateTime createdAt
         LocalDateTime updatedAt
     }
 
     ProviderMapType {
-        Long id PK
-        String code
+        UUID id PK "Primary Key (UUID)"
+        String code "Unique identifier code"
         String name
         String description
         Boolean active
-        Long version
+        Long version "Optimistic locking"
         LocalDateTime createdAt
         LocalDateTime updatedAt
     }
 
     ProviderMapping {
-        Long id PK
-        Long providerMapTypeId FK
-        Long providerMappingStatusId FK
-        Long providerId FK
-        Long internalProviderId FK
+        UUID id PK "Primary Key (UUID)"
+        UUID providerMapTypeId FK "Foreign Key (UUID)"
+        UUID providerMappingStatusId FK "Foreign Key (UUID)"
+        UUID providerId FK "Foreign Key (UUID)"
+        UUID internalProviderId FK "Foreign Key (UUID)"
         Boolean active
-        Long version
+        Long version "Optimistic locking"
         LocalDateTime createdAt
         LocalDateTime updatedAt
     }
 
     ProviderContractsStatus {
-        Long id PK
-        String code
+        UUID id PK "Primary Key (UUID)"
+        String code "Unique identifier code"
         String name
         String description
         Boolean active
-        Long version
+        Long version "Optimistic locking"
         LocalDateTime createdAt
         LocalDateTime updatedAt
     }
 
     ProviderContract {
-        Long id PK
-        Long contractId
-        Long contractTypeId
-        Long providerId FK
-        Long providerContractStatusId FK
+        UUID id PK "Primary Key (UUID)"
+        UUID contractId "Contract ID (UUID)"
+        UUID contractTypeId "Contract Type ID (UUID)"
+        UUID providerId FK "Foreign Key (UUID)"
+        UUID providerContractStatusId FK "Foreign Key (UUID)"
         String description
         LocalDateTime startDate
         LocalDateTime endDate
         Boolean active
-        Long version
+        Long version "Optimistic locking"
         LocalDateTime createdAt
         LocalDateTime updatedAt
     }
 
     ProviderContractMapping {
-        Long id PK
-        Long internalContractId
-        Long providerContractId FK
+        UUID id PK "Primary Key (UUID)"
+        UUID internalContractId "Internal Contract ID (UUID)"
+        UUID providerContractId FK "Foreign Key (UUID)"
         Boolean active
-        Long version
+        Long version "Optimistic locking"
         LocalDateTime createdAt
         LocalDateTime updatedAt
     }
@@ -315,9 +449,25 @@ erDiagram
 
 ## API Documentation
 
-The API follows RESTful principles with nested resources. All endpoints return reactive `Mono` types, including `Mono<PaginationResponse<T>>` for paginated results.
+The API follows RESTful principles with nested resources and uses UUIDs for all entity identifiers. All endpoints return reactive `Mono` types, including `Mono<PaginationResponse<T>>` for paginated results.
 
 Base URL: `/api/v1`
+
+### UUID Usage in APIs
+
+All entity identifiers in the API use UUID format. Examples:
+
+```bash
+# Provider management with UUIDs
+GET /api/v1/providers/550e8400-e29b-41d4-a716-446655440000
+PUT /api/v1/providers/550e8400-e29b-41d4-a716-446655440000
+DELETE /api/v1/providers/550e8400-e29b-41d4-a716-446655440000
+
+# Nested resources with UUIDs
+GET /api/v1/providers/550e8400-e29b-41d4-a716-446655440000/configs
+POST /api/v1/providers/550e8400-e29b-41d4-a716-446655440000/processes
+GET /api/v1/processes/6ba7b810-9dad-11d1-80b4-00c04fd430c8/versions
+```
 
 ### Main Resources
 
@@ -326,12 +476,41 @@ Base URL: `/api/v1`
 - `/api/v1/providers`: Provider management
 - `/api/v1/provider-process-statuses`: Process statuses management
 - `/api/v1/processes`: Process management
+- `/api/v1/provider-mappings`: Provider mappings management
+- `/api/v1/provider-contracts`: Provider contracts management
 
 ### Nested Resources
 
-- `/api/v1/providers/{providerId}/configs`: Provider configurations
-- `/api/v1/providers/{providerId}/processes`: Provider processes
-- `/api/v1/processes/{processId}/versions`: Process versions
+- `/api/v1/providers/{providerId}/configs`: Provider configurations (providerId is UUID)
+- `/api/v1/providers/{providerId}/processes`: Provider processes (providerId is UUID)
+- `/api/v1/processes/{processId}/versions`: Process versions (processId is UUID)
+
+### Request/Response Format
+
+All API requests and responses use UUID strings in standard format:
+
+```json
+{
+  "id": "550e8400-e29b-41d4-a716-446655440000",
+  "code": "TREEZOR",
+  "name": "Treezor",
+  "providerTypeId": "6ba7b810-9dad-11d1-80b4-00c04fd430c8",
+  "providerStatusId": "6ba7b811-9dad-11d1-80b4-00c04fd430c8",
+  "countryId": 1
+}
+```
+
+### API Validation
+
+The API validates UUID format and returns appropriate error messages for invalid UUIDs:
+
+```json
+{
+  "error": "Invalid UUID format",
+  "message": "The provided ID 'invalid-uuid' is not a valid UUID format",
+  "field": "providerId"
+}
+```
 
 For detailed API documentation, see the Swagger UI at `/swagger-ui.html` when the application is running.
 
@@ -916,6 +1095,39 @@ kubectl apply -f k8s/service.yaml
 
 For cloud deployment, follow the specific guidelines for your cloud provider.
 
+## Documentation
+
+### Core Documentation
+
+- **[UUID Best Practices Guide](docs/UUID_BEST_PRACTICES.md)**: Comprehensive guide for UUID implementation across database, application, and API layers
+- **[OpenAPI UUID Updates](docs/OPENAPI_UUID_UPDATES.md)**: Documentation of OpenAPI specification updates for UUID support
+
+### Database Documentation
+
+- **Database Migrations**: All migration files include comprehensive comments explaining UUID strategy
+- **Schema Documentation**: Entity Relationship Diagram above shows UUID implementation across all entities
+
+### API Documentation
+
+- **OpenAPI Specification**: `common-platform-config-mgmt-sdk/src/main/resources/api-spec/openapi.yml` includes detailed UUID documentation
+- **Swagger UI**: Available at `/swagger-ui.html` when running the application
+- **UUID Validation**: All API endpoints validate UUID format and provide clear error messages
+
+### Development Guidelines
+
+- **UUID Generation**: Use `uuid_generate_v4()` in database migrations
+- **Java Implementation**: Use `java.util.UUID` type in entities and DTOs
+- **API Usage**: Accept and return UUID strings in standard format
+- **Testing**: Use proper UUID generation in test data
+
+### Migration Documentation
+
+All database migration files include:
+- UUID extension setup (`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`)
+- Proper UUID generation in INSERT statements
+- Comments explaining UUID strategy and foreign key relationships
+- Examples of SELECT statements for referential integrity
+
 ## Contributing
 
 1. Fork the repository
@@ -923,6 +1135,16 @@ For cloud deployment, follow the specific guidelines for your cloud provider.
 3. Commit your changes (`git commit -m 'Add some amazing feature'`)
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
+
+### Development Standards
+
+When contributing to this project:
+
+- **Follow UUID patterns** documented in the best practices guide
+- **Add proper comments** to database migrations explaining UUID usage
+- **Use UUID validation** in API endpoints
+- **Include UUID examples** in API documentation
+- **Test with proper UUIDs** in unit and integration tests
 
 ## License
 

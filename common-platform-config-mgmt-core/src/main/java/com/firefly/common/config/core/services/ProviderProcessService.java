@@ -4,6 +4,7 @@ import com.firefly.common.config.interfaces.dtos.ProviderProcessDTO;
 import com.firefly.common.core.filters.FilterRequest;
 import com.firefly.common.core.queries.PaginationResponse;
 import reactor.core.publisher.Mono;
+import java.util.UUID;
 
 /**
  * Service interface for managing provider processes
@@ -15,7 +16,7 @@ public interface ProviderProcessService {
      * @param id Provider process ID
      * @return Provider process DTO
      */
-    Mono<ProviderProcessDTO> getById(Long id);
+    Mono<ProviderProcessDTO> getById(UUID id);
 
     /**
      * Filter provider processes based on criteria
@@ -37,12 +38,12 @@ public interface ProviderProcessService {
      * @param providerProcessDTO Provider process DTO
      * @return Updated provider process DTO
      */
-    Mono<ProviderProcessDTO> update(Long id, ProviderProcessDTO providerProcessDTO);
+    Mono<ProviderProcessDTO> update(UUID id, ProviderProcessDTO providerProcessDTO);
 
     /**
      * Delete a provider process
      * @param id Provider process ID
      * @return Void
      */
-    Mono<Void> delete(Long id);
+    Mono<Void> delete(UUID id);
 }

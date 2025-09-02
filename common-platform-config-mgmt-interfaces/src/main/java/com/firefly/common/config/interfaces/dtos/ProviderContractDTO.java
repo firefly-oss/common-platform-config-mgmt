@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 /**
  * DTO for Provider Contract entity
@@ -24,20 +25,20 @@ public class ProviderContractDTO {
 
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Schema(description = "Provider contract ID")
-    private Long id;
+    private UUID id;
 
     @NotNull(message = "Contract ID is required")
     @Schema(description = "ID of the contract", example = "12345")
-    private Long contractId;
+    private UUID contractId;
 
     @NotNull(message = "Contract type ID is required")
     @Schema(description = "ID of the contract type", example = "1")
-    private Long contractTypeId;
+    private UUID contractTypeId;
 
     @NotNull(message = "Provider ID is required")
     @FilterableId
     @Schema(description = "ID of the provider")
-    private Long providerId;
+    private UUID providerId;
 
     @Schema(description = "Provider information")
     private ProviderDTO provider;
@@ -45,7 +46,7 @@ public class ProviderContractDTO {
     @NotNull(message = "Provider contract status ID is required")
     @FilterableId
     @Schema(description = "ID of the provider contract status")
-    private Long providerContractStatusId;
+    private UUID providerContractStatusId;
 
     @Schema(description = "Provider contract status information")
     private ProviderContractStatusDTO providerContractStatus;

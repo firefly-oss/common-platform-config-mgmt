@@ -1,31 +1,71 @@
 openapi: 3.0.1
 info:
   title: common-platform-config-mgmt
-  description: Common Platform Config Management Core Application
+  description: |
+    Common Platform Config Management Core Application
+
+    ## UUID Strategy
+
+    This API uses UUIDs (Universally Unique Identifiers) for all entity primary keys and foreign key relationships. This design provides several benefits:
+
+    - **Global Uniqueness**: UUIDs are globally unique, eliminating ID conflicts when merging data from different environments
+    - **Distributed Systems Support**: No need for centralized sequence coordination across multiple database instances
+    - **Enhanced Security**: Non-sequential IDs make it harder to guess valid identifiers
+    - **Better Distribution**: UUIDs provide better distribution in sharded or partitioned databases
+
+    ### ID Field Format
+
+    All entity ID fields (primary keys and foreign keys) use the following format:
+    - **Type**: `string`
+    - **Format**: `uuid`
+    - **Example**: `550e8400-e29b-41d4-a716-446655440000`
+
+    ### Exception: Country IDs
+
+    Country IDs are the only exception and use sequential integer identifiers for simplicity and performance in geographical lookups.
+
+    ### API Usage
+
+    When making API requests:
+    - Always provide UUIDs in the standard format (8-4-4-4-12 hexadecimal digits)
+    - The API will validate UUID format and return appropriate error messages for invalid UUIDs
+    - All responses will include UUIDs in the standard string format
   contact:
     name: Firefly Software Solutions Inc
     email: dev@getfirefly.io
   version: 1.0.0
 servers:
-  - url: 'http://core.catalis.vc/config'
+  - url: http://core.catalis.vc/config
     description: Development Environment
   - url: /
     description: Local Development Environment
 tags:
+  - name: Provider Contract Statuses
+    description: API for managing provider contract statuses
   - name: Provider Statuses
     description: API for managing provider statuses
   - name: Provider Types
     description: API for managing provider types
   - name: Providers
     description: API for managing providers and their configurations and processes
+  - name: Provider Map Types
+    description: API for managing provider map types
+  - name: Provider Contract Mappings
+    description: API for managing provider contract mappings
+  - name: Provider Mappings
+    description: API for managing provider mappings
   - name: Provider Process Statuses
     description: API for managing provider process statuses
+  - name: Provider Contracts
+    description: API for managing provider contracts
   - name: Provider Process Versions
     description: API for managing provider process versions
   - name: Provider Processes
     description: API for managing provider processes and their versions
+  - name: Provider Mapping Statuses
+    description: API for managing provider mapping statuses
 paths:
-  '/api/v1/providers/{providerId}/processes/{id}':
+  /api/v1/providers/{providerId}/processes/{id}:
     get:
       tags:
         - Providers
@@ -38,15 +78,15 @@ paths:
           description: ID of the provider
           required: true
           schema:
-            type: integer
-            format: int64
+            type: string
+            format: uuid
         - name: id
           in: path
           description: ID of the process to retrieve
           required: true
           schema:
-            type: integer
-            format: int64
+            type: string
+            format: uuid
       responses:
         '200':
           description: Successful operation
@@ -72,20 +112,18 @@ paths:
           description: ID of the provider
           required: true
           schema:
-            type: integer
-            format: int64
+            type: string
+            format: uuid
         - name: id
           in: path
           description: ID of the process to update
           required: true
           schema:
-            type: integer
-            format: int64
+            type: string
+            format: uuid
         - name: X-Idempotency-Key
           in: header
-          description: >-
-            Unique key for idempotent requests. If provided, ensures that
-            identical requests with the same key will only be processed once.
+          description: Unique key for idempotent requests. If provided, ensures that identical requests with the same key will only be processed once.
           required: false
           schema:
             type: string
@@ -126,21 +164,21 @@ paths:
           description: ID of the provider
           required: true
           schema:
-            type: integer
-            format: int64
+            type: string
+            format: uuid
         - name: id
           in: path
           description: ID of the process to delete
           required: true
           schema:
-            type: integer
-            format: int64
+            type: string
+            format: uuid
       responses:
         '204':
           description: Process deleted
         '404':
           description: Process not found
-  '/api/v1/providers/{providerId}/configs/{id}':
+  /api/v1/providers/{providerId}/configs/{id}:
     get:
       tags:
         - Providers
@@ -153,15 +191,15 @@ paths:
           description: ID of the provider
           required: true
           schema:
-            type: integer
-            format: int64
+            type: string
+            format: uuid
         - name: id
           in: path
           description: ID of the configuration to retrieve
           required: true
           schema:
-            type: integer
-            format: int64
+            type: string
+            format: uuid
       responses:
         '200':
           description: Successful operation
@@ -187,20 +225,18 @@ paths:
           description: ID of the provider
           required: true
           schema:
-            type: integer
-            format: int64
+            type: string
+            format: uuid
         - name: id
           in: path
           description: ID of the configuration to update
           required: true
           schema:
-            type: integer
-            format: int64
+            type: string
+            format: uuid
         - name: X-Idempotency-Key
           in: header
-          description: >-
-            Unique key for idempotent requests. If provided, ensures that
-            identical requests with the same key will only be processed once.
+          description: Unique key for idempotent requests. If provided, ensures that identical requests with the same key will only be processed once.
           required: false
           schema:
             type: string
@@ -241,21 +277,21 @@ paths:
           description: ID of the provider
           required: true
           schema:
-            type: integer
-            format: int64
+            type: string
+            format: uuid
         - name: id
           in: path
           description: ID of the configuration to delete
           required: true
           schema:
-            type: integer
-            format: int64
+            type: string
+            format: uuid
       responses:
         '204':
           description: Configuration deleted
         '404':
           description: Configuration not found
-  '/api/v1/providers/{id}':
+  /api/v1/providers/{id}:
     get:
       tags:
         - Providers
@@ -268,8 +304,8 @@ paths:
           description: ID of the provider to retrieve
           required: true
           schema:
-            type: integer
-            format: int64
+            type: string
+            format: uuid
       responses:
         '200':
           description: Successful operation
@@ -295,13 +331,11 @@ paths:
           description: ID of the provider to update
           required: true
           schema:
-            type: integer
-            format: int64
+            type: string
+            format: uuid
         - name: X-Idempotency-Key
           in: header
-          description: >-
-            Unique key for idempotent requests. If provided, ensures that
-            identical requests with the same key will only be processed once.
+          description: Unique key for idempotent requests. If provided, ensures that identical requests with the same key will only be processed once.
           required: false
           schema:
             type: string
@@ -342,14 +376,14 @@ paths:
           description: ID of the provider to delete
           required: true
           schema:
-            type: integer
-            format: int64
+            type: string
+            format: uuid
       responses:
         '204':
           description: Provider deleted
         '404':
           description: Provider not found
-  '/api/v1/provider-types/{id}':
+  /api/v1/provider-types/{id}:
     get:
       tags:
         - Provider Types
@@ -362,8 +396,8 @@ paths:
           description: ID of the provider type to retrieve
           required: true
           schema:
-            type: integer
-            format: int64
+            type: string
+            format: uuid
       responses:
         '200':
           description: Successful operation
@@ -389,13 +423,11 @@ paths:
           description: ID of the provider type to update
           required: true
           schema:
-            type: integer
-            format: int64
+            type: string
+            format: uuid
         - name: X-Idempotency-Key
           in: header
-          description: >-
-            Unique key for idempotent requests. If provided, ensures that
-            identical requests with the same key will only be processed once.
+          description: Unique key for idempotent requests. If provided, ensures that identical requests with the same key will only be processed once.
           required: false
           schema:
             type: string
@@ -436,14 +468,14 @@ paths:
           description: ID of the provider type to delete
           required: true
           schema:
-            type: integer
-            format: int64
+            type: string
+            format: uuid
       responses:
         '204':
           description: Provider type deleted
         '404':
           description: Provider type not found
-  '/api/v1/provider-statuses/{id}':
+  /api/v1/provider-statuses/{id}:
     get:
       tags:
         - Provider Statuses
@@ -456,8 +488,8 @@ paths:
           description: ID of the provider status to retrieve
           required: true
           schema:
-            type: integer
-            format: int64
+            type: string
+            format: uuid
       responses:
         '200':
           description: Successful operation
@@ -483,13 +515,11 @@ paths:
           description: ID of the provider status to update
           required: true
           schema:
-            type: integer
-            format: int64
+            type: string
+            format: uuid
         - name: X-Idempotency-Key
           in: header
-          description: >-
-            Unique key for idempotent requests. If provided, ensures that
-            identical requests with the same key will only be processed once.
+          description: Unique key for idempotent requests. If provided, ensures that identical requests with the same key will only be processed once.
           required: false
           schema:
             type: string
@@ -530,14 +560,14 @@ paths:
           description: ID of the provider status to delete
           required: true
           schema:
-            type: integer
-            format: int64
+            type: string
+            format: uuid
       responses:
         '204':
           description: Provider status deleted
         '404':
           description: Provider status not found
-  '/api/v1/provider-process-statuses/{id}':
+  /api/v1/provider-process-statuses/{id}:
     get:
       tags:
         - Provider Process Statuses
@@ -550,8 +580,8 @@ paths:
           description: ID of the provider process status to retrieve
           required: true
           schema:
-            type: integer
-            format: int64
+            type: string
+            format: uuid
       responses:
         '200':
           description: Successful operation
@@ -577,13 +607,11 @@ paths:
           description: ID of the provider process status to update
           required: true
           schema:
-            type: integer
-            format: int64
+            type: string
+            format: uuid
         - name: X-Idempotency-Key
           in: header
-          description: >-
-            Unique key for idempotent requests. If provided, ensures that
-            identical requests with the same key will only be processed once.
+          description: Unique key for idempotent requests. If provided, ensures that identical requests with the same key will only be processed once.
           required: false
           schema:
             type: string
@@ -624,14 +652,566 @@ paths:
           description: ID of the provider process status to delete
           required: true
           schema:
-            type: integer
-            format: int64
+            type: string
+            format: uuid
       responses:
         '204':
           description: Provider process status deleted
         '404':
           description: Provider process status not found
-  '/api/v1/processes/{processId}/versions/{id}':
+  /api/v1/provider-mappings/{id}:
+    get:
+      tags:
+        - Provider Mappings
+      summary: Get a provider mapping by ID
+      description: Returns a provider mapping based on the ID
+      operationId: getProviderMappingById
+      parameters:
+        - name: id
+          in: path
+          description: ID of the provider mapping to retrieve
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ProviderMappingDTO'
+        '404':
+          description: Provider mapping not found
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ProviderMappingDTO'
+    put:
+      tags:
+        - Provider Mappings
+      summary: Update an existing provider mapping
+      description: Updates an existing provider mapping and returns it
+      operationId: updateProviderMapping
+      parameters:
+        - name: id
+          in: path
+          description: ID of the provider mapping to update
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: X-Idempotency-Key
+          in: header
+          description: Unique key for idempotent requests. If provided, ensures that identical requests with the same key will only be processed once.
+          required: false
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProviderMappingDTO'
+        required: true
+      responses:
+        '200':
+          description: Provider mapping updated
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ProviderMappingDTO'
+        '400':
+          description: Invalid input
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ProviderMappingDTO'
+        '404':
+          description: Provider mapping not found
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ProviderMappingDTO'
+    delete:
+      tags:
+        - Provider Mappings
+      summary: Delete a provider mapping
+      description: Deletes a provider mapping
+      operationId: deleteProviderMapping
+      parameters:
+        - name: id
+          in: path
+          description: ID of the provider mapping to delete
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Provider mapping deleted
+        '404':
+          description: Provider mapping not found
+  /api/v1/provider-mapping-statuses/{id}:
+    get:
+      tags:
+        - Provider Mapping Statuses
+      summary: Get a provider mapping status by ID
+      description: Returns a provider mapping status based on the ID
+      operationId: getProviderMappingStatusById
+      parameters:
+        - name: id
+          in: path
+          description: ID of the provider mapping status to retrieve
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ProviderMappingStatusDTO'
+        '404':
+          description: Provider mapping status not found
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ProviderMappingStatusDTO'
+    put:
+      tags:
+        - Provider Mapping Statuses
+      summary: Update an existing provider mapping status
+      description: Updates an existing provider mapping status and returns it
+      operationId: updateProviderMappingStatus
+      parameters:
+        - name: id
+          in: path
+          description: ID of the provider mapping status to update
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: X-Idempotency-Key
+          in: header
+          description: Unique key for idempotent requests. If provided, ensures that identical requests with the same key will only be processed once.
+          required: false
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProviderMappingStatusDTO'
+        required: true
+      responses:
+        '200':
+          description: Provider mapping status updated
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ProviderMappingStatusDTO'
+        '400':
+          description: Invalid input
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ProviderMappingStatusDTO'
+        '404':
+          description: Provider mapping status not found
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ProviderMappingStatusDTO'
+    delete:
+      tags:
+        - Provider Mapping Statuses
+      summary: Delete a provider mapping status
+      description: Deletes a provider mapping status
+      operationId: deleteProviderMappingStatus
+      parameters:
+        - name: id
+          in: path
+          description: ID of the provider mapping status to delete
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Provider mapping status deleted
+        '404':
+          description: Provider mapping status not found
+  /api/v1/provider-map-types/{id}:
+    get:
+      tags:
+        - Provider Map Types
+      summary: Get a provider map type by ID
+      description: Returns a provider map type based on the ID
+      operationId: getProviderMapTypeById
+      parameters:
+        - name: id
+          in: path
+          description: ID of the provider map type to retrieve
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ProviderMapTypeDTO'
+        '404':
+          description: Provider map type not found
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ProviderMapTypeDTO'
+    put:
+      tags:
+        - Provider Map Types
+      summary: Update an existing provider map type
+      description: Updates an existing provider map type and returns it
+      operationId: updateProviderMapType
+      parameters:
+        - name: id
+          in: path
+          description: ID of the provider map type to update
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: X-Idempotency-Key
+          in: header
+          description: Unique key for idempotent requests. If provided, ensures that identical requests with the same key will only be processed once.
+          required: false
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProviderMapTypeDTO'
+        required: true
+      responses:
+        '200':
+          description: Provider map type updated
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ProviderMapTypeDTO'
+        '400':
+          description: Invalid input
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ProviderMapTypeDTO'
+        '404':
+          description: Provider map type not found
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ProviderMapTypeDTO'
+    delete:
+      tags:
+        - Provider Map Types
+      summary: Delete a provider map type
+      description: Deletes a provider map type
+      operationId: deleteProviderMapType
+      parameters:
+        - name: id
+          in: path
+          description: ID of the provider map type to delete
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Provider map type deleted
+        '404':
+          description: Provider map type not found
+  /api/v1/provider-contracts/{id}:
+    get:
+      tags:
+        - Provider Contracts
+      summary: Get a provider contract by ID
+      description: Returns a provider contract based on the ID
+      operationId: getProviderContractById
+      parameters:
+        - name: id
+          in: path
+          description: ID of the provider contract to retrieve
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ProviderContractDTO'
+        '404':
+          description: Provider contract not found
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ProviderContractDTO'
+    put:
+      tags:
+        - Provider Contracts
+      summary: Update an existing provider contract
+      description: Updates an existing provider contract and returns it
+      operationId: updateProviderContract
+      parameters:
+        - name: id
+          in: path
+          description: ID of the provider contract to update
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: X-Idempotency-Key
+          in: header
+          description: Unique key for idempotent requests. If provided, ensures that identical requests with the same key will only be processed once.
+          required: false
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProviderContractDTO'
+        required: true
+      responses:
+        '200':
+          description: Provider contract updated
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ProviderContractDTO'
+        '400':
+          description: Invalid input
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ProviderContractDTO'
+        '404':
+          description: Provider contract not found
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ProviderContractDTO'
+    delete:
+      tags:
+        - Provider Contracts
+      summary: Delete a provider contract
+      description: Deletes a provider contract
+      operationId: deleteProviderContract
+      parameters:
+        - name: id
+          in: path
+          description: ID of the provider contract to delete
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Provider contract deleted
+        '404':
+          description: Provider contract not found
+  /api/v1/provider-contract-statuses/{id}:
+    get:
+      tags:
+        - Provider Contract Statuses
+      summary: Get a provider contract status by ID
+      description: Returns a provider contract status based on the ID
+      operationId: getProviderContractStatusById
+      parameters:
+        - name: id
+          in: path
+          description: ID of the provider contract status to retrieve
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ProviderContractStatusDTO'
+        '404':
+          description: Provider contract status not found
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ProviderContractStatusDTO'
+    put:
+      tags:
+        - Provider Contract Statuses
+      summary: Update an existing provider contract status
+      description: Updates an existing provider contract status and returns it
+      operationId: updateProviderContractStatus
+      parameters:
+        - name: id
+          in: path
+          description: ID of the provider contract status to update
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: X-Idempotency-Key
+          in: header
+          description: Unique key for idempotent requests. If provided, ensures that identical requests with the same key will only be processed once.
+          required: false
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProviderContractStatusDTO'
+        required: true
+      responses:
+        '200':
+          description: Provider contract status updated
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ProviderContractStatusDTO'
+        '400':
+          description: Invalid input
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ProviderContractStatusDTO'
+        '404':
+          description: Provider contract status not found
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ProviderContractStatusDTO'
+    delete:
+      tags:
+        - Provider Contract Statuses
+      summary: Delete a provider contract status
+      description: Deletes a provider contract status
+      operationId: deleteProviderContractStatus
+      parameters:
+        - name: id
+          in: path
+          description: ID of the provider contract status to delete
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Provider contract status deleted
+        '404':
+          description: Provider contract status not found
+  /api/v1/provider-contract-mappings/{id}:
+    get:
+      tags:
+        - Provider Contract Mappings
+      summary: Get a provider contract mapping by ID
+      description: Returns a provider contract mapping based on the ID
+      operationId: getProviderContractMappingById
+      parameters:
+        - name: id
+          in: path
+          description: ID of the provider contract mapping to retrieve
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ProviderContractMappingDTO'
+        '404':
+          description: Provider contract mapping not found
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ProviderContractMappingDTO'
+    put:
+      tags:
+        - Provider Contract Mappings
+      summary: Update an existing provider contract mapping
+      description: Updates an existing provider contract mapping and returns it
+      operationId: updateProviderContractMapping
+      parameters:
+        - name: id
+          in: path
+          description: ID of the provider contract mapping to update
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: X-Idempotency-Key
+          in: header
+          description: Unique key for idempotent requests. If provided, ensures that identical requests with the same key will only be processed once.
+          required: false
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProviderContractMappingDTO'
+        required: true
+      responses:
+        '200':
+          description: Provider contract mapping updated
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ProviderContractMappingDTO'
+        '400':
+          description: Invalid input
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ProviderContractMappingDTO'
+        '404':
+          description: Provider contract mapping not found
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ProviderContractMappingDTO'
+    delete:
+      tags:
+        - Provider Contract Mappings
+      summary: Delete a provider contract mapping
+      description: Deletes a provider contract mapping
+      operationId: deleteProviderContractMapping
+      parameters:
+        - name: id
+          in: path
+          description: ID of the provider contract mapping to delete
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Provider contract mapping deleted
+        '404':
+          description: Provider contract mapping not found
+  /api/v1/processes/{processId}/versions/{id}:
     get:
       tags:
         - Provider Processes
@@ -644,15 +1224,15 @@ paths:
           description: ID of the process
           required: true
           schema:
-            type: integer
-            format: int64
+            type: string
+            format: uuid
         - name: id
           in: path
           description: ID of the version to retrieve
           required: true
           schema:
-            type: integer
-            format: int64
+            type: string
+            format: uuid
       responses:
         '200':
           description: Successful operation
@@ -678,20 +1258,18 @@ paths:
           description: ID of the process
           required: true
           schema:
-            type: integer
-            format: int64
+            type: string
+            format: uuid
         - name: id
           in: path
           description: ID of the version to update
           required: true
           schema:
-            type: integer
-            format: int64
+            type: string
+            format: uuid
         - name: X-Idempotency-Key
           in: header
-          description: >-
-            Unique key for idempotent requests. If provided, ensures that
-            identical requests with the same key will only be processed once.
+          description: Unique key for idempotent requests. If provided, ensures that identical requests with the same key will only be processed once.
           required: false
           schema:
             type: string
@@ -732,21 +1310,21 @@ paths:
           description: ID of the process
           required: true
           schema:
-            type: integer
-            format: int64
+            type: string
+            format: uuid
         - name: id
           in: path
           description: ID of the version to delete
           required: true
           schema:
-            type: integer
-            format: int64
+            type: string
+            format: uuid
       responses:
         '204':
           description: Version deleted
         '404':
           description: Version not found
-  '/api/v1/processes/{id}':
+  /api/v1/processes/{id}:
     get:
       tags:
         - Provider Processes
@@ -759,8 +1337,8 @@ paths:
           description: ID of the provider process to retrieve
           required: true
           schema:
-            type: integer
-            format: int64
+            type: string
+            format: uuid
       responses:
         '200':
           description: Successful operation
@@ -786,13 +1364,11 @@ paths:
           description: ID of the provider process to update
           required: true
           schema:
-            type: integer
-            format: int64
+            type: string
+            format: uuid
         - name: X-Idempotency-Key
           in: header
-          description: >-
-            Unique key for idempotent requests. If provided, ensures that
-            identical requests with the same key will only be processed once.
+          description: Unique key for idempotent requests. If provided, ensures that identical requests with the same key will only be processed once.
           required: false
           schema:
             type: string
@@ -833,14 +1409,14 @@ paths:
           description: ID of the provider process to delete
           required: true
           schema:
-            type: integer
-            format: int64
+            type: string
+            format: uuid
       responses:
         '204':
           description: Provider process deleted
         '404':
           description: Provider process not found
-  '/api/v1/process-versions/{id}':
+  /api/v1/process-versions/{id}:
     get:
       tags:
         - Provider Process Versions
@@ -853,8 +1429,8 @@ paths:
           description: ID of the provider process version to retrieve
           required: true
           schema:
-            type: integer
-            format: int64
+            type: string
+            format: uuid
       responses:
         '200':
           description: Successful operation
@@ -880,13 +1456,11 @@ paths:
           description: ID of the provider process version to update
           required: true
           schema:
-            type: integer
-            format: int64
+            type: string
+            format: uuid
         - name: X-Idempotency-Key
           in: header
-          description: >-
-            Unique key for idempotent requests. If provided, ensures that
-            identical requests with the same key will only be processed once.
+          description: Unique key for idempotent requests. If provided, ensures that identical requests with the same key will only be processed once.
           required: false
           schema:
             type: string
@@ -927,8 +1501,8 @@ paths:
           description: ID of the provider process version to delete
           required: true
           schema:
-            type: integer
-            format: int64
+            type: string
+            format: uuid
       responses:
         '204':
           description: Provider process version deleted
@@ -944,9 +1518,7 @@ paths:
       parameters:
         - name: X-Idempotency-Key
           in: header
-          description: >-
-            Unique key for idempotent requests. If provided, ensures that
-            identical requests with the same key will only be processed once.
+          description: Unique key for idempotent requests. If provided, ensures that identical requests with the same key will only be processed once.
           required: false
           schema:
             type: string
@@ -969,7 +1541,7 @@ paths:
             '*/*':
               schema:
                 $ref: '#/components/schemas/ProviderDTO'
-  '/api/v1/providers/{providerId}/processes':
+  /api/v1/providers/{providerId}/processes:
     post:
       tags:
         - Providers
@@ -982,13 +1554,11 @@ paths:
           description: ID of the provider
           required: true
           schema:
-            type: integer
-            format: int64
+            type: string
+            format: uuid
         - name: X-Idempotency-Key
           in: header
-          description: >-
-            Unique key for idempotent requests. If provided, ensures that
-            identical requests with the same key will only be processed once.
+          description: Unique key for idempotent requests. If provided, ensures that identical requests with the same key will only be processed once.
           required: false
           schema:
             type: string
@@ -1017,7 +1587,7 @@ paths:
             '*/*':
               schema:
                 $ref: '#/components/schemas/ProviderProcessDTO'
-  '/api/v1/providers/{providerId}/processes/filter':
+  /api/v1/providers/{providerId}/processes/filter:
     post:
       tags:
         - Providers
@@ -1030,13 +1600,11 @@ paths:
           description: ID of the provider
           required: true
           schema:
-            type: integer
-            format: int64
+            type: string
+            format: uuid
         - name: X-Idempotency-Key
           in: header
-          description: >-
-            Unique key for idempotent requests. If provided, ensures that
-            identical requests with the same key will only be processed once.
+          description: Unique key for idempotent requests. If provided, ensures that identical requests with the same key will only be processed once.
           required: false
           schema:
             type: string
@@ -1053,7 +1621,7 @@ paths:
             '*/*':
               schema:
                 $ref: '#/components/schemas/PaginationResponseProviderProcessDTO'
-  '/api/v1/providers/{providerId}/configs':
+  /api/v1/providers/{providerId}/configs:
     post:
       tags:
         - Providers
@@ -1066,13 +1634,11 @@ paths:
           description: ID of the provider
           required: true
           schema:
-            type: integer
-            format: int64
+            type: string
+            format: uuid
         - name: X-Idempotency-Key
           in: header
-          description: >-
-            Unique key for idempotent requests. If provided, ensures that
-            identical requests with the same key will only be processed once.
+          description: Unique key for idempotent requests. If provided, ensures that identical requests with the same key will only be processed once.
           required: false
           schema:
             type: string
@@ -1101,7 +1667,7 @@ paths:
             '*/*':
               schema:
                 $ref: '#/components/schemas/ProviderConfigDTO'
-  '/api/v1/providers/{providerId}/configs/filter':
+  /api/v1/providers/{providerId}/configs/filter:
     post:
       tags:
         - Providers
@@ -1114,8 +1680,8 @@ paths:
           description: ID of the provider
           required: true
           schema:
-            type: integer
-            format: int64
+            type: string
+            format: uuid
         - name: pagination.pageNumber
           in: query
           description: Page number (0-based)
@@ -1164,8 +1730,7 @@ paths:
           description: Exact filter for provider id
           required: false
           schema:
-            type: integer
-            format: int32
+            type: string
         - name: filters.provider
           in: query
           description: Exact filter for provider
@@ -1245,14 +1810,14 @@ paths:
           schema:
             type: string
             format: date-time
-        - name: 'rangeFilters.ranges[expirationDate].from'
+        - name: rangeFilters.ranges[expirationDate].from
           in: query
           description: Filter expiration date from value
           required: false
           schema:
             type: string
             format: date-time
-        - name: 'rangeFilters.ranges[expirationDate].to'
+        - name: rangeFilters.ranges[expirationDate].to
           in: query
           description: Filter expiration date to value
           required: false
@@ -1278,14 +1843,14 @@ paths:
           schema:
             type: integer
             format: int32
-        - name: 'rangeFilters.ranges[orderIndex].from'
+        - name: rangeFilters.ranges[orderIndex].from
           in: query
           description: Filter order index from value
           required: false
           schema:
             type: integer
             format: int32
-        - name: 'rangeFilters.ranges[orderIndex].to'
+        - name: rangeFilters.ranges[orderIndex].to
           in: query
           description: Filter order index to value
           required: false
@@ -1305,14 +1870,14 @@ paths:
           schema:
             type: integer
             format: int32
-        - name: 'rangeFilters.ranges[version].from'
+        - name: rangeFilters.ranges[version].from
           in: query
           description: Filter version from value
           required: false
           schema:
             type: integer
             format: int32
-        - name: 'rangeFilters.ranges[version].to'
+        - name: rangeFilters.ranges[version].to
           in: query
           description: Filter version to value
           required: false
@@ -1326,14 +1891,14 @@ paths:
           schema:
             type: string
             format: date-time
-        - name: 'rangeFilters.ranges[createdAt].from'
+        - name: rangeFilters.ranges[createdAt].from
           in: query
           description: Filter created at from value
           required: false
           schema:
             type: string
             format: date-time
-        - name: 'rangeFilters.ranges[createdAt].to'
+        - name: rangeFilters.ranges[createdAt].to
           in: query
           description: Filter created at to value
           required: false
@@ -1347,14 +1912,14 @@ paths:
           schema:
             type: string
             format: date-time
-        - name: 'rangeFilters.ranges[updatedAt].from'
+        - name: rangeFilters.ranges[updatedAt].from
           in: query
           description: Filter updated at from value
           required: false
           schema:
             type: string
             format: date-time
-        - name: 'rangeFilters.ranges[updatedAt].to'
+        - name: rangeFilters.ranges[updatedAt].to
           in: query
           description: Filter updated at to value
           required: false
@@ -1363,9 +1928,7 @@ paths:
             format: date-time
         - name: X-Idempotency-Key
           in: header
-          description: >-
-            Unique key for idempotent requests. If provided, ensures that
-            identical requests with the same key will only be processed once.
+          description: Unique key for idempotent requests. If provided, ensures that identical requests with the same key will only be processed once.
           required: false
           schema:
             type: string
@@ -1450,8 +2013,7 @@ paths:
           description: Exact filter for provider type id
           required: false
           schema:
-            type: integer
-            format: int32
+            type: string
         - name: filters.providerType
           in: query
           description: Exact filter for provider type
@@ -1463,8 +2025,7 @@ paths:
           description: Exact filter for provider status id
           required: false
           schema:
-            type: integer
-            format: int32
+            type: string
         - name: filters.providerStatus
           in: query
           description: Exact filter for provider status
@@ -1543,12 +2104,6 @@ paths:
           required: false
           schema:
             type: string
-        - name: filters.countryCode
-          in: query
-          description: Exact filter for country code
-          required: false
-          schema:
-            type: string
         - name: filters.region
           in: query
           description: Exact filter for region
@@ -1574,14 +2129,14 @@ paths:
           schema:
             type: integer
             format: int32
-        - name: 'rangeFilters.ranges[maxRequestsPerSecond].from'
+        - name: rangeFilters.ranges[maxRequestsPerSecond].from
           in: query
           description: Filter max requests per second from value
           required: false
           schema:
             type: integer
             format: int32
-        - name: 'rangeFilters.ranges[maxRequestsPerSecond].to'
+        - name: rangeFilters.ranges[maxRequestsPerSecond].to
           in: query
           description: Filter max requests per second to value
           required: false
@@ -1595,14 +2150,14 @@ paths:
           schema:
             type: integer
             format: int32
-        - name: 'rangeFilters.ranges[maxConcurrentRequests].from'
+        - name: rangeFilters.ranges[maxConcurrentRequests].from
           in: query
           description: Filter max concurrent requests from value
           required: false
           schema:
             type: integer
             format: int32
-        - name: 'rangeFilters.ranges[maxConcurrentRequests].to'
+        - name: rangeFilters.ranges[maxConcurrentRequests].to
           in: query
           description: Filter max concurrent requests to value
           required: false
@@ -1646,14 +2201,14 @@ paths:
           schema:
             type: integer
             format: int32
-        - name: 'rangeFilters.ranges[pollingIntervalSeconds].from'
+        - name: rangeFilters.ranges[pollingIntervalSeconds].from
           in: query
           description: Filter polling interval seconds from value
           required: false
           schema:
             type: integer
             format: int32
-        - name: 'rangeFilters.ranges[pollingIntervalSeconds].to'
+        - name: rangeFilters.ranges[pollingIntervalSeconds].to
           in: query
           description: Filter polling interval seconds to value
           required: false
@@ -1673,14 +2228,14 @@ paths:
           schema:
             type: integer
             format: int32
-        - name: 'rangeFilters.ranges[version].from'
+        - name: rangeFilters.ranges[version].from
           in: query
           description: Filter version from value
           required: false
           schema:
             type: integer
             format: int32
-        - name: 'rangeFilters.ranges[version].to'
+        - name: rangeFilters.ranges[version].to
           in: query
           description: Filter version to value
           required: false
@@ -1694,14 +2249,14 @@ paths:
           schema:
             type: string
             format: date-time
-        - name: 'rangeFilters.ranges[createdAt].from'
+        - name: rangeFilters.ranges[createdAt].from
           in: query
           description: Filter created at from value
           required: false
           schema:
             type: string
             format: date-time
-        - name: 'rangeFilters.ranges[createdAt].to'
+        - name: rangeFilters.ranges[createdAt].to
           in: query
           description: Filter created at to value
           required: false
@@ -1715,14 +2270,14 @@ paths:
           schema:
             type: string
             format: date-time
-        - name: 'rangeFilters.ranges[updatedAt].from'
+        - name: rangeFilters.ranges[updatedAt].from
           in: query
           description: Filter updated at from value
           required: false
           schema:
             type: string
             format: date-time
-        - name: 'rangeFilters.ranges[updatedAt].to'
+        - name: rangeFilters.ranges[updatedAt].to
           in: query
           description: Filter updated at to value
           required: false
@@ -1731,9 +2286,7 @@ paths:
             format: date-time
         - name: X-Idempotency-Key
           in: header
-          description: >-
-            Unique key for idempotent requests. If provided, ensures that
-            identical requests with the same key will only be processed once.
+          description: Unique key for idempotent requests. If provided, ensures that identical requests with the same key will only be processed once.
           required: false
           schema:
             type: string
@@ -1754,9 +2307,7 @@ paths:
       parameters:
         - name: X-Idempotency-Key
           in: header
-          description: >-
-            Unique key for idempotent requests. If provided, ensures that
-            identical requests with the same key will only be processed once.
+          description: Unique key for idempotent requests. If provided, ensures that identical requests with the same key will only be processed once.
           required: false
           schema:
             type: string
@@ -1861,14 +2412,14 @@ paths:
           schema:
             type: integer
             format: int32
-        - name: 'rangeFilters.ranges[version].from'
+        - name: rangeFilters.ranges[version].from
           in: query
           description: Filter version from value
           required: false
           schema:
             type: integer
             format: int32
-        - name: 'rangeFilters.ranges[version].to'
+        - name: rangeFilters.ranges[version].to
           in: query
           description: Filter version to value
           required: false
@@ -1882,14 +2433,14 @@ paths:
           schema:
             type: string
             format: date-time
-        - name: 'rangeFilters.ranges[createdAt].from'
+        - name: rangeFilters.ranges[createdAt].from
           in: query
           description: Filter created at from value
           required: false
           schema:
             type: string
             format: date-time
-        - name: 'rangeFilters.ranges[createdAt].to'
+        - name: rangeFilters.ranges[createdAt].to
           in: query
           description: Filter created at to value
           required: false
@@ -1903,14 +2454,14 @@ paths:
           schema:
             type: string
             format: date-time
-        - name: 'rangeFilters.ranges[updatedAt].from'
+        - name: rangeFilters.ranges[updatedAt].from
           in: query
           description: Filter updated at from value
           required: false
           schema:
             type: string
             format: date-time
-        - name: 'rangeFilters.ranges[updatedAt].to'
+        - name: rangeFilters.ranges[updatedAt].to
           in: query
           description: Filter updated at to value
           required: false
@@ -1919,9 +2470,7 @@ paths:
             format: date-time
         - name: X-Idempotency-Key
           in: header
-          description: >-
-            Unique key for idempotent requests. If provided, ensures that
-            identical requests with the same key will only be processed once.
+          description: Unique key for idempotent requests. If provided, ensures that identical requests with the same key will only be processed once.
           required: false
           schema:
             type: string
@@ -1942,9 +2491,7 @@ paths:
       parameters:
         - name: X-Idempotency-Key
           in: header
-          description: >-
-            Unique key for idempotent requests. If provided, ensures that
-            identical requests with the same key will only be processed once.
+          description: Unique key for idempotent requests. If provided, ensures that identical requests with the same key will only be processed once.
           required: false
           schema:
             type: string
@@ -2049,14 +2596,14 @@ paths:
           schema:
             type: integer
             format: int32
-        - name: 'rangeFilters.ranges[version].from'
+        - name: rangeFilters.ranges[version].from
           in: query
           description: Filter version from value
           required: false
           schema:
             type: integer
             format: int32
-        - name: 'rangeFilters.ranges[version].to'
+        - name: rangeFilters.ranges[version].to
           in: query
           description: Filter version to value
           required: false
@@ -2070,14 +2617,14 @@ paths:
           schema:
             type: string
             format: date-time
-        - name: 'rangeFilters.ranges[createdAt].from'
+        - name: rangeFilters.ranges[createdAt].from
           in: query
           description: Filter created at from value
           required: false
           schema:
             type: string
             format: date-time
-        - name: 'rangeFilters.ranges[createdAt].to'
+        - name: rangeFilters.ranges[createdAt].to
           in: query
           description: Filter created at to value
           required: false
@@ -2091,14 +2638,14 @@ paths:
           schema:
             type: string
             format: date-time
-        - name: 'rangeFilters.ranges[updatedAt].from'
+        - name: rangeFilters.ranges[updatedAt].from
           in: query
           description: Filter updated at from value
           required: false
           schema:
             type: string
             format: date-time
-        - name: 'rangeFilters.ranges[updatedAt].to'
+        - name: rangeFilters.ranges[updatedAt].to
           in: query
           description: Filter updated at to value
           required: false
@@ -2107,9 +2654,7 @@ paths:
             format: date-time
         - name: X-Idempotency-Key
           in: header
-          description: >-
-            Unique key for idempotent requests. If provided, ensures that
-            identical requests with the same key will only be processed once.
+          description: Unique key for idempotent requests. If provided, ensures that identical requests with the same key will only be processed once.
           required: false
           schema:
             type: string
@@ -2130,9 +2675,7 @@ paths:
       parameters:
         - name: X-Idempotency-Key
           in: header
-          description: >-
-            Unique key for idempotent requests. If provided, ensures that
-            identical requests with the same key will only be processed once.
+          description: Unique key for idempotent requests. If provided, ensures that identical requests with the same key will only be processed once.
           required: false
           schema:
             type: string
@@ -2237,14 +2780,14 @@ paths:
           schema:
             type: integer
             format: int32
-        - name: 'rangeFilters.ranges[version].from'
+        - name: rangeFilters.ranges[version].from
           in: query
           description: Filter version from value
           required: false
           schema:
             type: integer
             format: int32
-        - name: 'rangeFilters.ranges[version].to'
+        - name: rangeFilters.ranges[version].to
           in: query
           description: Filter version to value
           required: false
@@ -2258,14 +2801,14 @@ paths:
           schema:
             type: string
             format: date-time
-        - name: 'rangeFilters.ranges[createdAt].from'
+        - name: rangeFilters.ranges[createdAt].from
           in: query
           description: Filter created at from value
           required: false
           schema:
             type: string
             format: date-time
-        - name: 'rangeFilters.ranges[createdAt].to'
+        - name: rangeFilters.ranges[createdAt].to
           in: query
           description: Filter created at to value
           required: false
@@ -2279,14 +2822,14 @@ paths:
           schema:
             type: string
             format: date-time
-        - name: 'rangeFilters.ranges[updatedAt].from'
+        - name: rangeFilters.ranges[updatedAt].from
           in: query
           description: Filter updated at from value
           required: false
           schema:
             type: string
             format: date-time
-        - name: 'rangeFilters.ranges[updatedAt].to'
+        - name: rangeFilters.ranges[updatedAt].to
           in: query
           description: Filter updated at to value
           required: false
@@ -2295,9 +2838,7 @@ paths:
             format: date-time
         - name: X-Idempotency-Key
           in: header
-          description: >-
-            Unique key for idempotent requests. If provided, ensures that
-            identical requests with the same key will only be processed once.
+          description: Unique key for idempotent requests. If provided, ensures that identical requests with the same key will only be processed once.
           required: false
           schema:
             type: string
@@ -2307,8 +2848,1189 @@ paths:
           content:
             '*/*':
               schema:
-                $ref: >-
-                  #/components/schemas/PaginationResponseProviderProcessStatusDTO
+                $ref: '#/components/schemas/PaginationResponseProviderProcessStatusDTO'
+  /api/v1/provider-mappings:
+    post:
+      tags:
+        - Provider Mappings
+      summary: Create a new provider mapping
+      description: Creates a new provider mapping and returns it
+      operationId: createProviderMapping
+      parameters:
+        - name: X-Idempotency-Key
+          in: header
+          description: Unique key for idempotent requests. If provided, ensures that identical requests with the same key will only be processed once.
+          required: false
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProviderMappingDTO'
+        required: true
+      responses:
+        '201':
+          description: Provider mapping created
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ProviderMappingDTO'
+        '400':
+          description: Invalid input
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ProviderMappingDTO'
+  /api/v1/provider-mappings/filter:
+    post:
+      tags:
+        - Provider Mappings
+      summary: Filter provider mappings
+      description: Returns a filtered list of provider mappings based on criteria
+      operationId: filterProviderMappings
+      parameters:
+        - name: pagination.pageNumber
+          in: query
+          description: Page number (0-based)
+          required: false
+          schema:
+            type: integer
+            format: int32
+            default: 0
+        - name: pagination.pageSize
+          in: query
+          description: Number of items per page
+          required: false
+          schema:
+            type: integer
+            format: int32
+            default: 10
+        - name: pagination.sortBy
+          in: query
+          description: Field to sort by
+          required: false
+          schema:
+            type: string
+        - name: pagination.sortDirection
+          in: query
+          description: Sort direction (ASC or DESC)
+          required: false
+          schema:
+            type: string
+            default: DESC
+        - name: options.caseInsensitiveStrings
+          in: query
+          description: Enable case-insensitive string filtering
+          required: false
+          schema:
+            type: boolean
+            default: false
+        - name: options.includeInheritedFields
+          in: query
+          description: Include fields from parent classes
+          required: false
+          schema:
+            type: boolean
+            default: false
+        - name: filters.providerMapTypeId
+          in: query
+          description: Exact filter for provider map type id
+          required: false
+          schema:
+            type: string
+        - name: filters.providerMapType
+          in: query
+          description: Exact filter for provider map type
+          required: false
+          schema:
+            type: string
+        - name: filters.providerId
+          in: query
+          description: Exact filter for provider id
+          required: false
+          schema:
+            type: string
+        - name: filters.provider
+          in: query
+          description: Exact filter for provider
+          required: false
+          schema:
+            type: string
+        - name: filters.internalProviderId
+          in: query
+          description: Exact filter for internal provider id
+          required: false
+          schema:
+            type: string
+        - name: filters.internalProvider
+          in: query
+          description: Exact filter for internal provider
+          required: false
+          schema:
+            type: string
+        - name: filters.active
+          in: query
+          description: Exact filter for active
+          required: false
+          schema:
+            type: boolean
+        - name: filters.version
+          in: query
+          description: Exact filter for version
+          required: false
+          schema:
+            type: integer
+            format: int32
+        - name: rangeFilters.ranges[version].from
+          in: query
+          description: Filter version from value
+          required: false
+          schema:
+            type: integer
+            format: int32
+        - name: rangeFilters.ranges[version].to
+          in: query
+          description: Filter version to value
+          required: false
+          schema:
+            type: integer
+            format: int32
+        - name: filters.createdAt
+          in: query
+          description: Exact filter for created at
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: rangeFilters.ranges[createdAt].from
+          in: query
+          description: Filter created at from value
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: rangeFilters.ranges[createdAt].to
+          in: query
+          description: Filter created at to value
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: filters.updatedAt
+          in: query
+          description: Exact filter for updated at
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: rangeFilters.ranges[updatedAt].from
+          in: query
+          description: Filter updated at from value
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: rangeFilters.ranges[updatedAt].to
+          in: query
+          description: Filter updated at to value
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: X-Idempotency-Key
+          in: header
+          description: Unique key for idempotent requests. If provided, ensures that identical requests with the same key will only be processed once.
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/PaginationResponseProviderMappingDTO'
+  /api/v1/provider-mapping-statuses:
+    post:
+      tags:
+        - Provider Mapping Statuses
+      summary: Create a new provider mapping status
+      description: Creates a new provider mapping status and returns it
+      operationId: createProviderMappingStatus
+      parameters:
+        - name: X-Idempotency-Key
+          in: header
+          description: Unique key for idempotent requests. If provided, ensures that identical requests with the same key will only be processed once.
+          required: false
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProviderMappingStatusDTO'
+        required: true
+      responses:
+        '201':
+          description: Provider mapping status created
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ProviderMappingStatusDTO'
+        '400':
+          description: Invalid input
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ProviderMappingStatusDTO'
+  /api/v1/provider-mapping-statuses/filter:
+    post:
+      tags:
+        - Provider Mapping Statuses
+      summary: Filter provider mapping statuses
+      description: Returns a filtered list of provider mapping statuses based on criteria
+      operationId: filterProviderMappingStatuses
+      parameters:
+        - name: pagination.pageNumber
+          in: query
+          description: Page number (0-based)
+          required: false
+          schema:
+            type: integer
+            format: int32
+            default: 0
+        - name: pagination.pageSize
+          in: query
+          description: Number of items per page
+          required: false
+          schema:
+            type: integer
+            format: int32
+            default: 10
+        - name: pagination.sortBy
+          in: query
+          description: Field to sort by
+          required: false
+          schema:
+            type: string
+        - name: pagination.sortDirection
+          in: query
+          description: Sort direction (ASC or DESC)
+          required: false
+          schema:
+            type: string
+            default: DESC
+        - name: options.caseInsensitiveStrings
+          in: query
+          description: Enable case-insensitive string filtering
+          required: false
+          schema:
+            type: boolean
+            default: false
+        - name: options.includeInheritedFields
+          in: query
+          description: Include fields from parent classes
+          required: false
+          schema:
+            type: boolean
+            default: false
+        - name: filters.code
+          in: query
+          description: Exact filter for code
+          required: false
+          schema:
+            type: string
+        - name: filters.name
+          in: query
+          description: Exact filter for name
+          required: false
+          schema:
+            type: string
+        - name: filters.description
+          in: query
+          description: Exact filter for description
+          required: false
+          schema:
+            type: string
+        - name: filters.active
+          in: query
+          description: Exact filter for active
+          required: false
+          schema:
+            type: boolean
+        - name: filters.version
+          in: query
+          description: Exact filter for version
+          required: false
+          schema:
+            type: integer
+            format: int32
+        - name: rangeFilters.ranges[version].from
+          in: query
+          description: Filter version from value
+          required: false
+          schema:
+            type: integer
+            format: int32
+        - name: rangeFilters.ranges[version].to
+          in: query
+          description: Filter version to value
+          required: false
+          schema:
+            type: integer
+            format: int32
+        - name: filters.createdAt
+          in: query
+          description: Exact filter for created at
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: rangeFilters.ranges[createdAt].from
+          in: query
+          description: Filter created at from value
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: rangeFilters.ranges[createdAt].to
+          in: query
+          description: Filter created at to value
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: filters.updatedAt
+          in: query
+          description: Exact filter for updated at
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: rangeFilters.ranges[updatedAt].from
+          in: query
+          description: Filter updated at from value
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: rangeFilters.ranges[updatedAt].to
+          in: query
+          description: Filter updated at to value
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: X-Idempotency-Key
+          in: header
+          description: Unique key for idempotent requests. If provided, ensures that identical requests with the same key will only be processed once.
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/PaginationResponseProviderMappingStatusDTO'
+  /api/v1/provider-map-types:
+    post:
+      tags:
+        - Provider Map Types
+      summary: Create a new provider map type
+      description: Creates a new provider map type and returns it
+      operationId: createProviderMapType
+      parameters:
+        - name: X-Idempotency-Key
+          in: header
+          description: Unique key for idempotent requests. If provided, ensures that identical requests with the same key will only be processed once.
+          required: false
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProviderMapTypeDTO'
+        required: true
+      responses:
+        '201':
+          description: Provider map type created
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ProviderMapTypeDTO'
+        '400':
+          description: Invalid input
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ProviderMapTypeDTO'
+  /api/v1/provider-map-types/filter:
+    post:
+      tags:
+        - Provider Map Types
+      summary: Filter provider map types
+      description: Returns a filtered list of provider map types based on criteria
+      operationId: filterProviderMapTypes
+      parameters:
+        - name: pagination.pageNumber
+          in: query
+          description: Page number (0-based)
+          required: false
+          schema:
+            type: integer
+            format: int32
+            default: 0
+        - name: pagination.pageSize
+          in: query
+          description: Number of items per page
+          required: false
+          schema:
+            type: integer
+            format: int32
+            default: 10
+        - name: pagination.sortBy
+          in: query
+          description: Field to sort by
+          required: false
+          schema:
+            type: string
+        - name: pagination.sortDirection
+          in: query
+          description: Sort direction (ASC or DESC)
+          required: false
+          schema:
+            type: string
+            default: DESC
+        - name: options.caseInsensitiveStrings
+          in: query
+          description: Enable case-insensitive string filtering
+          required: false
+          schema:
+            type: boolean
+            default: false
+        - name: options.includeInheritedFields
+          in: query
+          description: Include fields from parent classes
+          required: false
+          schema:
+            type: boolean
+            default: false
+        - name: filters.code
+          in: query
+          description: Exact filter for code
+          required: false
+          schema:
+            type: string
+        - name: filters.name
+          in: query
+          description: Exact filter for name
+          required: false
+          schema:
+            type: string
+        - name: filters.description
+          in: query
+          description: Exact filter for description
+          required: false
+          schema:
+            type: string
+        - name: filters.providerMappingStatusId
+          in: query
+          description: Exact filter for provider mapping status id
+          required: false
+          schema:
+            type: string
+        - name: filters.providerMappingStatus
+          in: query
+          description: Exact filter for provider mapping status
+          required: false
+          schema:
+            type: string
+        - name: filters.active
+          in: query
+          description: Exact filter for active
+          required: false
+          schema:
+            type: boolean
+        - name: filters.version
+          in: query
+          description: Exact filter for version
+          required: false
+          schema:
+            type: integer
+            format: int32
+        - name: rangeFilters.ranges[version].from
+          in: query
+          description: Filter version from value
+          required: false
+          schema:
+            type: integer
+            format: int32
+        - name: rangeFilters.ranges[version].to
+          in: query
+          description: Filter version to value
+          required: false
+          schema:
+            type: integer
+            format: int32
+        - name: filters.createdAt
+          in: query
+          description: Exact filter for created at
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: rangeFilters.ranges[createdAt].from
+          in: query
+          description: Filter created at from value
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: rangeFilters.ranges[createdAt].to
+          in: query
+          description: Filter created at to value
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: filters.updatedAt
+          in: query
+          description: Exact filter for updated at
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: rangeFilters.ranges[updatedAt].from
+          in: query
+          description: Filter updated at from value
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: rangeFilters.ranges[updatedAt].to
+          in: query
+          description: Filter updated at to value
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: X-Idempotency-Key
+          in: header
+          description: Unique key for idempotent requests. If provided, ensures that identical requests with the same key will only be processed once.
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/PaginationResponseProviderMapTypeDTO'
+  /api/v1/provider-contracts:
+    post:
+      tags:
+        - Provider Contracts
+      summary: Create a new provider contract
+      description: Creates a new provider contract and returns it
+      operationId: createProviderContract
+      parameters:
+        - name: X-Idempotency-Key
+          in: header
+          description: Unique key for idempotent requests. If provided, ensures that identical requests with the same key will only be processed once.
+          required: false
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProviderContractDTO'
+        required: true
+      responses:
+        '201':
+          description: Provider contract created
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ProviderContractDTO'
+        '400':
+          description: Invalid input
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ProviderContractDTO'
+  /api/v1/provider-contracts/filter:
+    post:
+      tags:
+        - Provider Contracts
+      summary: Filter provider contracts
+      description: Returns a filtered list of provider contracts based on criteria
+      operationId: filterProviderContracts
+      parameters:
+        - name: pagination.pageNumber
+          in: query
+          description: Page number (0-based)
+          required: false
+          schema:
+            type: integer
+            format: int32
+            default: 0
+        - name: pagination.pageSize
+          in: query
+          description: Number of items per page
+          required: false
+          schema:
+            type: integer
+            format: int32
+            default: 10
+        - name: pagination.sortBy
+          in: query
+          description: Field to sort by
+          required: false
+          schema:
+            type: string
+        - name: pagination.sortDirection
+          in: query
+          description: Sort direction (ASC or DESC)
+          required: false
+          schema:
+            type: string
+            default: DESC
+        - name: options.caseInsensitiveStrings
+          in: query
+          description: Enable case-insensitive string filtering
+          required: false
+          schema:
+            type: boolean
+            default: false
+        - name: options.includeInheritedFields
+          in: query
+          description: Include fields from parent classes
+          required: false
+          schema:
+            type: boolean
+            default: false
+        - name: filters.providerId
+          in: query
+          description: Exact filter for provider id
+          required: false
+          schema:
+            type: string
+        - name: filters.provider
+          in: query
+          description: Exact filter for provider
+          required: false
+          schema:
+            type: string
+        - name: filters.providerContractStatusId
+          in: query
+          description: Exact filter for provider contract status id
+          required: false
+          schema:
+            type: string
+        - name: filters.providerContractStatus
+          in: query
+          description: Exact filter for provider contract status
+          required: false
+          schema:
+            type: string
+        - name: filters.description
+          in: query
+          description: Exact filter for description
+          required: false
+          schema:
+            type: string
+        - name: filters.startDate
+          in: query
+          description: Exact filter for start date
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: rangeFilters.ranges[startDate].from
+          in: query
+          description: Filter start date from value
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: rangeFilters.ranges[startDate].to
+          in: query
+          description: Filter start date to value
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: filters.endDate
+          in: query
+          description: Exact filter for end date
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: rangeFilters.ranges[endDate].from
+          in: query
+          description: Filter end date from value
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: rangeFilters.ranges[endDate].to
+          in: query
+          description: Filter end date to value
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: filters.active
+          in: query
+          description: Exact filter for active
+          required: false
+          schema:
+            type: boolean
+        - name: filters.version
+          in: query
+          description: Exact filter for version
+          required: false
+          schema:
+            type: integer
+            format: int32
+        - name: rangeFilters.ranges[version].from
+          in: query
+          description: Filter version from value
+          required: false
+          schema:
+            type: integer
+            format: int32
+        - name: rangeFilters.ranges[version].to
+          in: query
+          description: Filter version to value
+          required: false
+          schema:
+            type: integer
+            format: int32
+        - name: filters.createdAt
+          in: query
+          description: Exact filter for created at
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: rangeFilters.ranges[createdAt].from
+          in: query
+          description: Filter created at from value
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: rangeFilters.ranges[createdAt].to
+          in: query
+          description: Filter created at to value
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: filters.updatedAt
+          in: query
+          description: Exact filter for updated at
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: rangeFilters.ranges[updatedAt].from
+          in: query
+          description: Filter updated at from value
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: rangeFilters.ranges[updatedAt].to
+          in: query
+          description: Filter updated at to value
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: X-Idempotency-Key
+          in: header
+          description: Unique key for idempotent requests. If provided, ensures that identical requests with the same key will only be processed once.
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/PaginationResponseProviderContractDTO'
+  /api/v1/provider-contract-statuses:
+    post:
+      tags:
+        - Provider Contract Statuses
+      summary: Create a new provider contract status
+      description: Creates a new provider contract status and returns it
+      operationId: createProviderContractStatus
+      parameters:
+        - name: X-Idempotency-Key
+          in: header
+          description: Unique key for idempotent requests. If provided, ensures that identical requests with the same key will only be processed once.
+          required: false
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProviderContractStatusDTO'
+        required: true
+      responses:
+        '201':
+          description: Provider contract status created
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ProviderContractStatusDTO'
+        '400':
+          description: Invalid input
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ProviderContractStatusDTO'
+  /api/v1/provider-contract-statuses/filter:
+    post:
+      tags:
+        - Provider Contract Statuses
+      summary: Filter provider contract statuses
+      description: Returns a filtered list of provider contract statuses based on criteria
+      operationId: filterProviderContractStatuses
+      parameters:
+        - name: pagination.pageNumber
+          in: query
+          description: Page number (0-based)
+          required: false
+          schema:
+            type: integer
+            format: int32
+            default: 0
+        - name: pagination.pageSize
+          in: query
+          description: Number of items per page
+          required: false
+          schema:
+            type: integer
+            format: int32
+            default: 10
+        - name: pagination.sortBy
+          in: query
+          description: Field to sort by
+          required: false
+          schema:
+            type: string
+        - name: pagination.sortDirection
+          in: query
+          description: Sort direction (ASC or DESC)
+          required: false
+          schema:
+            type: string
+            default: DESC
+        - name: options.caseInsensitiveStrings
+          in: query
+          description: Enable case-insensitive string filtering
+          required: false
+          schema:
+            type: boolean
+            default: false
+        - name: options.includeInheritedFields
+          in: query
+          description: Include fields from parent classes
+          required: false
+          schema:
+            type: boolean
+            default: false
+        - name: filters.code
+          in: query
+          description: Exact filter for code
+          required: false
+          schema:
+            type: string
+        - name: filters.name
+          in: query
+          description: Exact filter for name
+          required: false
+          schema:
+            type: string
+        - name: filters.description
+          in: query
+          description: Exact filter for description
+          required: false
+          schema:
+            type: string
+        - name: filters.active
+          in: query
+          description: Exact filter for active
+          required: false
+          schema:
+            type: boolean
+        - name: filters.version
+          in: query
+          description: Exact filter for version
+          required: false
+          schema:
+            type: integer
+            format: int32
+        - name: rangeFilters.ranges[version].from
+          in: query
+          description: Filter version from value
+          required: false
+          schema:
+            type: integer
+            format: int32
+        - name: rangeFilters.ranges[version].to
+          in: query
+          description: Filter version to value
+          required: false
+          schema:
+            type: integer
+            format: int32
+        - name: filters.createdAt
+          in: query
+          description: Exact filter for created at
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: rangeFilters.ranges[createdAt].from
+          in: query
+          description: Filter created at from value
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: rangeFilters.ranges[createdAt].to
+          in: query
+          description: Filter created at to value
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: filters.updatedAt
+          in: query
+          description: Exact filter for updated at
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: rangeFilters.ranges[updatedAt].from
+          in: query
+          description: Filter updated at from value
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: rangeFilters.ranges[updatedAt].to
+          in: query
+          description: Filter updated at to value
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: X-Idempotency-Key
+          in: header
+          description: Unique key for idempotent requests. If provided, ensures that identical requests with the same key will only be processed once.
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/PaginationResponseProviderContractStatusDTO'
+  /api/v1/provider-contract-mappings:
+    post:
+      tags:
+        - Provider Contract Mappings
+      summary: Create a new provider contract mapping
+      description: Creates a new provider contract mapping and returns it
+      operationId: createProviderContractMapping
+      parameters:
+        - name: X-Idempotency-Key
+          in: header
+          description: Unique key for idempotent requests. If provided, ensures that identical requests with the same key will only be processed once.
+          required: false
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProviderContractMappingDTO'
+        required: true
+      responses:
+        '201':
+          description: Provider contract mapping created
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ProviderContractMappingDTO'
+        '400':
+          description: Invalid input
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ProviderContractMappingDTO'
+  /api/v1/provider-contract-mappings/filter:
+    post:
+      tags:
+        - Provider Contract Mappings
+      summary: Filter provider contract mappings
+      description: Returns a filtered list of provider contract mappings based on criteria
+      operationId: filterProviderContractMappings
+      parameters:
+        - name: pagination.pageNumber
+          in: query
+          description: Page number (0-based)
+          required: false
+          schema:
+            type: integer
+            format: int32
+            default: 0
+        - name: pagination.pageSize
+          in: query
+          description: Number of items per page
+          required: false
+          schema:
+            type: integer
+            format: int32
+            default: 10
+        - name: pagination.sortBy
+          in: query
+          description: Field to sort by
+          required: false
+          schema:
+            type: string
+        - name: pagination.sortDirection
+          in: query
+          description: Sort direction (ASC or DESC)
+          required: false
+          schema:
+            type: string
+            default: DESC
+        - name: options.caseInsensitiveStrings
+          in: query
+          description: Enable case-insensitive string filtering
+          required: false
+          schema:
+            type: boolean
+            default: false
+        - name: options.includeInheritedFields
+          in: query
+          description: Include fields from parent classes
+          required: false
+          schema:
+            type: boolean
+            default: false
+        - name: filters.providerContractId
+          in: query
+          description: Exact filter for provider contract id
+          required: false
+          schema:
+            type: string
+        - name: filters.providerContract
+          in: query
+          description: Exact filter for provider contract
+          required: false
+          schema:
+            type: string
+        - name: filters.active
+          in: query
+          description: Exact filter for active
+          required: false
+          schema:
+            type: boolean
+        - name: filters.version
+          in: query
+          description: Exact filter for version
+          required: false
+          schema:
+            type: integer
+            format: int32
+        - name: rangeFilters.ranges[version].from
+          in: query
+          description: Filter version from value
+          required: false
+          schema:
+            type: integer
+            format: int32
+        - name: rangeFilters.ranges[version].to
+          in: query
+          description: Filter version to value
+          required: false
+          schema:
+            type: integer
+            format: int32
+        - name: filters.createdAt
+          in: query
+          description: Exact filter for created at
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: rangeFilters.ranges[createdAt].from
+          in: query
+          description: Filter created at from value
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: rangeFilters.ranges[createdAt].to
+          in: query
+          description: Filter created at to value
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: filters.updatedAt
+          in: query
+          description: Exact filter for updated at
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: rangeFilters.ranges[updatedAt].from
+          in: query
+          description: Filter updated at from value
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: rangeFilters.ranges[updatedAt].to
+          in: query
+          description: Filter updated at to value
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: X-Idempotency-Key
+          in: header
+          description: Unique key for idempotent requests. If provided, ensures that identical requests with the same key will only be processed once.
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/PaginationResponseProviderContractMappingDTO'
   /api/v1/processes:
     post:
       tags:
@@ -2319,9 +4041,7 @@ paths:
       parameters:
         - name: X-Idempotency-Key
           in: header
-          description: >-
-            Unique key for idempotent requests. If provided, ensures that
-            identical requests with the same key will only be processed once.
+          description: Unique key for idempotent requests. If provided, ensures that identical requests with the same key will only be processed once.
           required: false
           schema:
             type: string
@@ -2344,7 +4064,7 @@ paths:
             '*/*':
               schema:
                 $ref: '#/components/schemas/ProviderProcessDTO'
-  '/api/v1/processes/{processId}/versions':
+  /api/v1/processes/{processId}/versions:
     post:
       tags:
         - Provider Processes
@@ -2357,13 +4077,11 @@ paths:
           description: ID of the process
           required: true
           schema:
-            type: integer
-            format: int64
+            type: string
+            format: uuid
         - name: X-Idempotency-Key
           in: header
-          description: >-
-            Unique key for idempotent requests. If provided, ensures that
-            identical requests with the same key will only be processed once.
+          description: Unique key for idempotent requests. If provided, ensures that identical requests with the same key will only be processed once.
           required: false
           schema:
             type: string
@@ -2392,7 +4110,7 @@ paths:
             '*/*':
               schema:
                 $ref: '#/components/schemas/ProviderProcessVersionDTO'
-  '/api/v1/processes/{processId}/versions/filter':
+  /api/v1/processes/{processId}/versions/filter:
     post:
       tags:
         - Provider Processes
@@ -2405,8 +4123,8 @@ paths:
           description: ID of the process
           required: true
           schema:
-            type: integer
-            format: int64
+            type: string
+            format: uuid
         - name: pagination.pageNumber
           in: query
           description: Page number (0-based)
@@ -2455,8 +4173,7 @@ paths:
           description: Exact filter for provider process id
           required: false
           schema:
-            type: integer
-            format: int32
+            type: string
         - name: filters.providerProcess
           in: query
           description: Exact filter for provider process
@@ -2486,8 +4203,7 @@ paths:
           description: Exact filter for provider process status id
           required: false
           schema:
-            type: integer
-            format: int32
+            type: string
         - name: filters.providerProcessStatus
           in: query
           description: Exact filter for provider process status
@@ -2519,14 +4235,14 @@ paths:
           schema:
             type: string
             format: date-time
-        - name: 'rangeFilters.ranges[deployedAt].from'
+        - name: rangeFilters.ranges[deployedAt].from
           in: query
           description: Filter deployed at from value
           required: false
           schema:
             type: string
             format: date-time
-        - name: 'rangeFilters.ranges[deployedAt].to'
+        - name: rangeFilters.ranges[deployedAt].to
           in: query
           description: Filter deployed at to value
           required: false
@@ -2558,14 +4274,14 @@ paths:
           schema:
             type: integer
             format: int32
-        - name: 'rangeFilters.ranges[versionNumber].from'
+        - name: rangeFilters.ranges[versionNumber].from
           in: query
           description: Filter version number from value
           required: false
           schema:
             type: integer
             format: int32
-        - name: 'rangeFilters.ranges[versionNumber].to'
+        - name: rangeFilters.ranges[versionNumber].to
           in: query
           description: Filter version number to value
           required: false
@@ -2579,14 +4295,14 @@ paths:
           schema:
             type: string
             format: date-time
-        - name: 'rangeFilters.ranges[createdAt].from'
+        - name: rangeFilters.ranges[createdAt].from
           in: query
           description: Filter created at from value
           required: false
           schema:
             type: string
             format: date-time
-        - name: 'rangeFilters.ranges[createdAt].to'
+        - name: rangeFilters.ranges[createdAt].to
           in: query
           description: Filter created at to value
           required: false
@@ -2600,14 +4316,14 @@ paths:
           schema:
             type: string
             format: date-time
-        - name: 'rangeFilters.ranges[updatedAt].from'
+        - name: rangeFilters.ranges[updatedAt].from
           in: query
           description: Filter updated at from value
           required: false
           schema:
             type: string
             format: date-time
-        - name: 'rangeFilters.ranges[updatedAt].to'
+        - name: rangeFilters.ranges[updatedAt].to
           in: query
           description: Filter updated at to value
           required: false
@@ -2616,9 +4332,7 @@ paths:
             format: date-time
         - name: X-Idempotency-Key
           in: header
-          description: >-
-            Unique key for idempotent requests. If provided, ensures that
-            identical requests with the same key will only be processed once.
+          description: Unique key for idempotent requests. If provided, ensures that identical requests with the same key will only be processed once.
           required: false
           schema:
             type: string
@@ -2628,8 +4342,7 @@ paths:
           content:
             '*/*':
               schema:
-                $ref: >-
-                  #/components/schemas/PaginationResponseProviderProcessVersionDTO
+                $ref: '#/components/schemas/PaginationResponseProviderProcessVersionDTO'
   /api/v1/processes/filter:
     post:
       tags:
@@ -2640,9 +4353,7 @@ paths:
       parameters:
         - name: X-Idempotency-Key
           in: header
-          description: >-
-            Unique key for idempotent requests. If provided, ensures that
-            identical requests with the same key will only be processed once.
+          description: Unique key for idempotent requests. If provided, ensures that identical requests with the same key will only be processed once.
           required: false
           schema:
             type: string
@@ -2669,9 +4380,7 @@ paths:
       parameters:
         - name: X-Idempotency-Key
           in: header
-          description: >-
-            Unique key for idempotent requests. If provided, ensures that
-            identical requests with the same key will only be processed once.
+          description: Unique key for idempotent requests. If provided, ensures that identical requests with the same key will only be processed once.
           required: false
           schema:
             type: string
@@ -2704,9 +4413,7 @@ paths:
       parameters:
         - name: X-Idempotency-Key
           in: header
-          description: >-
-            Unique key for idempotent requests. If provided, ensures that
-            identical requests with the same key will only be processed once.
+          description: Unique key for idempotent requests. If provided, ensures that identical requests with the same key will only be processed once.
           required: false
           schema:
             type: string
@@ -2722,10 +4429,17 @@ paths:
           content:
             '*/*':
               schema:
-                $ref: >-
-                  #/components/schemas/PaginationResponseProviderProcessVersionDTO
+                $ref: '#/components/schemas/PaginationResponseProviderProcessVersionDTO'
 components:
   schemas:
+    # Common UUID schema for reuse across all entity ID fields
+    UUID:
+      type: string
+      format: uuid
+      description: Universally Unique Identifier (UUID) in standard format
+      example: "550e8400-e29b-41d4-a716-446655440000"
+      pattern: '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
+
     ProviderDTO:
       required:
         - code
@@ -2735,9 +4449,10 @@ components:
       type: object
       properties:
         id:
-          type: integer
+          type: string
           description: Provider ID
-          format: int64
+          format: uuid
+          example: "550e8400-e29b-41d4-a716-446655440000"
           readOnly: true
         code:
           maxLength: 50
@@ -2756,41 +4471,43 @@ components:
           description: Description of the provider
           example: Treezor is a Banking as a Service provider
         providerTypeId:
-          type: integer
+          type: string
           description: ID of the provider type
-          format: int64
+          format: uuid
+          example: "6ba7b810-9dad-11d1-80b4-00c04fd430c8"
         providerType:
           $ref: '#/components/schemas/ProviderTypeDTO'
         providerStatusId:
-          type: integer
+          type: string
           description: ID of the provider status
-          format: int64
+          format: uuid
+          example: "6ba7b811-9dad-11d1-80b4-00c04fd430c8"
         providerStatus:
           $ref: '#/components/schemas/ProviderStatusDTO'
         apiBaseUrl:
           type: string
           description: Base URL for the provider's API
-          example: 'https://api.treezor.com'
+          example: https://api.treezor.com
         webhookUrl:
           type: string
           description: URL for receiving webhooks from the provider
-          example: 'https://webhooks.mycompany.com/treezor'
+          example: https://webhooks.mycompany.com/treezor
         callbackUrl:
           type: string
           description: URL for receiving callbacks from the provider
-          example: 'https://callbacks.mycompany.com/treezor'
+          example: https://callbacks.mycompany.com/treezor
         logoUrl:
           type: string
           description: URL for the provider's logo
-          example: 'https://assets.mycompany.com/logos/treezor.png'
+          example: https://assets.mycompany.com/logos/treezor.png
         documentationUrl:
           type: string
           description: URL for the provider's documentation
-          example: 'https://docs.treezor.com'
+          example: https://docs.treezor.com
         supportUrl:
           type: string
           description: URL for the provider's support
-          example: 'https://support.treezor.com'
+          example: https://support.treezor.com
         contactName:
           type: string
           description: Name of the primary contact person
@@ -2815,10 +4532,11 @@ components:
           type: string
           description: Phone number of the technical contact person
           example: '+33987654321'
-        countryCode:
-          type: string
-          description: ISO country code where the provider operates
-          example: FR
+        countryId:
+          type: integer
+          description: Country ID (sequential integer identifier)
+          format: int64
+          example: 1
         region:
           type: string
           description: Region where the provider operates
@@ -2895,9 +4613,9 @@ components:
       type: object
       properties:
         id:
-          type: integer
+          type: string
           description: Provider process ID
-          format: int64
+          format: uuid
         code:
           maxLength: 50
           minLength: 2
@@ -2915,9 +4633,9 @@ components:
           description: Description of the process
           example: Process for handling payment transactions
         providerId:
-          type: integer
+          type: string
           description: ID of the provider
-          format: int64
+          format: uuid
         provider:
           $ref: '#/components/schemas/ProviderDTO'
         processType:
@@ -2947,7 +4665,7 @@ components:
         tags:
           type: string
           description: Tags for categorizing the process
-          example: 'payment,transaction'
+          example: payment,transaction
         metadata:
           type: string
           description: Additional metadata for the process
@@ -2979,9 +4697,9 @@ components:
       type: object
       properties:
         id:
-          type: integer
+          type: string
           description: Provider status ID
-          format: int64
+          format: uuid
           readOnly: true
         code:
           maxLength: 50
@@ -3026,9 +4744,9 @@ components:
       type: object
       properties:
         id:
-          type: integer
+          type: string
           description: Provider type ID
-          format: int64
+          format: uuid
           readOnly: true
         code:
           maxLength: 50
@@ -3074,14 +4792,14 @@ components:
       type: object
       properties:
         id:
-          type: integer
+          type: string
           description: Provider config ID
-          format: int64
+          format: uuid
           readOnly: true
         providerId:
-          type: integer
+          type: string
           description: ID of the provider
-          format: int64
+          format: uuid
         provider:
           $ref: '#/components/schemas/ProviderDTO'
         configGroup:
@@ -3125,7 +4843,7 @@ components:
         validationRegex:
           type: string
           description: Regular expression for validating the value
-          example: '^[a-zA-Z0-9]{10,}$'
+          example: ^[a-zA-Z0-9]{10,}$
         defaultValue:
           type: string
           description: Default value for the configuration
@@ -3142,7 +4860,7 @@ components:
         tags:
           type: string
           description: Tags for categorizing the configuration
-          example: 'auth,security'
+          example: auth,security
         metadata:
           type: string
           description: Additional metadata for the configuration
@@ -3180,9 +4898,9 @@ components:
       type: object
       properties:
         id:
-          type: integer
+          type: string
           description: Provider process status ID
-          format: int64
+          format: uuid
           readOnly: true
         code:
           maxLength: 50
@@ -3220,6 +4938,310 @@ components:
           format: date-time
           readOnly: true
       description: Provider Process Status information
+    ProviderMapTypeDTO:
+      required:
+        - code
+        - name
+        - providerMappingStatusId
+      type: object
+      properties:
+        id:
+          type: string
+          description: Provider Map Type ID
+          format: uuid
+          readOnly: true
+        code:
+          maxLength: 50
+          minLength: 2
+          type: string
+          description: Unique code for the provider map type
+          example: INTERNAL_EXTERNAL
+        name:
+          maxLength: 100
+          minLength: 2
+          type: string
+          description: Name of the provider map type
+          example: Internal to External Mapping
+        description:
+          type: string
+          description: Description of the provider map type
+          example: Maps internal providers to external providers
+        providerMappingStatusId:
+          type: string
+          description: ID of the provider mapping status
+          format: uuid
+        providerMappingStatus:
+          $ref: '#/components/schemas/ProviderMappingStatusDTO'
+        active:
+          type: boolean
+          description: Whether the provider map type is active
+          default: true
+        version:
+          type: integer
+          description: Version for optimistic locking
+          format: int64
+          readOnly: true
+        createdAt:
+          type: string
+          description: Creation timestamp
+          format: date-time
+          readOnly: true
+        updatedAt:
+          type: string
+          description: Last update timestamp
+          format: date-time
+          readOnly: true
+      description: Provider Map Type information
+    ProviderMappingDTO:
+      required:
+        - internalProviderId
+        - providerId
+        - providerMapTypeId
+      type: object
+      properties:
+        id:
+          type: string
+          description: Provider Mapping ID
+          format: uuid
+          readOnly: true
+        providerMapTypeId:
+          type: string
+          description: ID of the provider map type
+          format: uuid
+        providerMapType:
+          $ref: '#/components/schemas/ProviderMapTypeDTO'
+        providerId:
+          type: string
+          description: ID of the provider
+          format: uuid
+        provider:
+          $ref: '#/components/schemas/ProviderDTO'
+        internalProviderId:
+          type: string
+          description: ID of the internal provider
+          format: uuid
+        internalProvider:
+          $ref: '#/components/schemas/ProviderDTO'
+        active:
+          type: boolean
+          description: Whether the provider mapping is active
+          default: true
+        version:
+          type: integer
+          description: Version for optimistic locking
+          format: int64
+          readOnly: true
+        createdAt:
+          type: string
+          description: Creation timestamp
+          format: date-time
+          readOnly: true
+        updatedAt:
+          type: string
+          description: Last update timestamp
+          format: date-time
+          readOnly: true
+      description: Provider Mapping information
+    ProviderMappingStatusDTO:
+      required:
+        - code
+        - name
+      type: object
+      properties:
+        id:
+          type: string
+          description: Provider Mapping Status ID
+          format: uuid
+          readOnly: true
+        code:
+          maxLength: 50
+          minLength: 2
+          type: string
+          description: Unique code for the provider mapping status
+          example: ACTIVE
+        name:
+          maxLength: 100
+          minLength: 2
+          type: string
+          description: Name of the provider mapping status
+          example: Active
+        description:
+          type: string
+          description: Description of the provider mapping status
+          example: Provider mapping status is active and operational
+        active:
+          type: boolean
+          description: Whether the provider mapping status is active
+          default: true
+        version:
+          type: integer
+          description: Version for optimistic locking
+          format: int64
+          readOnly: true
+        createdAt:
+          type: string
+          description: Creation timestamp
+          format: date-time
+          readOnly: true
+        updatedAt:
+          type: string
+          description: Last update timestamp
+          format: date-time
+          readOnly: true
+      description: Provider Mapping Status information
+    ProviderContractDTO:
+      required:
+        - contractId
+        - contractTypeId
+        - providerContractStatusId
+        - providerId
+      type: object
+      properties:
+        id:
+          type: string
+          description: Provider contract ID
+          format: uuid
+          readOnly: true
+        contractId:
+          type: string
+          description: ID of the contract
+          format: uuid
+        contractTypeId:
+          type: string
+          description: ID of the contract type
+          format: uuid
+        providerId:
+          type: string
+          description: ID of the provider
+          format: uuid
+        provider:
+          $ref: '#/components/schemas/ProviderDTO'
+        providerContractStatusId:
+          type: string
+          description: ID of the provider contract status
+          format: uuid
+        providerContractStatus:
+          $ref: '#/components/schemas/ProviderContractStatusDTO'
+        description:
+          type: string
+          description: Description of the provider contract
+          example: Contract for payment processing services
+        startDate:
+          type: string
+          description: Start date of the contract
+          format: date-time
+        endDate:
+          type: string
+          description: End date of the contract
+          format: date-time
+        active:
+          type: boolean
+          description: Whether the provider contract is active
+          default: true
+        version:
+          type: integer
+          description: Version for optimistic locking
+          format: int64
+          readOnly: true
+        createdAt:
+          type: string
+          description: Creation timestamp
+          format: date-time
+          readOnly: true
+        updatedAt:
+          type: string
+          description: Last update timestamp
+          format: date-time
+          readOnly: true
+      description: Provider Contract information
+    ProviderContractStatusDTO:
+      required:
+        - code
+        - name
+      type: object
+      properties:
+        id:
+          type: string
+          description: Provider contract status ID
+          format: uuid
+          readOnly: true
+        code:
+          maxLength: 50
+          minLength: 2
+          type: string
+          description: Unique code for the provider contract status
+          example: ACTIVE
+        name:
+          maxLength: 100
+          minLength: 2
+          type: string
+          description: Name of the provider contract status
+          example: Active
+        description:
+          type: string
+          description: Description of the provider contract status
+          example: Provider contract is active and operational
+        active:
+          type: boolean
+          description: Whether the provider contract status is active
+          default: true
+        version:
+          type: integer
+          description: Version for optimistic locking
+          format: int64
+          readOnly: true
+        createdAt:
+          type: string
+          description: Creation timestamp
+          format: date-time
+          readOnly: true
+        updatedAt:
+          type: string
+          description: Last update timestamp
+          format: date-time
+          readOnly: true
+      description: Provider Contract Status information
+    ProviderContractMappingDTO:
+      required:
+        - internalContractId
+        - providerContractId
+      type: object
+      properties:
+        id:
+          type: string
+          description: Provider contract mapping ID
+          format: uuid
+          readOnly: true
+        internalContractId:
+          type: string
+          description: ID of the internal contract
+          format: uuid
+        providerContractId:
+          type: string
+          description: ID of the provider contract
+          format: uuid
+        providerContract:
+          $ref: '#/components/schemas/ProviderContractDTO'
+        active:
+          type: boolean
+          description: Whether the provider contract mapping is active
+          default: true
+        version:
+          type: integer
+          description: Version for optimistic locking
+          format: int64
+          readOnly: true
+        createdAt:
+          type: string
+          description: Creation timestamp
+          format: date-time
+          readOnly: true
+        updatedAt:
+          type: string
+          description: Last update timestamp
+          format: date-time
+          readOnly: true
+      description: Provider Contract Mapping information
     ProviderProcessVersionDTO:
       required:
         - bpmnXml
@@ -3229,14 +5251,14 @@ components:
       type: object
       properties:
         id:
-          type: integer
+          type: string
           description: Provider process version ID
-          format: int64
+          format: uuid
           readOnly: true
         providerProcessId:
-          type: integer
+          type: string
           description: ID of the provider process
-          format: int64
+          format: uuid
         providerProcess:
           $ref: '#/components/schemas/ProviderProcessDTO'
         version:
@@ -3252,9 +5274,9 @@ components:
           type: string
           description: BPMN diagram XML for visualization
         providerProcessStatusId:
-          type: integer
+          type: string
           description: ID of the provider process status
-          format: int64
+          format: uuid
         providerProcessStatus:
           $ref: '#/components/schemas/ProviderProcessStatusDTO'
         notes:
@@ -3350,12 +5372,10 @@ components:
           example: name
         sortDirection:
           type: string
-          description: 'The direction of sorting, either ASC or DESC.'
+          description: The direction of sorting, either ASC or DESC.
           example: DESC
           default: DESC
-      description: >-
-        Represents a pagination request for retrieving paginated results,
-        including page number, size, sort field, and direction.
+      description: Represents a pagination request for retrieving paginated results, including page number, size, sort field, and direction.
     RangeFilter:
       type: object
       properties:
@@ -3393,11 +5413,9 @@ components:
           format: int32
         currentPage:
           type: integer
-          description: 'The current page number, typically zero-based.'
+          description: The current page number, typically zero-based.
           format: int32
-      description: >-
-        Represents a paginated response containing a list of items and
-        pagination metadata.
+      description: Represents a paginated response containing a list of items and pagination metadata.
     PaginationResponseProviderConfigDTO:
       type: object
       properties:
@@ -3416,11 +5434,9 @@ components:
           format: int32
         currentPage:
           type: integer
-          description: 'The current page number, typically zero-based.'
+          description: The current page number, typically zero-based.
           format: int32
-      description: >-
-        Represents a paginated response containing a list of items and
-        pagination metadata.
+      description: Represents a paginated response containing a list of items and pagination metadata.
     PaginationResponseProviderDTO:
       type: object
       properties:
@@ -3439,11 +5455,9 @@ components:
           format: int32
         currentPage:
           type: integer
-          description: 'The current page number, typically zero-based.'
+          description: The current page number, typically zero-based.
           format: int32
-      description: >-
-        Represents a paginated response containing a list of items and
-        pagination metadata.
+      description: Represents a paginated response containing a list of items and pagination metadata.
     PaginationResponseProviderTypeDTO:
       type: object
       properties:
@@ -3462,11 +5476,9 @@ components:
           format: int32
         currentPage:
           type: integer
-          description: 'The current page number, typically zero-based.'
+          description: The current page number, typically zero-based.
           format: int32
-      description: >-
-        Represents a paginated response containing a list of items and
-        pagination metadata.
+      description: Represents a paginated response containing a list of items and pagination metadata.
     PaginationResponseProviderStatusDTO:
       type: object
       properties:
@@ -3485,11 +5497,9 @@ components:
           format: int32
         currentPage:
           type: integer
-          description: 'The current page number, typically zero-based.'
+          description: The current page number, typically zero-based.
           format: int32
-      description: >-
-        Represents a paginated response containing a list of items and
-        pagination metadata.
+      description: Represents a paginated response containing a list of items and pagination metadata.
     PaginationResponseProviderProcessStatusDTO:
       type: object
       properties:
@@ -3508,11 +5518,135 @@ components:
           format: int32
         currentPage:
           type: integer
-          description: 'The current page number, typically zero-based.'
+          description: The current page number, typically zero-based.
           format: int32
-      description: >-
-        Represents a paginated response containing a list of items and
-        pagination metadata.
+      description: Represents a paginated response containing a list of items and pagination metadata.
+    PaginationResponseProviderMappingDTO:
+      type: object
+      properties:
+        content:
+          type: array
+          description: The list of items for the current page.
+          items:
+            $ref: '#/components/schemas/ProviderMappingDTO'
+        totalElements:
+          type: integer
+          description: The total number of elements across all pages.
+          format: int64
+        totalPages:
+          type: integer
+          description: The total number of pages based on the data size and page size.
+          format: int32
+        currentPage:
+          type: integer
+          description: The current page number, typically zero-based.
+          format: int32
+      description: Represents a paginated response containing a list of items and pagination metadata.
+    PaginationResponseProviderMappingStatusDTO:
+      type: object
+      properties:
+        content:
+          type: array
+          description: The list of items for the current page.
+          items:
+            $ref: '#/components/schemas/ProviderMappingStatusDTO'
+        totalElements:
+          type: integer
+          description: The total number of elements across all pages.
+          format: int64
+        totalPages:
+          type: integer
+          description: The total number of pages based on the data size and page size.
+          format: int32
+        currentPage:
+          type: integer
+          description: The current page number, typically zero-based.
+          format: int32
+      description: Represents a paginated response containing a list of items and pagination metadata.
+    PaginationResponseProviderMapTypeDTO:
+      type: object
+      properties:
+        content:
+          type: array
+          description: The list of items for the current page.
+          items:
+            $ref: '#/components/schemas/ProviderMapTypeDTO'
+        totalElements:
+          type: integer
+          description: The total number of elements across all pages.
+          format: int64
+        totalPages:
+          type: integer
+          description: The total number of pages based on the data size and page size.
+          format: int32
+        currentPage:
+          type: integer
+          description: The current page number, typically zero-based.
+          format: int32
+      description: Represents a paginated response containing a list of items and pagination metadata.
+    PaginationResponseProviderContractDTO:
+      type: object
+      properties:
+        content:
+          type: array
+          description: The list of items for the current page.
+          items:
+            $ref: '#/components/schemas/ProviderContractDTO'
+        totalElements:
+          type: integer
+          description: The total number of elements across all pages.
+          format: int64
+        totalPages:
+          type: integer
+          description: The total number of pages based on the data size and page size.
+          format: int32
+        currentPage:
+          type: integer
+          description: The current page number, typically zero-based.
+          format: int32
+      description: Represents a paginated response containing a list of items and pagination metadata.
+    PaginationResponseProviderContractStatusDTO:
+      type: object
+      properties:
+        content:
+          type: array
+          description: The list of items for the current page.
+          items:
+            $ref: '#/components/schemas/ProviderContractStatusDTO'
+        totalElements:
+          type: integer
+          description: The total number of elements across all pages.
+          format: int64
+        totalPages:
+          type: integer
+          description: The total number of pages based on the data size and page size.
+          format: int32
+        currentPage:
+          type: integer
+          description: The current page number, typically zero-based.
+          format: int32
+      description: Represents a paginated response containing a list of items and pagination metadata.
+    PaginationResponseProviderContractMappingDTO:
+      type: object
+      properties:
+        content:
+          type: array
+          description: The list of items for the current page.
+          items:
+            $ref: '#/components/schemas/ProviderContractMappingDTO'
+        totalElements:
+          type: integer
+          description: The total number of elements across all pages.
+          format: int64
+        totalPages:
+          type: integer
+          description: The total number of pages based on the data size and page size.
+          format: int32
+        currentPage:
+          type: integer
+          description: The current page number, typically zero-based.
+          format: int32
+      description: Represents a paginated response containing a list of items and pagination metadata.
     PaginationResponseProviderProcessVersionDTO:
       type: object
       properties:
@@ -3531,11 +5665,9 @@ components:
           format: int32
         currentPage:
           type: integer
-          description: 'The current page number, typically zero-based.'
+          description: The current page number, typically zero-based.
           format: int32
-      description: >-
-        Represents a paginated response containing a list of items and
-        pagination metadata.
+      description: Represents a paginated response containing a list of items and pagination metadata.
     FilterRequestProviderProcessVersionDTO:
       required:
         - pagination

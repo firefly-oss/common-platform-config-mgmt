@@ -4,15 +4,16 @@ import com.firefly.common.config.models.entities.ProviderContractMapping;
 import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import java.util.UUID;
 
 @Repository
-public interface ProviderContractMappingRepository extends BaseRepository<ProviderContractMapping, Long> {
+public interface ProviderContractMappingRepository extends BaseRepository<ProviderContractMapping, UUID> {
 
     Flux<ProviderContractMapping> findByActiveTrue();
 
-    Flux<ProviderContractMapping> findByProviderContractId(Long providerContractId);
+    Flux<ProviderContractMapping> findByProviderContractId(UUID providerContractId);
 
-    Flux<ProviderContractMapping> findByInternalContractId(Long internalContractId);
+    Flux<ProviderContractMapping> findByInternalContractId(UUID internalContractId);
 
-    Mono<ProviderContractMapping> findByProviderContractIdAndInternalContractId(Long providerContractId, Long internalContractId);
+    Mono<ProviderContractMapping> findByProviderContractIdAndInternalContractId(UUID providerContractId, UUID internalContractId);
 }

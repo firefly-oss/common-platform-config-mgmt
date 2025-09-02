@@ -11,6 +11,7 @@ import com.firefly.common.core.queries.PaginationResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
+import java.util.UUID;
 
 /**
  * Implementation of the ProviderContractService interface
@@ -25,7 +26,7 @@ public class ProviderContractServiceImpl implements ProviderContractService {
     private ProviderContractMapper mapper;
 
     @Override
-    public Mono<ProviderContractDTO> getById(Long id) {
+    public Mono<ProviderContractDTO> getById(UUID id) {
         return repository.findById(id)
                 .switchIfEmpty(Mono.error(new RuntimeException("Provider contract not found with id: " + id)))
                 .map(mapper::toDTO);
@@ -53,7 +54,7 @@ public class ProviderContractServiceImpl implements ProviderContractService {
     }
 
     @Override
-    public Mono<ProviderContractDTO> update(Long id, ProviderContractDTO providerContractDTO) {
+    public Mono<ProviderContractDTO> update(UUID id, ProviderContractDTO providerContractDTO) {
         return repository.findById(id)
                 .switchIfEmpty(Mono.error(new RuntimeException("Provider contract not found with id: " + id)))
                 .flatMap(existingEntity -> {
@@ -73,7 +74,7 @@ public class ProviderContractServiceImpl implements ProviderContractService {
     }
 
     @Override
-    public Mono<Void> delete(Long id) {
+    public Mono<Void> delete(UUID id) {
         return repository.findById(id)
                 .switchIfEmpty(Mono.error(new RuntimeException("Provider contract not found with id: " + id)))
                 .flatMap(entity -> repository.delete(entity));

@@ -12,6 +12,7 @@ import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 /**
  * Entity representing a provider in the system
@@ -24,7 +25,7 @@ import java.time.LocalDateTime;
 public class Provider {
 
     @Id
-    private Long id;
+    private UUID id;
 
     @Column("code")
     private String code;
@@ -36,10 +37,10 @@ public class Provider {
     private String description;
 
     @Column("provider_type_id")
-    private Long providerTypeId;
+    private UUID providerTypeId;
 
     @Column("provider_status_id")
-    private Long providerStatusId;
+    private UUID providerStatusId;
 
     @Column("api_base_url")
     private String apiBaseUrl;
@@ -78,7 +79,7 @@ public class Provider {
     private String technicalContactPhone;
 
     @Column("country_id")
-    private Long countryId;
+    private UUID countryId;
 
     @Column("region")
     private String region;

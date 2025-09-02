@@ -4,6 +4,7 @@ import com.firefly.common.config.interfaces.dtos.ProviderDTO;
 import com.firefly.common.core.filters.FilterRequest;
 import com.firefly.common.core.queries.PaginationResponse;
 import reactor.core.publisher.Mono;
+import java.util.UUID;
 
 /**
  * Service interface for managing providers
@@ -15,7 +16,7 @@ public interface ProviderService {
      * @param id Provider ID
      * @return Provider DTO
      */
-    Mono<ProviderDTO> getById(Long id);
+    Mono<ProviderDTO> getById(UUID id);
 
     /**
      * Filter providers based on criteria
@@ -37,12 +38,12 @@ public interface ProviderService {
      * @param providerDTO Provider DTO
      * @return Updated provider DTO
      */
-    Mono<ProviderDTO> update(Long id, ProviderDTO providerDTO);
+    Mono<ProviderDTO> update(UUID id, ProviderDTO providerDTO);
 
     /**
      * Delete a provider
      * @param id Provider ID
      * @return Void
      */
-    Mono<Void> delete(Long id);
+    Mono<Void> delete(UUID id);
 }

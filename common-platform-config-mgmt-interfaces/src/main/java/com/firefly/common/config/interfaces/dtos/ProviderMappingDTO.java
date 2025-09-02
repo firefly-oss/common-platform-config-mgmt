@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 /**
  * DTO for ProviderMapping entity
@@ -23,12 +24,12 @@ public class ProviderMappingDTO {
     
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Schema(description = "Provider Mapping ID")
-    private Long id;
+    private UUID id;
     
     @NotNull(message = "Provider map type ID is required")
     @FilterableId
     @Schema(description = "ID of the provider map type")
-    private Long providerMapTypeId;
+    private UUID providerMapTypeId;
     
     @Schema(description = "Provider map type information")
     private ProviderMapTypeDTO providerMapType;
@@ -36,7 +37,7 @@ public class ProviderMappingDTO {
     @NotNull(message = "Provider ID is required")
     @FilterableId
     @Schema(description = "ID of the provider")
-    private Long providerId;
+    private UUID providerId;
     
     @Schema(description = "Provider information")
     private ProviderDTO provider;
@@ -44,7 +45,7 @@ public class ProviderMappingDTO {
     @NotNull(message = "Internal provider ID is required")
     @FilterableId
     @Schema(description = "ID of the internal provider")
-    private Long internalProviderId;
+    private UUID internalProviderId;
     
     @Schema(description = "Internal provider information")
     private ProviderDTO internalProvider;

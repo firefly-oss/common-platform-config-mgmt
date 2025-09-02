@@ -13,6 +13,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 /**
  * DTO for Provider Config entity
@@ -26,12 +27,12 @@ public class ProviderConfigDTO {
 
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Schema(description = "Provider config ID")
-    private Long id;
+    private UUID id;
 
     @NotNull(message = "Provider ID is required")
     @FilterableId
     @Schema(description = "ID of the provider")
-    private Long providerId;
+    private UUID providerId;
 
     @Schema(description = "Provider information")
     private ProviderDTO provider;

@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 /**
  * DTO for Provider Contract Mapping entity
@@ -23,16 +24,16 @@ public class ProviderContractMappingDTO {
     
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Schema(description = "Provider contract mapping ID")
-    private Long id;
+    private UUID id;
     
     @NotNull(message = "Internal contract ID is required")
     @Schema(description = "ID of the internal contract", example = "12345")
-    private Long internalContractId;
+    private UUID internalContractId;
     
     @NotNull(message = "Provider contract ID is required")
     @FilterableId
     @Schema(description = "ID of the provider contract")
-    private Long providerContractId;
+    private UUID providerContractId;
     
     @Schema(description = "Provider contract information")
     private ProviderContractDTO providerContract;

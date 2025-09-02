@@ -12,6 +12,7 @@ import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 /**
  * Entity representing configuration settings for a provider
@@ -24,10 +25,10 @@ import java.time.LocalDateTime;
 public class ProviderConfig {
 
     @Id
-    private Long id;
+    private UUID id;
 
     @Column("provider_id")
-    private Long providerId;
+    private UUID providerId;
 
     @Column("config_group")
     private String configGroup;

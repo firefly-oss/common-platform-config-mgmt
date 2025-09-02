@@ -1,132 +1,153 @@
+-- Enable UUID extension for generating UUIDs
+-- This extension provides functions for generating UUIDs (Universally Unique Identifiers)
+-- uuid_generate_v4() generates random UUIDs based on random or pseudo-random numbers
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
 -- Provider Types
-INSERT INTO provider_types (code, name, description, active)
-VALUES ('BAAS', 'Banking as a Service', 'Providers that offer banking services through APIs', true);
+-- All tables use UUID as primary keys for better distribution and to avoid ID conflicts
+-- when merging data from different environments or systems
+INSERT INTO provider_types (id, code, name, description, active)
+VALUES (uuid_generate_v4(), 'BAAS', 'Banking as a Service', 'Providers that offer banking services through APIs', true);
 
 -- Provider Statuses
-INSERT INTO provider_statuses (code, name, description, active)
-VALUES ('ACTIVE', 'Active', 'Provider is active and operational', true);
+-- Each status record gets a unique UUID to ensure referential integrity
+INSERT INTO provider_statuses (id, code, name, description, active)
+VALUES (uuid_generate_v4(), 'ACTIVE', 'Active', 'Provider is active and operational', true);
 
 -- Treezor Provider
+-- Foreign key references use SELECT statements to find the correct UUID values
+-- This ensures data consistency even when UUIDs are generated dynamically
 INSERT INTO providers (
-    code, 
-    name, 
-    description, 
-    provider_type_id, 
-    provider_status_id, 
-    api_base_url, 
-    country_code, 
-    currency_code, 
-    requires_authentication, 
+    id,
+    code,
+    name,
+    description,
+    provider_type_id,
+    provider_status_id,
+    api_base_url,
+    country_code,
+    currency_code,
+    requires_authentication,
     active
 )
 VALUES (
-    'TREEZOR', 
-    'Treezor', 
-    'Treezor Banking as a Service provider', 
-    (SELECT id FROM provider_types WHERE code = 'BAAS'), 
-    (SELECT id FROM provider_statuses WHERE code = 'ACTIVE'), 
-    'https://api.treezor.com', 
-    'FR', 
-    'EUR', 
-    true, 
+    uuid_generate_v4(),
+    'TREEZOR',
+    'Treezor',
+    'Treezor Banking as a Service provider',
+    (SELECT id FROM provider_types WHERE code = 'BAAS'),
+    (SELECT id FROM provider_statuses WHERE code = 'ACTIVE'),
+    'https://api.treezor.com',
+    'FR',
+    'EUR',
+    true,
     true
 );
 
 -- Provider Process Statuses
-INSERT INTO provider_process_statuses (code, name, description, active)
-VALUES 
-('DRAFT', 'Draft', 'Process is in draft state', true),
-('PUBLISHED', 'Published', 'Process is published and ready for use', true),
-('ACTIVE', 'Active', 'Process is active and in use', true),
-('DEPRECATED', 'Deprecated', 'Process is deprecated but still supported', true),
-('RETIRED', 'Retired', 'Process is no longer supported', true);
+INSERT INTO provider_process_statuses (id, code, name, description, active)
+VALUES
+(uuid_generate_v4(), 'DRAFT', 'Draft', 'Process is in draft state', true),
+(uuid_generate_v4(), 'PUBLISHED', 'Published', 'Process is published and ready for use', true),
+(uuid_generate_v4(), 'ACTIVE', 'Active', 'Process is active and in use', true),
+(uuid_generate_v4(), 'DEPRECATED', 'Deprecated', 'Process is deprecated but still supported', true),
+(uuid_generate_v4(), 'RETIRED', 'Retired', 'Process is no longer supported', true);
 
 -- Provider Processes for Treezor
 INSERT INTO provider_processes (
-    code, 
-    name, 
-    description, 
-    provider_id, 
-    process_type, 
-    process_category, 
-    is_common, 
+    id,
+    code,
+    name,
+    description,
+    provider_id,
+    process_type,
+    process_category,
+    is_common,
     active
 )
-VALUES 
+VALUES
 (
-    'create-account-process', 
-    'Create Account Process', 
-    'Process to create a new account in Treezor', 
-    (SELECT id FROM providers WHERE code = 'TREEZOR'), 
-    'ACCOUNT', 
-    'ONBOARDING', 
-    false, 
+    uuid_generate_v4(),
+    'create-account-process',
+    'Create Account Process',
+    'Process to create a new account in Treezor',
+    (SELECT id FROM providers WHERE code = 'TREEZOR'),
+    'ACCOUNT',
+    'ONBOARDING',
+    false,
     true
 ),
 (
-    'create-document-process', 
-    'Create Document Process', 
-    'Process to create a new document in Treezor', 
-    (SELECT id FROM providers WHERE code = 'TREEZOR'), 
-    'DOCUMENT', 
-    'ONBOARDING', 
-    false, 
+    uuid_generate_v4(),
+    'create-document-process',
+    'Create Document Process',
+    'Process to create a new document in Treezor',
+    (SELECT id FROM providers WHERE code = 'TREEZOR'),
+    'DOCUMENT',
+    'ONBOARDING',
+    false,
     true
 ),
 (
-    'create-legal-person-process', 
-    'Create Legal Person Process', 
-    'Process to create a new legal person in Treezor', 
-    (SELECT id FROM providers WHERE code = 'TREEZOR'), 
-    'LEGAL_PERSON', 
-    'ONBOARDING', 
-    false, 
+    uuid_generate_v4(),
+    'create-legal-person-process',
+    'Create Legal Person Process',
+    'Process to create a new legal person in Treezor',
+    (SELECT id FROM providers WHERE code = 'TREEZOR'),
+    'LEGAL_PERSON',
+    'ONBOARDING',
+    false,
     true
 ),
 (
-    'create-natural-person-process', 
-    'Create Natural Person Process', 
-    'Process to create a new natural person in Treezor', 
-    (SELECT id FROM providers WHERE code = 'TREEZOR'), 
-    'NATURAL_PERSON', 
-    'ONBOARDING', 
-    false, 
+    uuid_generate_v4(),
+    'create-natural-person-process',
+    'Create Natural Person Process',
+    'Process to create a new natural person in Treezor',
+    (SELECT id FROM providers WHERE code = 'TREEZOR'),
+    'NATURAL_PERSON',
+    'ONBOARDING',
+    false,
     true
 ),
 (
-    'create-tax-residence-process', 
-    'Create Tax Residence Process', 
-    'Process to create a new tax residence in Treezor', 
-    (SELECT id FROM providers WHERE code = 'TREEZOR'), 
-    'TAX_RESIDENCE', 
-    'ONBOARDING', 
-    false, 
+    uuid_generate_v4(),
+    'create-tax-residence-process',
+    'Create Tax Residence Process',
+    'Process to create a new tax residence in Treezor',
+    (SELECT id FROM providers WHERE code = 'TREEZOR'),
+    'TAX_RESIDENCE',
+    'ONBOARDING',
+    false,
     true
 ),
 (
-    'user-kyb-review-process', 
-    'User KYB Review Process', 
-    'Process for KYB (Know Your Business) review in Treezor', 
-    (SELECT id FROM providers WHERE code = 'TREEZOR'), 
-    'KYB', 
-    'COMPLIANCE', 
-    false, 
+    uuid_generate_v4(),
+    'user-kyb-review-process',
+    'User KYB Review Process',
+    'Process for KYB (Know Your Business) review in Treezor',
+    (SELECT id FROM providers WHERE code = 'TREEZOR'),
+    'KYB',
+    'COMPLIANCE',
+    false,
     true
 ),
 (
-    'user-kyc-review-process', 
-    'User KYC Review Process', 
-    'Process for KYC (Know Your Customer) review in Treezor', 
-    (SELECT id FROM providers WHERE code = 'TREEZOR'), 
-    'KYC', 
-    'COMPLIANCE', 
-    false, 
+    uuid_generate_v4(),
+    'user-kyc-review-process',
+    'User KYC Review Process',
+    'Process for KYC (Know Your Customer) review in Treezor',
+    (SELECT id FROM providers WHERE code = 'TREEZOR'),
+    'KYC',
+    'COMPLIANCE',
+    false,
     true
 );
 
 -- Provider Process Versions
 -- For create-account-process
 INSERT INTO provider_process_versions (
+    id,
     provider_process_id,
     version,
     bpmn_xml,
@@ -136,6 +157,7 @@ INSERT INTO provider_process_versions (
     active
 )
 VALUES (
+    uuid_generate_v4(),
     (SELECT id FROM provider_processes WHERE code = 'create-account-process'),
     '1.0.0',
     '<?xml version="1.0" encoding="UTF-8"?>
@@ -166,6 +188,7 @@ VALUES (
 
 -- For create-document-process
 INSERT INTO provider_process_versions (
+    id,
     provider_process_id,
     version,
     bpmn_xml,
@@ -175,6 +198,7 @@ INSERT INTO provider_process_versions (
     active
 )
 VALUES (
+    uuid_generate_v4(),
     (SELECT id FROM provider_processes WHERE code = 'create-document-process'),
     '1.0.0',
     '<?xml version="1.0" encoding="UTF-8"?>
@@ -205,6 +229,7 @@ VALUES (
 
 -- For create-legal-person-process
 INSERT INTO provider_process_versions (
+    id,
     provider_process_id,
     version,
     bpmn_xml,
@@ -214,6 +239,7 @@ INSERT INTO provider_process_versions (
     active
 )
 VALUES (
+    uuid_generate_v4(),
     (SELECT id FROM provider_processes WHERE code = 'create-legal-person-process'),
     '1.0.0',
     '<?xml version="1.0" encoding="UTF-8"?>
@@ -244,6 +270,7 @@ VALUES (
 
 -- For create-natural-person-process
 INSERT INTO provider_process_versions (
+    id,
     provider_process_id,
     version,
     bpmn_xml,
@@ -253,6 +280,7 @@ INSERT INTO provider_process_versions (
     active
 )
 VALUES (
+    uuid_generate_v4(),
     (SELECT id FROM provider_processes WHERE code = 'create-natural-person-process'),
     '1.0.0',
     '<?xml version="1.0" encoding="UTF-8"?>
@@ -283,6 +311,7 @@ VALUES (
 
 -- For create-tax-residence-process
 INSERT INTO provider_process_versions (
+    id,
     provider_process_id,
     version,
     bpmn_xml,
@@ -292,6 +321,7 @@ INSERT INTO provider_process_versions (
     active
 )
 VALUES (
+    uuid_generate_v4(),
     (SELECT id FROM provider_processes WHERE code = 'create-tax-residence-process'),
     '1.0.0',
     '<?xml version="1.0" encoding="UTF-8"?>
@@ -322,6 +352,7 @@ VALUES (
 
 -- For user-kyb-review-process
 INSERT INTO provider_process_versions (
+    id,
     provider_process_id,
     version,
     bpmn_xml,
@@ -331,6 +362,7 @@ INSERT INTO provider_process_versions (
     active
 )
 VALUES (
+    uuid_generate_v4(),
     (SELECT id FROM provider_processes WHERE code = 'user-kyb-review-process'),
     '1.0.0',
     '<?xml version="1.0" encoding="UTF-8"?>
@@ -361,6 +393,7 @@ VALUES (
 
 -- For user-kyc-review-process
 INSERT INTO provider_process_versions (
+    id,
     provider_process_id,
     version,
     bpmn_xml,
@@ -370,6 +403,7 @@ INSERT INTO provider_process_versions (
     active
 )
 VALUES (
+    uuid_generate_v4(),
     (SELECT id FROM provider_processes WHERE code = 'user-kyc-review-process'),
     '1.0.0',
     '<?xml version="1.0" encoding="UTF-8"?>

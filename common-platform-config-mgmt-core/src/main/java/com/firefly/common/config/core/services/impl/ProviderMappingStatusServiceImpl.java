@@ -11,6 +11,7 @@ import com.firefly.common.core.queries.PaginationResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
+import java.util.UUID;
 
 /**
  * Implementation of the ProviderMappingStatusService interface
@@ -25,7 +26,7 @@ public class ProviderMappingStatusServiceImpl implements ProviderMappingStatusSe
     private ProviderMappingStatusMapper mapper;
 
     @Override
-    public Mono<ProviderMappingStatusDTO> getById(Long id) {
+    public Mono<ProviderMappingStatusDTO> getById(UUID id) {
         return repository.findById(id)
                 .switchIfEmpty(Mono.error(new RuntimeException("Provider mapping status not found with id: " + id)))
                 .map(mapper::toDTO);
@@ -53,7 +54,7 @@ public class ProviderMappingStatusServiceImpl implements ProviderMappingStatusSe
     }
 
     @Override
-    public Mono<ProviderMappingStatusDTO> update(Long id, ProviderMappingStatusDTO providerMappingStatusDTO) {
+    public Mono<ProviderMappingStatusDTO> update(UUID id, ProviderMappingStatusDTO providerMappingStatusDTO) {
         return repository.findById(id)
                 .switchIfEmpty(Mono.error(new RuntimeException("Provider mapping status not found with id: " + id)))
                 .flatMap(existingEntity -> {
@@ -73,7 +74,7 @@ public class ProviderMappingStatusServiceImpl implements ProviderMappingStatusSe
     }
 
     @Override
-    public Mono<Void> delete(Long id) {
+    public Mono<Void> delete(UUID id) {
         return repository.findById(id)
                 .switchIfEmpty(Mono.error(new RuntimeException("Provider mapping status not found with id: " + id)))
                 .flatMap(entity -> repository.delete(entity));

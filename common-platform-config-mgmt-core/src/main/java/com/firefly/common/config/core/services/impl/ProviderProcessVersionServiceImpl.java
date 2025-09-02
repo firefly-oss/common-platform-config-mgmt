@@ -11,6 +11,7 @@ import com.firefly.common.core.queries.PaginationResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
+import java.util.UUID;
 
 /**
  * Implementation of the ProviderProcessVersionService interface
@@ -25,7 +26,7 @@ public class ProviderProcessVersionServiceImpl implements ProviderProcessVersion
     private ProviderProcessVersionMapper mapper;
 
     @Override
-    public Mono<ProviderProcessVersionDTO> getById(Long id) {
+    public Mono<ProviderProcessVersionDTO> getById(UUID id) {
         return repository.findById(id)
                 .switchIfEmpty(Mono.error(new RuntimeException("Provider process version not found with id: " + id)))
                 .map(mapper::toDTO);
@@ -53,7 +54,7 @@ public class ProviderProcessVersionServiceImpl implements ProviderProcessVersion
     }
 
     @Override
-    public Mono<ProviderProcessVersionDTO> update(Long id, ProviderProcessVersionDTO providerProcessVersionDTO) {
+    public Mono<ProviderProcessVersionDTO> update(UUID id, ProviderProcessVersionDTO providerProcessVersionDTO) {
         return repository.findById(id)
                 .switchIfEmpty(Mono.error(new RuntimeException("Provider process version not found with id: " + id)))
                 .flatMap(existingEntity -> {
@@ -73,7 +74,7 @@ public class ProviderProcessVersionServiceImpl implements ProviderProcessVersion
     }
 
     @Override
-    public Mono<Void> delete(Long id) {
+    public Mono<Void> delete(UUID id) {
         return repository.findById(id)
                 .switchIfEmpty(Mono.error(new RuntimeException("Provider process version not found with id: " + id)))
                 .flatMap(entity -> repository.delete(entity));

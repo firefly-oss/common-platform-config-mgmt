@@ -4,9 +4,10 @@ import com.firefly.common.config.models.entities.ProviderType;
 import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import java.util.UUID;
 
 @Repository
-public interface ProviderTypeRepository extends BaseRepository<ProviderType, Long> {
+public interface ProviderTypeRepository extends BaseRepository<ProviderType, UUID> {
 
     Flux<ProviderType> findByActiveTrue();
 

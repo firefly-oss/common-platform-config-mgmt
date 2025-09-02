@@ -1,94 +1,103 @@
 -- Common Provider
 INSERT INTO providers (
-    code, 
-    name, 
-    description, 
-    provider_type_id, 
-    provider_status_id, 
-    country_code, 
-    currency_code, 
-    requires_authentication, 
+    id,
+    code,
+    name,
+    description,
+    provider_type_id,
+    provider_status_id,
+    country_code,
+    currency_code,
+    requires_authentication,
     active
 )
 VALUES (
-    'COMMON', 
-    'Common', 
-    'Common provider for shared processes', 
-    (SELECT id FROM provider_types WHERE code = 'BAAS'), 
-    (SELECT id FROM provider_statuses WHERE code = 'ACTIVE'), 
-    'EU', 
-    'EUR', 
-    true, 
+    uuid_generate_v4(),
+    'COMMON',
+    'Common',
+    'Common provider for shared processes',
+    (SELECT id FROM provider_types WHERE code = 'BAAS'),
+    (SELECT id FROM provider_statuses WHERE code = 'ACTIVE'),
+    'EU',
+    'EUR',
+    true,
     true
 );
 
 -- Provider Processes for TREEZOR - create-beneficiary-process
 INSERT INTO provider_processes (
-    code, 
-    name, 
-    description, 
-    provider_id, 
-    process_type, 
-    process_category, 
-    is_common, 
+    id,
+    code,
+    name,
+    description,
+    provider_id,
+    process_type,
+    process_category,
+    is_common,
     active
 )
 VALUES (
-    'create-beneficiary-process', 
-    'Create Beneficiary Process', 
-    'Process to create a new beneficiary in Treezor', 
-    (SELECT id FROM providers WHERE code = 'TREEZOR'), 
-    'BENEFICIARY', 
-    'ONBOARDING', 
-    false, 
+    uuid_generate_v4(),
+    'create-beneficiary-process',
+    'Create Beneficiary Process',
+    'Process to create a new beneficiary in Treezor',
+    (SELECT id FROM providers WHERE code = 'TREEZOR'),
+    'BENEFICIARY',
+    'ONBOARDING',
+    false,
     true
 );
 
 -- Provider Processes for COMMON
 INSERT INTO provider_processes (
-    code, 
-    name, 
-    description, 
-    provider_id, 
-    process_type, 
-    process_category, 
-    is_common, 
+    id,
+    code,
+    name,
+    description,
+    provider_id,
+    process_type,
+    process_category,
+    is_common,
     active
 )
-VALUES 
+VALUES
 (
-    'send-verification-sms', 
-    'Send Verification SMS Process', 
-    'Process to send verification SMS', 
-    (SELECT id FROM providers WHERE code = 'COMMON'), 
-    'VERIFICATION', 
-    'SECURITY', 
-    true, 
+    uuid_generate_v4(),
+    'send-verification-sms',
+    'Send Verification SMS Process',
+    'Process to send verification SMS',
+    (SELECT id FROM providers WHERE code = 'COMMON'),
+    'VERIFICATION',
+    'SECURITY',
+    true,
     true
 ),
 (
-    'send-verification-email', 
-    'Send Verification Email Process', 
-    'Process to send verification email', 
-    (SELECT id FROM providers WHERE code = 'COMMON'), 
-    'VERIFICATION', 
-    'SECURITY', 
-    true, 
+    uuid_generate_v4(),
+    'send-verification-email',
+    'Send Verification Email Process',
+    'Process to send verification email',
+    (SELECT id FROM providers WHERE code = 'COMMON'),
+    'VERIFICATION',
+    'SECURITY',
+    true,
     true
 ),
 (
-    'validate-verification-code', 
-    'Validate Verification Code Process', 
-    'Process to validate verification code', 
-    (SELECT id FROM providers WHERE code = 'COMMON'), 
-    'VERIFICATION', 
-    'SECURITY', 
-    true, 
+    uuid_generate_v4(),
+    'validate-verification-code',
+    'Validate Verification Code Process',
+    'Process to validate verification code',
+    (SELECT id FROM providers WHERE code = 'COMMON'),
+    'VERIFICATION',
+    'SECURITY',
+    true,
     true
 );
 
 -- Provider Process Versions for create-beneficiary-process
 INSERT INTO provider_process_versions (
+    id,
     provider_process_id,
     version,
     bpmn_xml,
@@ -98,6 +107,7 @@ INSERT INTO provider_process_versions (
     active
 )
 VALUES (
+    uuid_generate_v4(),
     (SELECT id FROM provider_processes WHERE code = 'create-beneficiary-process'),
     '1.0.0',
     '<?xml version="1.0" encoding="UTF-8"?>
@@ -155,6 +165,7 @@ VALUES (
 
 -- Provider Process Versions for send-verification-sms
 INSERT INTO provider_process_versions (
+    id,
     provider_process_id,
     version,
     bpmn_xml,
@@ -164,6 +175,7 @@ INSERT INTO provider_process_versions (
     active
 )
 VALUES (
+    uuid_generate_v4(),
     (SELECT id FROM provider_processes WHERE code = 'send-verification-sms'),
     '1.0.0',
     '<?xml version="1.0" encoding="UTF-8"?>
@@ -251,6 +263,7 @@ VALUES (
 
 -- Provider Process Versions for send-verification-email
 INSERT INTO provider_process_versions (
+    id,
     provider_process_id,
     version,
     bpmn_xml,
@@ -260,6 +273,7 @@ INSERT INTO provider_process_versions (
     active
 )
 VALUES (
+    uuid_generate_v4(),
     (SELECT id FROM provider_processes WHERE code = 'send-verification-email'),
     '1.0.0',
     '<?xml version="1.0" encoding="UTF-8"?>
@@ -347,6 +361,7 @@ VALUES (
 
 -- Provider Process Versions for validate-verification-code
 INSERT INTO provider_process_versions (
+    id,
     provider_process_id,
     version,
     bpmn_xml,
@@ -356,6 +371,7 @@ INSERT INTO provider_process_versions (
     active
 )
 VALUES (
+    uuid_generate_v4(),
     (SELECT id FROM provider_processes WHERE code = 'validate-verification-code'),
     '1.0.0',
     '<?xml version="1.0" encoding="UTF-8"?>

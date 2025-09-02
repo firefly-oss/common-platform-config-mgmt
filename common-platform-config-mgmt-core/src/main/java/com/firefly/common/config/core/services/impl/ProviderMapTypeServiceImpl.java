@@ -11,6 +11,7 @@ import com.firefly.common.core.queries.PaginationResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
+import java.util.UUID;
 
 /**
  * Implementation of the ProviderMapTypeService interface
@@ -25,7 +26,7 @@ public class ProviderMapTypeServiceImpl implements ProviderMapTypeService {
     private ProviderMapTypeMapper mapper;
 
     @Override
-    public Mono<ProviderMapTypeDTO> getById(Long id) {
+    public Mono<ProviderMapTypeDTO> getById(UUID id) {
         return repository.findById(id)
                 .switchIfEmpty(Mono.error(new RuntimeException("Provider map type not found with id: " + id)))
                 .map(mapper::toDTO);
@@ -53,7 +54,7 @@ public class ProviderMapTypeServiceImpl implements ProviderMapTypeService {
     }
 
     @Override
-    public Mono<ProviderMapTypeDTO> update(Long id, ProviderMapTypeDTO providerMapTypeDTO) {
+    public Mono<ProviderMapTypeDTO> update(UUID id, ProviderMapTypeDTO providerMapTypeDTO) {
         return repository.findById(id)
                 .switchIfEmpty(Mono.error(new RuntimeException("Provider map type not found with id: " + id)))
                 .flatMap(existingEntity -> {
@@ -73,7 +74,7 @@ public class ProviderMapTypeServiceImpl implements ProviderMapTypeService {
     }
 
     @Override
-    public Mono<Void> delete(Long id) {
+    public Mono<Void> delete(UUID id) {
         return repository.findById(id)
                 .switchIfEmpty(Mono.error(new RuntimeException("Provider map type not found with id: " + id)))
                 .flatMap(entity -> repository.delete(entity));

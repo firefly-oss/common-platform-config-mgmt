@@ -4,19 +4,20 @@ import com.firefly.common.config.models.entities.Provider;
 import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import java.util.UUID;
 
 @Repository
-public interface ProviderRepository extends BaseRepository<Provider, Long> {
+public interface ProviderRepository extends BaseRepository<Provider, UUID> {
 
     Flux<Provider> findByActiveTrue();
 
     Mono<Provider> findByCode(String code);
 
-    Flux<Provider> findByProviderTypeId(Long providerTypeId);
+    Flux<Provider> findByProviderTypeId(UUID providerTypeId);
 
-    Flux<Provider> findByProviderStatusId(Long providerStatusId);
+    Flux<Provider> findByProviderStatusId(UUID providerStatusId);
 
-    Flux<Provider> findByCountryId(Long countryId);
+    Flux<Provider> findByCountryId(UUID countryId);
 
     Flux<Provider> findByRegion(String region);
 }

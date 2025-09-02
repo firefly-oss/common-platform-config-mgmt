@@ -12,6 +12,7 @@ import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 /**
  * Entity representing a provider map type in the system
@@ -24,7 +25,7 @@ import java.time.LocalDateTime;
 public class ProviderMapType {
 
     @Id
-    private Long id;
+    private UUID id;
 
     @Column("code")
     private String code;
@@ -36,7 +37,7 @@ public class ProviderMapType {
     private String description;
 
     @Column("provider_map_type_status_id")
-    private Long providerMappingStatusId;
+    private UUID providerMappingStatusId;
 
     @Column("active")
     private Boolean active;

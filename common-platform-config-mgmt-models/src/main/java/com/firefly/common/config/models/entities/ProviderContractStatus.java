@@ -12,6 +12,7 @@ import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 /**
  * Entity representing a provider contract status in the system (Active, Inactive, Suspended, etc.)
@@ -24,7 +25,7 @@ import java.time.LocalDateTime;
 public class ProviderContractStatus {
 
     @Id
-    private Long id;
+    private UUID id;
 
     @Column("code")
     private String code;

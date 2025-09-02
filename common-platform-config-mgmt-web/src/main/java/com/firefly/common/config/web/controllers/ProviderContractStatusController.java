@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
 import jakarta.validation.Valid;
+import java.util.UUID;
 
 /**
  * REST controller for managing provider contract statuses
@@ -48,7 +49,7 @@ public class ProviderContractStatusController {
     )
     public ResponseEntity<Mono<ProviderContractStatusDTO>> getById(
             @Parameter(description = "ID of the provider contract status to retrieve", required = true)
-            @PathVariable Long id) {
+            @PathVariable UUID id) {
         return ResponseEntity.ok(providerContractStatusService.getById(id));
     }
 
@@ -116,7 +117,7 @@ public class ProviderContractStatusController {
     )
     public ResponseEntity<Mono<ProviderContractStatusDTO>> update(
             @Parameter(description = "ID of the provider contract status to update", required = true)
-            @PathVariable Long id,
+            @PathVariable UUID id,
             @Parameter(description = "Provider contract status to update", required = true)
             @Valid @RequestBody ProviderContractStatusDTO providerContractStatusDTO) {
         return ResponseEntity.ok(providerContractStatusService.update(id, providerContractStatusDTO));
@@ -141,7 +142,7 @@ public class ProviderContractStatusController {
     )
     public Mono<ResponseEntity<Void>> delete(
             @Parameter(description = "ID of the provider contract status to delete", required = true)
-            @PathVariable Long id) {
+            @PathVariable UUID id) {
         return providerContractStatusService.delete(id)
                 .then(Mono.just(ResponseEntity.noContent().<Void>build()));
     }

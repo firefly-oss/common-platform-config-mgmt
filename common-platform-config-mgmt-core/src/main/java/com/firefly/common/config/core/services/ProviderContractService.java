@@ -4,6 +4,7 @@ import com.firefly.common.config.interfaces.dtos.ProviderContractDTO;
 import com.firefly.common.core.filters.FilterRequest;
 import com.firefly.common.core.queries.PaginationResponse;
 import reactor.core.publisher.Mono;
+import java.util.UUID;
 
 /**
  * Service interface for managing provider contracts
@@ -15,7 +16,7 @@ public interface ProviderContractService {
      * @param id Provider contract ID
      * @return Provider contract DTO
      */
-    Mono<ProviderContractDTO> getById(Long id);
+    Mono<ProviderContractDTO> getById(UUID id);
 
     /**
      * Filter provider contracts based on criteria
@@ -37,12 +38,12 @@ public interface ProviderContractService {
      * @param providerContractDTO Provider contract DTO
      * @return Updated provider contract DTO
      */
-    Mono<ProviderContractDTO> update(Long id, ProviderContractDTO providerContractDTO);
+    Mono<ProviderContractDTO> update(UUID id, ProviderContractDTO providerContractDTO);
 
     /**
      * Delete a provider contract
      * @param id Provider contract ID
      * @return Void
      */
-    Mono<Void> delete(Long id);
+    Mono<Void> delete(UUID id);
 }

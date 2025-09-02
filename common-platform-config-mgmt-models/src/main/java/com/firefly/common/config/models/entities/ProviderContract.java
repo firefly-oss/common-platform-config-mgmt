@@ -12,6 +12,7 @@ import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 /**
  * Entity representing a provider contract in the system
@@ -24,19 +25,19 @@ import java.time.LocalDateTime;
 public class ProviderContract {
 
     @Id
-    private Long id;
+    private UUID id;
 
     @Column("contract_id")
-    private Long contractId;
+    private UUID contractId;
 
     @Column("contract_type_id")
-    private Long contractTypeId;
+    private UUID contractTypeId;
 
     @Column("provider_id")
-    private Long providerId;
+    private UUID providerId;
 
     @Column("provider_contract_status_id")
-    private Long providerContractStatusId;
+    private UUID providerContractStatusId;
 
     @Column("description")
     private String description;

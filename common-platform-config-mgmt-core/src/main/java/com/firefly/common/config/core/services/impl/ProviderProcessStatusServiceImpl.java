@@ -11,6 +11,7 @@ import com.firefly.common.core.queries.PaginationResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
+import java.util.UUID;
 
 /**
  * Implementation of the ProviderProcessStatusService interface
@@ -25,7 +26,7 @@ public class ProviderProcessStatusServiceImpl implements ProviderProcessStatusSe
     private ProviderProcessStatusMapper mapper;
 
     @Override
-    public Mono<ProviderProcessStatusDTO> getById(Long id) {
+    public Mono<ProviderProcessStatusDTO> getById(UUID id) {
         return repository.findById(id)
                 .switchIfEmpty(Mono.error(new RuntimeException("Provider process status not found with id: " + id)))
                 .map(mapper::toDTO);
@@ -53,7 +54,7 @@ public class ProviderProcessStatusServiceImpl implements ProviderProcessStatusSe
     }
 
     @Override
-    public Mono<ProviderProcessStatusDTO> update(Long id, ProviderProcessStatusDTO providerProcessStatusDTO) {
+    public Mono<ProviderProcessStatusDTO> update(UUID id, ProviderProcessStatusDTO providerProcessStatusDTO) {
         return repository.findById(id)
                 .switchIfEmpty(Mono.error(new RuntimeException("Provider process status not found with id: " + id)))
                 .flatMap(existingEntity -> {
@@ -73,7 +74,7 @@ public class ProviderProcessStatusServiceImpl implements ProviderProcessStatusSe
     }
 
     @Override
-    public Mono<Void> delete(Long id) {
+    public Mono<Void> delete(UUID id) {
         return repository.findById(id)
                 .switchIfEmpty(Mono.error(new RuntimeException("Provider process status not found with id: " + id)))
                 .flatMap(entity -> repository.delete(entity));

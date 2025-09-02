@@ -4,6 +4,7 @@ import com.firefly.common.config.interfaces.dtos.ProviderProcessVersionDTO;
 import com.firefly.common.core.filters.FilterRequest;
 import com.firefly.common.core.queries.PaginationResponse;
 import reactor.core.publisher.Mono;
+import java.util.UUID;
 
 /**
  * Service interface for managing provider process versions
@@ -15,7 +16,7 @@ public interface ProviderProcessVersionService {
      * @param id Provider process version ID
      * @return Provider process version DTO
      */
-    Mono<ProviderProcessVersionDTO> getById(Long id);
+    Mono<ProviderProcessVersionDTO> getById(UUID id);
 
     /**
      * Filter provider process versions based on criteria
@@ -37,12 +38,12 @@ public interface ProviderProcessVersionService {
      * @param providerProcessVersionDTO Provider process version DTO
      * @return Updated provider process version DTO
      */
-    Mono<ProviderProcessVersionDTO> update(Long id, ProviderProcessVersionDTO providerProcessVersionDTO);
+    Mono<ProviderProcessVersionDTO> update(UUID id, ProviderProcessVersionDTO providerProcessVersionDTO);
 
     /**
      * Delete a provider process version
      * @param id Provider process version ID
      * @return Void
      */
-    Mono<Void> delete(Long id);
+    Mono<Void> delete(UUID id);
 }

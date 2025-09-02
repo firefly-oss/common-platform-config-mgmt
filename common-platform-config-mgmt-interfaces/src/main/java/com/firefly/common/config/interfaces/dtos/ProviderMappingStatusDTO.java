@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 /**
  * DTO for ProviderMappingStatus entity
@@ -23,7 +24,7 @@ public class ProviderMappingStatusDTO {
     
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Schema(description = "Provider Mapping Status ID")
-    private Long id;
+    private UUID id;
     
     @NotBlank(message = "Code is required")
     @Size(min = 2, max = 50, message = "Code must be between 2 and 50 characters")

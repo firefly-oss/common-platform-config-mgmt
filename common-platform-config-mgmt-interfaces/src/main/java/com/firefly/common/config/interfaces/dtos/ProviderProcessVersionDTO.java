@@ -13,6 +13,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 /**
  * DTO for Provider Process Version entity
@@ -26,12 +27,12 @@ public class ProviderProcessVersionDTO {
 
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Schema(description = "Provider process version ID")
-    private Long id;
+    private UUID id;
 
     @NotNull(message = "Provider process ID is required")
     @FilterableId
     @Schema(description = "ID of the provider process")
-    private Long providerProcessId;
+    private UUID providerProcessId;
 
     @Schema(description = "Provider process information")
     private ProviderProcessDTO providerProcess;
@@ -51,7 +52,7 @@ public class ProviderProcessVersionDTO {
     @NotNull(message = "Provider process status ID is required")
     @FilterableId
     @Schema(description = "ID of the provider process status")
-    private Long providerProcessStatusId;
+    private UUID providerProcessStatusId;
 
     @Schema(description = "Provider process status information")
     private ProviderProcessStatusDTO providerProcessStatus;

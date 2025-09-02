@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
 import jakarta.validation.Valid;
+import java.util.UUID;
 
 /**
  * REST controller for managing provider process versions
@@ -48,7 +49,7 @@ public class ProviderProcessVersionController {
     )
     public ResponseEntity<Mono<ProviderProcessVersionDTO>> getById(
             @Parameter(description = "ID of the provider process version to retrieve", required = true)
-            @PathVariable Long id) {
+            @PathVariable UUID id) {
         return ResponseEntity.ok(providerProcessVersionService.getById(id));
     }
 
@@ -125,7 +126,7 @@ public class ProviderProcessVersionController {
     )
     public ResponseEntity<Mono<ProviderProcessVersionDTO>> update(
             @Parameter(description = "ID of the provider process version to update", required = true)
-            @PathVariable Long id,
+            @PathVariable UUID id,
             @Parameter(description = "Provider process version to update", required = true)
             @Valid @RequestBody ProviderProcessVersionDTO providerProcessVersionDTO) {
         return ResponseEntity.ok(providerProcessVersionService.update(id, providerProcessVersionDTO));
@@ -150,7 +151,7 @@ public class ProviderProcessVersionController {
     )
     public Mono<ResponseEntity<Void>> delete(
             @Parameter(description = "ID of the provider process version to delete", required = true)
-            @PathVariable Long id) {
+            @PathVariable UUID id) {
         return providerProcessVersionService.delete(id)
                 .then(Mono.just(ResponseEntity.noContent().<Void>build()));
     }

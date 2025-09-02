@@ -4,21 +4,22 @@ import com.firefly.common.config.models.entities.ProviderConfig;
 import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import java.util.UUID;
 
 @Repository
-public interface ProviderConfigRepository extends BaseRepository<ProviderConfig, Long> {
+public interface ProviderConfigRepository extends BaseRepository<ProviderConfig, UUID> {
 
-    Flux<ProviderConfig> findByProviderId(Long providerId);
+    Flux<ProviderConfig> findByProviderId(UUID providerId);
 
-    Flux<ProviderConfig> findByProviderIdAndActiveTrue(Long providerId);
+    Flux<ProviderConfig> findByProviderIdAndActiveTrue(UUID providerId);
 
-    Mono<ProviderConfig> findByProviderIdAndKey(Long providerId, String key);
+    Mono<ProviderConfig> findByProviderIdAndKey(UUID providerId, String key);
 
-    Flux<ProviderConfig> findByProviderIdAndEnvironment(Long providerId, String environment);
+    Flux<ProviderConfig> findByProviderIdAndEnvironment(UUID providerId, String environment);
 
-    Flux<ProviderConfig> findByProviderIdAndConfigGroup(Long providerId, String configGroup);
+    Flux<ProviderConfig> findByProviderIdAndConfigGroup(UUID providerId, String configGroup);
 
-    Flux<ProviderConfig> findByProviderIdAndIsSecret(Long providerId, Boolean isSecret);
+    Flux<ProviderConfig> findByProviderIdAndIsSecret(UUID providerId, Boolean isSecret);
 
-    Flux<ProviderConfig> findByProviderIdAndIsRequired(Long providerId, Boolean isRequired);
+    Flux<ProviderConfig> findByProviderIdAndIsRequired(UUID providerId, Boolean isRequired);
 }

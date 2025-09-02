@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
 import jakarta.validation.Valid;
+import java.util.UUID;
 
 /**
  * REST controller for managing provider map types
@@ -48,7 +49,7 @@ public class ProviderMapTypeController {
     )
     public ResponseEntity<Mono<ProviderMapTypeDTO>> getById(
             @Parameter(description = "ID of the provider map type to retrieve", required = true)
-            @PathVariable Long id) {
+            @PathVariable UUID id) {
         return ResponseEntity.ok(providerMapTypeService.getById(id));
     }
 
@@ -116,7 +117,7 @@ public class ProviderMapTypeController {
     )
     public ResponseEntity<Mono<ProviderMapTypeDTO>> update(
             @Parameter(description = "ID of the provider map type to update", required = true)
-            @PathVariable Long id,
+            @PathVariable UUID id,
             @Parameter(description = "Provider map type to update", required = true)
             @Valid @RequestBody ProviderMapTypeDTO providerMapTypeDTO) {
         return ResponseEntity.ok(providerMapTypeService.update(id, providerMapTypeDTO));
@@ -141,7 +142,7 @@ public class ProviderMapTypeController {
     )
     public Mono<ResponseEntity<Void>> delete(
             @Parameter(description = "ID of the provider map type to delete", required = true)
-            @PathVariable Long id) {
+            @PathVariable UUID id) {
         return providerMapTypeService.delete(id)
                 .then(Mono.just(ResponseEntity.noContent().<Void>build()));
     }
