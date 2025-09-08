@@ -35,7 +35,7 @@ info:
     email: dev@getfirefly.io
   version: 1.0.0
 servers:
-  - url: http://core.catalis.vc/config
+  - url: http://core.getfirefly.io/config
     description: Development Environment
   - url: /
     description: Local Development Environment
