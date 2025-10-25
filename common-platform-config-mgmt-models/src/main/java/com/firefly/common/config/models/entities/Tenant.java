@@ -55,38 +55,29 @@ public class Tenant {
     @Column("description")
     private String description;
 
+    @Column("tenant_status_id")
+    private UUID tenantStatusId;
+
     @Column("country_id")
     private UUID countryId;
-
-    @Column("region")
-    private String region;
 
     @Column("timezone")
     private String timezone;
 
-    @Column("currency_code")
-    private String currencyCode;
+    @Column("default_currency_code")
+    private String defaultCurrencyCode;
 
-    @Column("language_code")
-    private String languageCode;
+    @Column("default_language_code")
+    private String defaultLanguageCode;
 
-    @Column("logo_url")
-    private String logoUrl;
+    @Column("business_contact_name")
+    private String businessContactName;
 
-    @Column("primary_color")
-    private String primaryColor;
+    @Column("business_contact_email")
+    private String businessContactEmail;
 
-    @Column("secondary_color")
-    private String secondaryColor;
-
-    @Column("contact_name")
-    private String contactName;
-
-    @Column("contact_email")
-    private String contactEmail;
-
-    @Column("contact_phone")
-    private String contactPhone;
+    @Column("business_contact_phone")
+    private String businessContactPhone;
 
     @Column("technical_contact_name")
     private String technicalContactName;
@@ -97,15 +88,6 @@ public class Tenant {
     @Column("technical_contact_phone")
     private String technicalContactPhone;
 
-    @Column("max_users")
-    private Integer maxUsers;
-
-    @Column("max_accounts")
-    private Integer maxAccounts;
-
-    @Column("max_transactions_per_day")
-    private Integer maxTransactionsPerDay;
-
     @Column("subscription_tier")
     private String subscriptionTier;
 
@@ -115,8 +97,8 @@ public class Tenant {
     @Column("subscription_end_date")
     private LocalDateTime subscriptionEndDate;
 
-    @Column("trial_mode")
-    private Boolean trialMode;
+    @Column("is_trial")
+    private Boolean isTrial;
 
     @Column("trial_end_date")
     private LocalDateTime trialEndDate;
