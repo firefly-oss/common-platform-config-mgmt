@@ -506,6 +506,7 @@ CREATE INDEX idx_channel_configs_priority ON channel_configs(priority);
 CREATE TABLE IF NOT EXISTS channel_config_parameters (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     channel_config_id UUID NOT NULL REFERENCES channel_configs(id) ON DELETE CASCADE,
+    channel_code VARCHAR(50) NOT NULL, -- Denormalized for easier querying (WEB_BANKING, MOBILE_BANKING, etc.)
     parameter_key VARCHAR(100) NOT NULL,
     parameter_value TEXT,
     parameter_type VARCHAR(50) NOT NULL, -- STRING, INTEGER, DECIMAL, BOOLEAN, JSON
@@ -524,6 +525,7 @@ CREATE TABLE IF NOT EXISTS channel_config_parameters (
 );
 
 CREATE INDEX idx_channel_config_params_channel ON channel_config_parameters(channel_config_id);
+CREATE INDEX idx_channel_config_params_code ON channel_config_parameters(channel_code);
 CREATE INDEX idx_channel_config_params_key ON channel_config_parameters(parameter_key);
 CREATE INDEX idx_channel_config_params_category ON channel_config_parameters(category);
 CREATE INDEX idx_channel_config_params_active ON channel_config_parameters(active);
