@@ -77,6 +77,7 @@ public class ConfigurationAuditController {
     @Operation(
             operationId = "createConfigurationAudit",
             summary = "Create a new configuration audit entry",
+            description = "Audit entries are immutable and cannot be updated or deleted once created",
             responses = {
                     @ApiResponse(responseCode = "201", description = "Configuration audit created", content = @Content(schema = @Schema(implementation = ConfigurationAuditDTO.class))),
                     @ApiResponse(responseCode = "400", description = "Invalid input")
@@ -86,39 +87,6 @@ public class ConfigurationAuditController {
             @Parameter(description = "Configuration audit to create", required = true)
             @Valid @RequestBody ConfigurationAuditDTO configurationAuditDTO) {
         return ResponseEntity.status(HttpStatus.CREATED).body(configurationAuditService.create(configurationAuditDTO));
-    }
-
-    @PutMapping("/{id}")
-    @Operation(
-            operationId = "updateConfigurationAudit",
-            summary = "Update an existing configuration audit entry",
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "Configuration audit updated", content = @Content(schema = @Schema(implementation = ConfigurationAuditDTO.class))),
-                    @ApiResponse(responseCode = "404", description = "Configuration audit not found"),
-                    @ApiResponse(responseCode = "400", description = "Invalid input")
-            }
-    )
-    public ResponseEntity<Mono<ConfigurationAuditDTO>> update(
-            @Parameter(description = "ID of the configuration audit to update", required = true)
-            @PathVariable UUID id,
-            @Parameter(description = "Updated configuration audit data", required = true)
-            @Valid @RequestBody ConfigurationAuditDTO configurationAuditDTO) {
-        return ResponseEntity.ok(configurationAuditService.update(id, configurationAuditDTO));
-    }
-
-    @DeleteMapping("/{id}")
-    @Operation(
-            operationId = "deleteConfigurationAudit",
-            summary = "Delete a configuration audit entry",
-            responses = {
-                    @ApiResponse(responseCode = "204", description = "Configuration audit deleted"),
-                    @ApiResponse(responseCode = "404", description = "Configuration audit not found")
-            }
-    )
-    public ResponseEntity<Mono<Void>> delete(
-            @Parameter(description = "ID of the configuration audit to delete", required = true)
-            @PathVariable UUID id) {
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(configurationAuditService.delete(id));
     }
 }
 
