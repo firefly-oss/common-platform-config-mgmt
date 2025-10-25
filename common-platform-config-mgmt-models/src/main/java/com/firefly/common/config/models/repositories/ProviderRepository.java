@@ -33,8 +33,4 @@ public interface ProviderRepository extends BaseRepository<Provider, UUID> {
     Flux<Provider> findByProviderTypeId(UUID providerTypeId);
 
     Flux<Provider> findByProviderStatusId(UUID providerStatusId);
-
-    Flux<Provider> findByCountryId(UUID countryId);
-
-    Flux<Provider> findByRegion(String region);
 }

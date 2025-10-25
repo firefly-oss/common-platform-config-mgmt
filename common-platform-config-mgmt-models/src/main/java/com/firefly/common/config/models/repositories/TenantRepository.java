@@ -34,10 +34,8 @@ public interface TenantRepository extends BaseRepository<Tenant, UUID> {
 
     Flux<Tenant> findByCountryId(UUID countryId);
 
-    Flux<Tenant> findByRegion(String region);
-
     Flux<Tenant> findBySubscriptionTier(String subscriptionTier);
 
-    Flux<Tenant> findByTrialModeTrue();
+    Flux<Tenant> findByIsTrialTrue();
 }
 

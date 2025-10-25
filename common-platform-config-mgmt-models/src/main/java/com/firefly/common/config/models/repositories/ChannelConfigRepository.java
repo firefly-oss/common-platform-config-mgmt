@@ -26,20 +26,39 @@ import java.util.UUID;
 @Repository
 public interface ChannelConfigRepository extends BaseRepository<ChannelConfig, UUID> {
 
+    /**
+     * Find all active channel configs
+     */
     Flux<ChannelConfig> findByActiveTrue();
 
+    /**
+     * Find all channel configs for a specific tenant
+     */
     Flux<ChannelConfig> findByTenantId(UUID tenantId);
 
+    /**
+     * Find all active channel configs for a specific tenant
+     */
     Flux<ChannelConfig> findByTenantIdAndActiveTrue(UUID tenantId);
 
+    /**
+     * Find all enabled channel configs for a specific tenant
+     */
     Flux<ChannelConfig> findByTenantIdAndEnabledTrue(UUID tenantId);
 
+    /**
+     * Find a specific channel config by tenant ID and channel code
+     */
     Mono<ChannelConfig> findByTenantIdAndChannelCode(UUID tenantId, String channelCode);
 
+    /**
+     * Find all channel configs by channel code
+     */
     Flux<ChannelConfig> findByChannelCode(String channelCode);
 
-    Flux<ChannelConfig> findByMaintenanceModeEnabledTrue();
-
+    /**
+     * Find all channel configs for a tenant ordered by priority (ascending)
+     */
     Flux<ChannelConfig> findByTenantIdOrderByPriorityAsc(UUID tenantId);
 }
 
