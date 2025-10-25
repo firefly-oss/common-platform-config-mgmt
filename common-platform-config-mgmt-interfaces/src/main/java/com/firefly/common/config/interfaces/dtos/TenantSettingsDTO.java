@@ -83,15 +83,30 @@ public class TenantSettingsDTO {
     @Schema(description = "Password expiry in days (0 = never)", example = "90")
     private Integer passwordExpiryDays;
 
+    @Min(value = 0, message = "Password history count must be non-negative")
+    @Schema(description = "Number of previous passwords to remember (prevents reuse)", example = "5")
+    private Integer passwordHistoryCount;
+
     @Schema(description = "Whether MFA is enabled", example = "true")
     private Boolean mfaEnabled;
 
     @Schema(description = "Whether MFA is required", example = "false")
     private Boolean mfaRequired;
 
+    @Schema(description = "Comma-separated list of allowed 2FA methods: SMS, EMAIL, TOTP, BIOMETRIC", example = "TOTP,SMS")
+    private String twoFactorAuthMethods;
+
     @Min(value = 1, message = "Session timeout must be at least 1 minute")
     @Schema(description = "Session timeout in minutes", example = "30")
     private Integer sessionTimeoutMinutes;
+
+    @Min(value = 1, message = "Session idle timeout must be at least 1 minute")
+    @Schema(description = "Session idle timeout in minutes before automatic logout", example = "15")
+    private Integer sessionIdleTimeoutMinutes;
+
+    @Min(value = 1, message = "Concurrent sessions limit must be at least 1")
+    @Schema(description = "Maximum number of concurrent sessions allowed per user", example = "3")
+    private Integer concurrentSessionsLimit;
 
     @Min(value = 1, message = "Max login attempts must be at least 1")
     @Schema(description = "Maximum login attempts before lockout", example = "5")
@@ -100,6 +115,90 @@ public class TenantSettingsDTO {
     @Min(value = 0, message = "Lockout duration must be non-negative")
     @Schema(description = "Account lockout duration in minutes", example = "30")
     private Integer accountLockoutDurationMinutes;
+
+    @Schema(description = "Force password change on first login", example = "true")
+    private Boolean forcePasswordChangeOnFirstLogin;
+
+    @Min(value = 1, message = "API key rotation days must be at least 1")
+    @Schema(description = "API key rotation interval in days", example = "90")
+    private Integer apiKeyRotationDays;
+
+    @Schema(description = "Encryption algorithm used: AES256, RSA2048, etc.", example = "AES256")
+    private String encryptionAlgorithm;
+
+    // Network Security
+
+    @Schema(description = "Comma-separated list of whitelisted IP addresses or CIDR ranges", example = "192.168.1.0/24,10.0.0.1")
+    private String ipWhitelist;
+
+    @Schema(description = "Comma-separated list of blacklisted IP addresses or CIDR ranges", example = "203.0.113.0/24")
+    private String ipBlacklist;
+
+    @Schema(description = "Whether geographic blocking is enabled", example = "false")
+    private Boolean geoBlockingEnabled;
+
+    @Schema(description = "Comma-separated list of allowed country codes (ISO 3166-1 alpha-2)", example = "US,CA,GB")
+    private String allowedCountries;
+
+    @Schema(description = "Comma-separated list of blocked country codes (ISO 3166-1 alpha-2)", example = "KP,IR")
+    private String blockedCountries;
+
+    // Compliance
+
+    @Schema(description = "Whether GDPR compliance is enabled", example = "true")
+    private Boolean gdprEnabled;
+
+    @Schema(description = "Whether PCI-DSS compliance is enabled", example = "true")
+    private Boolean pciDssEnabled;
+
+    @Schema(description = "Whether SOX compliance is enabled", example = "false")
+    private Boolean soxComplianceEnabled;
+
+    @Schema(description = "Whether HIPAA compliance is enabled", example = "false")
+    private Boolean hipaaComplianceEnabled;
+
+    @Schema(description = "Whether ISO 27001 compliance is enabled", example = "true")
+    private Boolean iso27001ComplianceEnabled;
+
+    @Schema(description = "Data residency country code (ISO 3166-1 alpha-2)", example = "US")
+    private String dataResidencyCountry;
+
+    @Schema(description = "Whether regulatory reporting is enabled", example = "true")
+    private Boolean regulatoryReportingEnabled;
+
+    @Schema(description = "Regulatory reporting frequency: DAILY, WEEKLY, MONTHLY, QUARTERLY", example = "MONTHLY")
+    private String regulatoryReportingFrequency;
+
+    // Fraud Detection and Monitoring
+
+    @Schema(description = "Whether fraud detection is enabled", example = "true")
+    private Boolean fraudDetectionEnabled;
+
+    @Min(value = 0, message = "Fraud score threshold must be non-negative")
+    @Schema(description = "Fraud score threshold (0-100) for flagging transactions", example = "75")
+    private Integer fraudScoreThreshold;
+
+    @Schema(description = "Whether transaction monitoring is enabled", example = "true")
+    private Boolean transactionMonitoringEnabled;
+
+    @Schema(description = "Whether AML (Anti-Money Laundering) screening is enabled", example = "true")
+    private Boolean amlScreeningEnabled;
+
+    @Schema(description = "Whether sanctions screening is enabled", example = "true")
+    private Boolean sanctionsScreeningEnabled;
+
+    @Schema(description = "Whether KYC (Know Your Customer) verification is required", example = "true")
+    private Boolean kycVerificationRequired;
+
+    @Min(value = 1, message = "KYC refresh interval must be at least 1 day")
+    @Schema(description = "KYC refresh interval in days", example = "365")
+    private Integer kycRefreshIntervalDays;
+
+    @Schema(description = "Whether document verification is required", example = "true")
+    private Boolean documentVerificationRequired;
+
+    @Schema(description = "Whether biometric verification is enabled", example = "false")
+    private Boolean biometricVerificationEnabled;
 
     // Circuit Breaker Configuration
     @Schema(description = "Whether circuit breaker is enabled", example = "true")
@@ -144,7 +243,11 @@ public class TenantSettingsDTO {
     @Schema(description = "Whether sensitive data masking is enabled", example = "true")
     private Boolean sensitiveDataMaskingEnabled;
 
-    // Data Retention
+    // Data Retention and Archiving
+
+    @Schema(description = "Data retention policy description or JSON configuration", example = "STANDARD_7_YEARS")
+    private String dataRetentionPolicy;
+
     @Min(value = 1, message = "Retention days must be at least 1")
     @Schema(description = "Transaction retention in days", example = "2555")
     private Integer transactionRetentionDays;
@@ -153,6 +256,20 @@ public class TenantSettingsDTO {
     @Schema(description = "Document retention in days", example = "2555")
     private Integer documentRetentionDays;
 
+    @Schema(description = "Whether auto-archiving is enabled", example = "true")
+    private Boolean autoArchiveEnabled;
+
+    @Min(value = 1, message = "Archive after days must be at least 1")
+    @Schema(description = "Number of days after which data is automatically archived", example = "365")
+    private Integer archiveAfterDays;
+
+    @Schema(description = "Whether auto-deletion is enabled", example = "false")
+    private Boolean autoDeleteEnabled;
+
+    @Min(value = 1, message = "Delete after days must be at least 1")
+    @Schema(description = "Number of days after which archived data is automatically deleted", example = "2555")
+    private Integer deleteAfterDays;
+
     @Schema(description = "Whether backup is enabled", example = "true")
     private Boolean backupEnabled;
 
@@ -160,7 +277,26 @@ public class TenantSettingsDTO {
     @Schema(description = "Backup frequency in hours", example = "24")
     private Integer backupFrequencyHours;
 
+    @Min(value = 1, message = "Backup retention days must be at least 1")
+    @Schema(description = "Backup retention in days", example = "90")
+    private Integer backupRetentionDays;
+
+    // Disaster Recovery
+
+    @Schema(description = "Whether disaster recovery is enabled", example = "true")
+    private Boolean disasterRecoveryEnabled;
+
+    @Schema(description = "Whether point-in-time recovery is enabled", example = "true")
+    private Boolean pointInTimeRecoveryEnabled;
+
+    @Schema(description = "Whether cross-region replication is enabled", example = "false")
+    private Boolean crossRegionReplicationEnabled;
+
+    @Schema(description = "Comma-separated list of replication regions", example = "us-east-1,eu-west-1")
+    private String replicationRegions;
+
     // Notification Settings
+
     @Schema(description = "Whether email notifications are enabled", example = "true")
     private Boolean emailNotificationsEnabled;
 
@@ -173,15 +309,7 @@ public class TenantSettingsDTO {
     @Schema(description = "Whether webhook notifications are enabled", example = "true")
     private Boolean webhookNotificationsEnabled;
 
-    // Compliance
-    @Schema(description = "Whether GDPR is enabled", example = "true")
-    private Boolean gdprEnabled;
-
-    @Schema(description = "Whether PCI-DSS is enabled", example = "true")
-    private Boolean pciDssEnabled;
-
-    @Schema(description = "Data residency country code", example = "US")
-    private String dataResidencyCountry;
+    // System Fields
 
     @Schema(description = "Additional metadata (JSON)")
     private String metadata;
