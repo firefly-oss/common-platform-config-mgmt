@@ -39,7 +39,7 @@ CREATE TABLE IF NOT EXISTS tenants (
     name VARCHAR(255) NOT NULL,
     description TEXT,
     tenant_status_id UUID NOT NULL,
-    country_code VARCHAR(3),
+    country_id UUID,
     timezone VARCHAR(50),
     default_currency_code VARCHAR(3),
     default_language_code VARCHAR(10),
@@ -64,7 +64,7 @@ CREATE TABLE IF NOT EXISTS tenants (
 
 CREATE INDEX idx_tenants_code ON tenants(code);
 CREATE INDEX idx_tenants_status ON tenants(tenant_status_id);
-CREATE INDEX idx_tenants_country ON tenants(country_code);
+CREATE INDEX idx_tenants_country ON tenants(country_id);
 CREATE INDEX idx_tenants_active ON tenants(active);
 
 -- =====================================================
@@ -277,4 +277,254 @@ CREATE INDEX idx_provider_tenants_tenant ON provider_tenants(tenant_id);
 CREATE INDEX idx_provider_tenants_primary ON provider_tenants(is_primary);
 CREATE INDEX idx_provider_tenants_enabled ON provider_tenants(enabled);
 CREATE INDEX idx_provider_tenants_active ON provider_tenants(active);
+
+-- =====================================================
+-- FEATURE FLAGS TABLE
+-- =====================================================
+CREATE TABLE IF NOT EXISTS feature_flags (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    tenant_id UUID,
+    feature_key VARCHAR(100) NOT NULL,
+    feature_name VARCHAR(200) NOT NULL,
+    description TEXT,
+    enabled BOOLEAN DEFAULT FALSE,
+    environment VARCHAR(50),
+    rollout_percentage INTEGER DEFAULT 0,
+    start_date TIMESTAMP,
+    end_date TIMESTAMP,
+    target_user_segments TEXT,
+    metadata TEXT,
+    active BOOLEAN DEFAULT TRUE,
+    version BIGINT DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_feature_flag_tenant FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE,
+    CONSTRAINT uq_feature_key_tenant UNIQUE (feature_key, tenant_id)
+);
+
+CREATE INDEX idx_feature_flags_tenant ON feature_flags(tenant_id);
+CREATE INDEX idx_feature_flags_key ON feature_flags(feature_key);
+CREATE INDEX idx_feature_flags_enabled ON feature_flags(enabled);
+CREATE INDEX idx_feature_flags_environment ON feature_flags(environment);
+CREATE INDEX idx_feature_flags_active ON feature_flags(active);
+
+-- =====================================================
+-- TENANT SETTINGS TABLE
+-- =====================================================
+CREATE TABLE IF NOT EXISTS tenant_settings (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    tenant_id UUID NOT NULL UNIQUE,
+    -- Rate Limiting
+    api_rate_limit_per_minute INTEGER DEFAULT 100,
+    api_rate_limit_per_hour INTEGER DEFAULT 5000,
+    api_rate_limit_per_day INTEGER DEFAULT 100000,
+    -- Security Policies
+    password_min_length INTEGER DEFAULT 12,
+    password_require_uppercase BOOLEAN DEFAULT TRUE,
+    password_require_lowercase BOOLEAN DEFAULT TRUE,
+    password_require_numbers BOOLEAN DEFAULT TRUE,
+    password_require_special_chars BOOLEAN DEFAULT TRUE,
+    password_expiry_days INTEGER DEFAULT 90,
+    mfa_enabled BOOLEAN DEFAULT TRUE,
+    mfa_required BOOLEAN DEFAULT FALSE,
+    session_timeout_minutes INTEGER DEFAULT 30,
+    max_login_attempts INTEGER DEFAULT 5,
+    account_lockout_duration_minutes INTEGER DEFAULT 30,
+    -- Circuit Breaker Configuration
+    circuit_breaker_enabled BOOLEAN DEFAULT TRUE,
+    circuit_breaker_failure_threshold INTEGER DEFAULT 5,
+    circuit_breaker_timeout_seconds INTEGER DEFAULT 30,
+    circuit_breaker_reset_timeout_seconds INTEGER DEFAULT 60,
+    -- Maintenance Windows
+    maintenance_mode_enabled BOOLEAN DEFAULT FALSE,
+    maintenance_start_time TIMESTAMP,
+    maintenance_end_time TIMESTAMP,
+    maintenance_message TEXT,
+    -- Audit and Logging
+    audit_enabled BOOLEAN DEFAULT TRUE,
+    audit_retention_days INTEGER DEFAULT 365,
+    log_level VARCHAR(20) DEFAULT 'INFO',
+    sensitive_data_masking_enabled BOOLEAN DEFAULT TRUE,
+    -- Data Retention
+    transaction_retention_days INTEGER DEFAULT 2555,
+    document_retention_days INTEGER DEFAULT 2555,
+    backup_enabled BOOLEAN DEFAULT TRUE,
+    backup_frequency_hours INTEGER DEFAULT 24,
+    -- Notification Settings
+    email_notifications_enabled BOOLEAN DEFAULT TRUE,
+    sms_notifications_enabled BOOLEAN DEFAULT TRUE,
+    push_notifications_enabled BOOLEAN DEFAULT TRUE,
+    webhook_notifications_enabled BOOLEAN DEFAULT TRUE,
+    -- Compliance
+    gdpr_enabled BOOLEAN DEFAULT FALSE,
+    pci_dss_enabled BOOLEAN DEFAULT FALSE,
+    data_residency_country VARCHAR(2),
+    metadata TEXT,
+    active BOOLEAN DEFAULT TRUE,
+    version BIGINT DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_tenant_settings_tenant FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE
+);
+
+CREATE INDEX idx_tenant_settings_tenant ON tenant_settings(tenant_id);
+CREATE INDEX idx_tenant_settings_maintenance ON tenant_settings(maintenance_mode_enabled);
+CREATE INDEX idx_tenant_settings_active ON tenant_settings(active);
+
+-- =====================================================
+-- WEBHOOK CONFIGS TABLE
+-- =====================================================
+CREATE TABLE IF NOT EXISTS webhook_configs (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    tenant_id UUID,
+    provider_id UUID,
+    webhook_name VARCHAR(100) NOT NULL,
+    webhook_url TEXT NOT NULL,
+    description TEXT,
+    event_types TEXT,
+    http_method VARCHAR(10) DEFAULT 'POST',
+    auth_type VARCHAR(50),
+    auth_header_name VARCHAR(100),
+    auth_header_value TEXT,
+    secret_key TEXT,
+    custom_headers TEXT,
+    timeout_seconds INTEGER DEFAULT 30,
+    retry_enabled BOOLEAN DEFAULT TRUE,
+    max_retry_attempts INTEGER DEFAULT 3,
+    retry_delay_seconds INTEGER DEFAULT 60,
+    retry_backoff_multiplier DECIMAL(3,1) DEFAULT 2.0,
+    enabled BOOLEAN DEFAULT TRUE,
+    metadata TEXT,
+    active BOOLEAN DEFAULT TRUE,
+    version BIGINT DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_webhook_config_tenant FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE,
+    CONSTRAINT fk_webhook_config_provider FOREIGN KEY (provider_id) REFERENCES providers(id) ON DELETE CASCADE
+);
+
+CREATE INDEX idx_webhook_configs_tenant ON webhook_configs(tenant_id);
+CREATE INDEX idx_webhook_configs_provider ON webhook_configs(provider_id);
+CREATE INDEX idx_webhook_configs_name ON webhook_configs(webhook_name);
+CREATE INDEX idx_webhook_configs_enabled ON webhook_configs(enabled);
+CREATE INDEX idx_webhook_configs_active ON webhook_configs(active);
+
+-- =====================================================
+-- CONFIGURATION AUDITS TABLE
+-- =====================================================
+CREATE TABLE IF NOT EXISTS configuration_audits (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    tenant_id UUID,
+    entity_type VARCHAR(100) NOT NULL,
+    entity_id UUID NOT NULL,
+    action VARCHAR(50) NOT NULL,
+    field_name VARCHAR(100),
+    old_value TEXT,
+    new_value TEXT,
+    changed_by_user_id UUID,
+    changed_by_username VARCHAR(255),
+    change_reason TEXT,
+    ip_address VARCHAR(50),
+    user_agent TEXT,
+    rollback_available BOOLEAN DEFAULT TRUE,
+    metadata TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_configuration_audit_tenant FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE
+);
+
+CREATE INDEX idx_configuration_audits_tenant ON configuration_audits(tenant_id);
+CREATE INDEX idx_configuration_audits_entity ON configuration_audits(entity_type, entity_id);
+CREATE INDEX idx_configuration_audits_user ON configuration_audits(changed_by_user_id);
+CREATE INDEX idx_configuration_audits_created ON configuration_audits(created_at);
+CREATE INDEX idx_configuration_audits_rollback ON configuration_audits(rollback_available);
+
+-- =====================================================
+-- ENVIRONMENT CONFIGS TABLE
+-- =====================================================
+CREATE TABLE IF NOT EXISTS environment_configs (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    tenant_id UUID,
+    environment_name VARCHAR(50) NOT NULL,
+    config_key VARCHAR(100) NOT NULL,
+    config_value TEXT NOT NULL,
+    config_type VARCHAR(50),
+    description TEXT,
+    is_secret BOOLEAN DEFAULT FALSE,
+    category VARCHAR(50),
+    metadata TEXT,
+    active BOOLEAN DEFAULT TRUE,
+    version BIGINT DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_environment_config_tenant FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE,
+    CONSTRAINT uq_environment_config UNIQUE (tenant_id, environment_name, config_key)
+);
+
+CREATE INDEX idx_environment_configs_tenant ON environment_configs(tenant_id);
+CREATE INDEX idx_environment_configs_environment ON environment_configs(environment_name);
+CREATE INDEX idx_environment_configs_key ON environment_configs(config_key);
+CREATE INDEX idx_environment_configs_category ON environment_configs(category);
+CREATE INDEX idx_environment_configs_active ON environment_configs(active);
+
+
+-- =====================================================================================================================
+-- Channel Configurations
+-- =====================================================================================================================
+
+-- Simplified channel_configs table with only essential fields
+-- Additional dynamic configuration is stored in channel_config_parameters table
+CREATE TABLE IF NOT EXISTS channel_configs (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    tenant_id UUID NOT NULL REFERENCES tenants(id),
+    channel_code VARCHAR(50) NOT NULL,
+    channel_name VARCHAR(100) NOT NULL,
+    description TEXT,
+    enabled BOOLEAN DEFAULT true,
+    priority INTEGER DEFAULT 1,
+    failover_channel_id UUID,
+    metadata TEXT,
+    active BOOLEAN DEFAULT true,
+    version BIGINT DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT uq_channel_config UNIQUE (tenant_id, channel_code)
+);
+
+CREATE INDEX idx_channel_configs_tenant ON channel_configs(tenant_id);
+CREATE INDEX idx_channel_configs_code ON channel_configs(channel_code);
+CREATE INDEX idx_channel_configs_enabled ON channel_configs(enabled);
+CREATE INDEX idx_channel_configs_active ON channel_configs(active);
+CREATE INDEX idx_channel_configs_priority ON channel_configs(priority);
+
+-- =====================================================================================================================
+-- Channel Configuration Parameters (Dynamic EAV Pattern)
+-- =====================================================================================================================
+
+-- Stores dynamic configuration parameters for channels
+-- Allows flexible, extensible configuration without schema changes
+CREATE TABLE IF NOT EXISTS channel_config_parameters (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    channel_config_id UUID NOT NULL REFERENCES channel_configs(id) ON DELETE CASCADE,
+    parameter_key VARCHAR(100) NOT NULL,
+    parameter_value TEXT,
+    parameter_type VARCHAR(50) NOT NULL, -- STRING, INTEGER, DECIMAL, BOOLEAN, JSON
+    description TEXT,
+    is_sensitive BOOLEAN DEFAULT false,
+    is_required BOOLEAN DEFAULT false,
+    validation_regex VARCHAR(500),
+    default_value TEXT,
+    category VARCHAR(50), -- SECURITY, LIMITS, FEATURES, AVAILABILITY, MONITORING, etc.
+    active BOOLEAN DEFAULT true,
+    version BIGINT DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT uq_channel_config_parameter UNIQUE (channel_config_id, parameter_key)
+);
+
+CREATE INDEX idx_channel_config_params_channel ON channel_config_parameters(channel_config_id);
+CREATE INDEX idx_channel_config_params_key ON channel_config_parameters(parameter_key);
+CREATE INDEX idx_channel_config_params_category ON channel_config_parameters(category);
+CREATE INDEX idx_channel_config_params_active ON channel_config_parameters(active);
 
