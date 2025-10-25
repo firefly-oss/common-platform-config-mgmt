@@ -18,7 +18,6 @@
 package com.firefly.common.config.interfaces.dtos;
 
 import com.firefly.core.utils.annotations.FilterableId;
-import com.firefly.core.utils.annotations.ValidDate;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
@@ -64,79 +63,54 @@ public class TenantDTO {
     @FilterableId
     @Schema(description = "ID of the tenant status")
     private UUID tenantStatusId;
-    
-    @Schema(description = "Tenant status information")
-    private TenantStatusDTO tenantStatus;
-    
+
     @FilterableId
-    @Schema(description = "ID of the country")
+    @Schema(description = "Country ID (UUID reference to country entity)")
     private UUID countryId;
-    
-    @Schema(description = "Region of the tenant", example = "North America")
-    private String region;
-    
+
     @Schema(description = "Timezone of the tenant", example = "America/New_York")
     private String timezone;
+
+    @Size(max = 3, message = "Currency code must be 3 characters")
+    @Schema(description = "Default currency code (ISO 4217)", example = "USD")
+    private String defaultCurrencyCode;
+
+    @Size(max = 10, message = "Language code must not exceed 10 characters")
+    @Schema(description = "Default language code (ISO 639-1)", example = "en-US")
+    private String defaultLanguageCode;
+
+    @Schema(description = "Business contact name", example = "John Doe")
+    private String businessContactName;
+
+    @Email(message = "Business contact email must be valid")
+    @Schema(description = "Business contact email", example = "business@acmebank.com")
+    private String businessContactEmail;
     
-    @Schema(description = "Currency code", example = "USD")
-    private String currencyCode;
-    
-    @Schema(description = "Language code", example = "en")
-    private String languageCode;
-    
-    @Schema(description = "Logo URL", example = "https://example.com/logo.png")
-    private String logoUrl;
-    
-    @Schema(description = "Primary brand color", example = "#FF5733")
-    private String primaryColor;
-    
-    @Schema(description = "Secondary brand color", example = "#33FF57")
-    private String secondaryColor;
-    
-    @Schema(description = "Contact name", example = "John Doe")
-    private String contactName;
-    
-    @Email(message = "Contact email must be valid")
-    @Schema(description = "Contact email", example = "contact@acmebank.com")
-    private String contactEmail;
-    
-    @Schema(description = "Contact phone", example = "+1-555-0100")
-    private String contactPhone;
-    
+    @Schema(description = "Business contact phone", example = "+1-555-0100")
+    private String businessContactPhone;
+
     @Schema(description = "Technical contact name", example = "Jane Smith")
     private String technicalContactName;
-    
+
     @Email(message = "Technical contact email must be valid")
     @Schema(description = "Technical contact email", example = "tech@acmebank.com")
     private String technicalContactEmail;
-    
+
     @Schema(description = "Technical contact phone", example = "+1-555-0101")
     private String technicalContactPhone;
-    
-    @Schema(description = "Maximum number of users allowed", example = "1000")
-    private Integer maxUsers;
-    
-    @Schema(description = "Maximum number of accounts allowed", example = "10000")
-    private Integer maxAccounts;
-    
-    @Schema(description = "Maximum transactions per day allowed", example = "50000")
-    private Integer maxTransactionsPerDay;
-    
+
     @Schema(description = "Subscription tier", example = "ENTERPRISE")
     private String subscriptionTier;
-    
-    @ValidDate
+
     @Schema(description = "Subscription start date")
     private LocalDateTime subscriptionStartDate;
-    
-    @ValidDate
+
     @Schema(description = "Subscription end date")
     private LocalDateTime subscriptionEndDate;
-    
+
     @Schema(description = "Whether the tenant is in trial mode", defaultValue = "false")
-    private Boolean trialMode;
-    
-    @ValidDate
+    private Boolean isTrial;
+
     @Schema(description = "Trial end date")
     private LocalDateTime trialEndDate;
     

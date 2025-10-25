@@ -18,7 +18,6 @@
 package com.firefly.common.config.interfaces.dtos;
 
 import com.firefly.core.utils.annotations.FilterableId;
-import com.firefly.core.utils.annotations.ValidDate;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
@@ -48,17 +47,11 @@ public class ProviderTenantDTO {
     @FilterableId
     @Schema(description = "ID of the provider")
     private UUID providerId;
-    
-    @Schema(description = "Provider information")
-    private ProviderDTO provider;
-    
+
     @NotNull(message = "Tenant ID is required")
     @FilterableId
     @Schema(description = "ID of the tenant")
     private UUID tenantId;
-    
-    @Schema(description = "Tenant information")
-    private TenantDTO tenant;
     
     @Schema(description = "Whether this is the primary provider for the tenant", defaultValue = "false")
     private Boolean isPrimary;
@@ -71,12 +64,10 @@ public class ProviderTenantDTO {
     
     @Schema(description = "Whether this provider is enabled for the tenant", defaultValue = "true")
     private Boolean enabled;
-    
-    @ValidDate
+
     @Schema(description = "Start date of the provider-tenant relationship")
     private LocalDateTime startDate;
-    
-    @ValidDate
+
     @Schema(description = "End date of the provider-tenant relationship")
     private LocalDateTime endDate;
     
