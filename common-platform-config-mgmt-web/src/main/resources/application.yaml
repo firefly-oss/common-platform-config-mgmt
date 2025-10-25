@@ -94,6 +94,14 @@ spring:
   config:
     activate:
       on-profile: dev
+  r2dbc:
+    url: r2dbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:firefly_config}?sslMode=${DB_SSL_MODE:disable}
+    username: ${DB_USERNAME:firefly}
+    password: ${DB_PASSWORD:firefly}
+  flyway:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:firefly_config}?sslMode=${DB_SSL_MODE:disable}
+    user: ${DB_USERNAME:firefly}
+    password: ${DB_PASSWORD:firefly}
 
 logging:
   level:
