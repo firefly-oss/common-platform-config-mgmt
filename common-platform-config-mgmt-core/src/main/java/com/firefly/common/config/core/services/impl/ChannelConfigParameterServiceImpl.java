@@ -22,9 +22,9 @@ import com.firefly.common.config.core.services.ChannelConfigParameterService;
 import com.firefly.common.config.interfaces.dtos.ChannelConfigParameterDTO;
 import com.firefly.common.config.models.entities.ChannelConfigParameter;
 import com.firefly.common.config.models.repositories.ChannelConfigParameterRepository;
-import com.firefly.core.utils.filter.FilterRequest;
-import com.firefly.core.utils.filter.FilterUtils;
-import com.firefly.core.utils.pagination.PaginationResponse;
+import com.firefly.common.core.filters.FilterRequest;
+import com.firefly.common.core.filters.FilterUtils;
+import com.firefly.common.core.queries.PaginationResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -54,11 +54,10 @@ public class ChannelConfigParameterServiceImpl implements ChannelConfigParameter
     @Override
     public Mono<PaginationResponse<ChannelConfigParameterDTO>> filter(FilterRequest<ChannelConfigParameterDTO> filterRequest) {
         log.debug("Filtering channel config parameters with request: {}", filterRequest);
-        return FilterUtils.filterWithPagination(
-                repository,
-                filterRequest,
+        return FilterUtils.createFilter(
+                ChannelConfigParameter.class,
                 mapper::toDTO
-        );
+        ).filter(filterRequest);
     }
 
     @Override

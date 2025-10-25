@@ -18,8 +18,8 @@
 package com.firefly.common.config.core.services;
 
 import com.firefly.common.config.interfaces.dtos.ChannelConfigParameterDTO;
-import com.firefly.core.utils.filter.FilterRequest;
-import com.firefly.core.utils.pagination.PaginationResponse;
+import com.firefly.common.core.filters.FilterRequest;
+import com.firefly.common.core.queries.PaginationResponse;
 import reactor.core.publisher.Mono;
 
 import java.util.UUID;
