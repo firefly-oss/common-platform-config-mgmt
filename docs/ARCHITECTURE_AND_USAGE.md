@@ -1,4 +1,4 @@
-# 📘 Architecture and Usage Guide - Firefly Config Management
+i # 📘 Architecture and Usage Guide - Firefly Config Management
 
 **Version:** 1.0.0  
 **Date:** 2025-10-25  
