@@ -38,12 +38,25 @@ import jakarta.validation.Valid;
 import java.util.UUID;
 
 /**
- * REST controller for managing provider-tenant relationships
+ * REST controller for managing Provider-Tenant Relationships in the Firefly core banking platform.
+ *
+ * <p>Provider-Tenant relationships define how tenants use external service providers. Each relationship
+ * includes configuration overrides, billing settings, priority for load balancing, failover configuration,
+ * circuit breaker settings, and usage metrics. This enables fine-grained control over provider integrations
+ * at the tenant level.</p>
  */
 @RestController
 @RequestMapping("/api/v1/provider-tenants")
 @RequiredArgsConstructor
-@Tag(name = "Provider-Tenant Relationships", description = "API for managing provider-tenant relationships")
+@Tag(
+    name = "Provider-Tenant Relationships",
+    description = "Manage provider integration configurations for specific tenants. " +
+                  "Provider-Tenant relationships define how a tenant uses an external service provider, including " +
+                  "tenant-specific configuration overrides, billing models (transaction-based, volume-based, flat-fee), " +
+                  "priority for load balancing, failover settings, circuit breaker thresholds, transaction limits, " +
+                  "and usage tracking. Use these APIs to associate providers with tenants, configure relationship settings, " +
+                  "monitor usage metrics, and manage provider failover strategies."
+)
 public class ProviderTenantController {
 
     private final ProviderTenantService providerTenantService;
@@ -51,15 +64,32 @@ public class ProviderTenantController {
     @GetMapping("/{id}")
     @Operation(
             operationId = "getProviderTenantById",
-            summary = "Get a provider-tenant relationship by ID",
-            description = "Returns a provider-tenant relationship based on the ID",
+            summary = "Retrieve provider-tenant relationship by ID",
+            description = "Fetches complete provider-tenant relationship configuration including priority, billing settings " +
+                         "(cost per transaction, monthly fees, transaction limits), configuration overrides, failover settings, " +
+                         "circuit breaker configuration, approval details, and usage metrics (total requests, failures, average response time).",
             responses = {
-                    @ApiResponse(responseCode = "200", description = "Successful operation", content = @Content(schema = @Schema(implementation = ProviderTenantDTO.class))),
-                    @ApiResponse(responseCode = "404", description = "Provider-tenant relationship not found")
+                    @ApiResponse(
+                        responseCode = "200",
+                        description = "Provider-tenant relationship successfully retrieved",
+                        content = @Content(schema = @Schema(implementation = ProviderTenantDTO.class))
+                    ),
+                    @ApiResponse(
+                        responseCode = "404",
+                        description = "Provider-tenant relationship not found - The specified relationship ID does not exist"
+                    ),
+                    @ApiResponse(
+                        responseCode = "403",
+                        description = "Access denied - Insufficient permissions to view this relationship"
+                    )
             }
     )
     public ResponseEntity<Mono<ProviderTenantDTO>> getById(
-            @Parameter(description = "ID of the provider-tenant relationship to retrieve", required = true)
+            @Parameter(
+                description = "Unique identifier (UUID) of the provider-tenant relationship to retrieve",
+                required = true,
+                example = "123e4567-e89b-12d3-a456-426614174000"
+            )
             @PathVariable UUID id) {
         return ResponseEntity.ok(providerTenantService.getById(id));
     }
@@ -67,10 +97,20 @@ public class ProviderTenantController {
     @PostMapping("/filter")
     @Operation(
             operationId = "filterProviderTenants",
-            summary = "Filter provider-tenant relationships",
-            description = "Returns a filtered list of provider-tenant relationships based on criteria",
+            summary = "Search and filter provider-tenant relationships",
+            description = "Performs advanced filtering and pagination of provider-tenant relationships. Supports filtering by " +
+                         "tenant, provider, relationship type (STANDARD, PREMIUM, TRIAL), enabled status, billing model, " +
+                         "and date ranges. Results include usage metrics for monitoring provider performance per tenant. " +
+                         "Useful for tenant management dashboards, billing reports, and provider usage analysis.",
             responses = {
-                    @ApiResponse(responseCode = "200", description = "Successful operation")
+                    @ApiResponse(
+                        responseCode = "200",
+                        description = "Filtered provider-tenant relationships successfully retrieved with pagination metadata"
+                    ),
+                    @ApiResponse(
+                        responseCode = "400",
+                        description = "Invalid filter criteria - Check filter syntax and field names"
+                    )
             }
     )
     public ResponseEntity<Mono<PaginationResponse<ProviderTenantDTO>>> filter(

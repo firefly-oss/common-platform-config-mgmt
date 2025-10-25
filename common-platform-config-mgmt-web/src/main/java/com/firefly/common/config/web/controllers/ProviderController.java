@@ -38,51 +38,81 @@ import jakarta.validation.Valid;
 import java.util.UUID;
 
 /**
- * REST controller for managing providers and their nested resources
+ * REST controller for managing External Service Providers in the Firefly core banking platform.
+ *
+ * <p>Providers represent external services that Firefly integrates with to deliver banking functionality.
+ * This includes payment gateways (Stripe, PayPal), KYC/AML providers (Onfido, Jumio), card issuers,
+ * fraud detection services, and other third-party integrations.</p>
+ *
+ * <p>This controller provides comprehensive CRUD operations for provider management, including
+ * configuration, health monitoring, SLA tracking, and contract management.</p>
  */
 @RestController
 @RequestMapping("/api/v1/providers")
 @RequiredArgsConstructor
-@Tag(name = "Providers", description = "API for managing providers")
+@Tag(
+    name = "Provider Management",
+    description = "Manage external service provider integrations for Firefly core banking. " +
+                  "Providers are third-party services that Firefly integrates with to deliver banking capabilities " +
+                  "such as payment processing, KYC/AML verification, card issuing, fraud detection, and more. " +
+                  "Use these APIs to register providers, configure API endpoints, manage credentials, track SLAs, " +
+                  "monitor health status, and maintain provider contracts and certifications."
+)
 public class ProviderController {
 
     private final ProviderService providerService;
 
-    /**
-     * GET /api/v1/providers/:id : Get a provider by ID
-     *
-     * @param id the ID of the provider to retrieve
-     * @return the ResponseEntity with status 200 (OK) and the provider in the body, or status 404 (Not Found)
-     */
     @GetMapping("/{id}")
     @Operation(
             operationId = "getProviderById",
-            summary = "Get a provider by ID",
-            description = "Returns a provider based on the ID",
+            summary = "Retrieve provider by ID",
+            description = "Fetches complete provider information including API configuration (production/sandbox URLs), " +
+                         "supported capabilities, SLA commitments, compliance certifications, contract details, " +
+                         "contact information, and current health status. Returns 404 if provider does not exist.",
             responses = {
-                    @ApiResponse(responseCode = "200", description = "Successful operation", content = @Content(schema = @Schema(implementation = ProviderDTO.class))),
-                    @ApiResponse(responseCode = "404", description = "Provider not found")
+                    @ApiResponse(
+                        responseCode = "200",
+                        description = "Provider successfully retrieved",
+                        content = @Content(schema = @Schema(implementation = ProviderDTO.class))
+                    ),
+                    @ApiResponse(
+                        responseCode = "404",
+                        description = "Provider not found - The specified provider ID does not exist or has been deleted"
+                    ),
+                    @ApiResponse(
+                        responseCode = "403",
+                        description = "Access denied - Insufficient permissions to view this provider"
+                    )
             }
     )
     public ResponseEntity<Mono<ProviderDTO>> getById(
-            @Parameter(description = "ID of the provider to retrieve", required = true)
+            @Parameter(
+                description = "Unique identifier (UUID) of the provider to retrieve",
+                required = true,
+                example = "123e4567-e89b-12d3-a456-426614174000"
+            )
             @PathVariable UUID id) {
         return ResponseEntity.ok(providerService.getById(id));
     }
 
-    /**
-     * POST /api/v1/providers/filter : Filter providers
-     *
-     * @param filterRequest the filter criteria
-     * @return the ResponseEntity with status 200 (OK) and the list of providers in the body
-     */
     @PostMapping("/filter")
     @Operation(
             operationId = "filterProviders",
-            summary = "Filter providers",
-            description = "Returns a filtered list of providers based on criteria",
+            summary = "Search and filter providers",
+            description = "Performs advanced filtering and pagination of providers based on multiple criteria. " +
+                         "Supports filtering by provider type (PAYMENT_GATEWAY, KYC, CARD_ISSUING, etc.), status, " +
+                         "supported countries/currencies, certification level, health status, and custom metadata. " +
+                         "Results are paginated and can be sorted by any field. Useful for provider discovery, " +
+                         "administrative dashboards, and integration planning.",
             responses = {
-                    @ApiResponse(responseCode = "200", description = "Successful operation")
+                    @ApiResponse(
+                        responseCode = "200",
+                        description = "Filtered provider list successfully retrieved with pagination metadata"
+                    ),
+                    @ApiResponse(
+                        responseCode = "400",
+                        description = "Invalid filter criteria - Check filter syntax and field names"
+                    )
             }
     )
     public ResponseEntity<Mono<PaginationResponse<ProviderDTO>>> filter(
@@ -90,52 +120,83 @@ public class ProviderController {
         return ResponseEntity.ok(providerService.filter(filterRequest));
     }
 
-    /**
-     * POST /api/v1/providers : Create a new provider
-     *
-     * @param providerDTO the provider to create
-     * @return the ResponseEntity with status 201 (Created) and the new provider in the body
-     */
     @PostMapping
     @Operation(
             operationId = "createProvider",
-            summary = "Create a new provider",
-            description = "Creates a new provider and returns it",
+            summary = "Register a new provider",
+            description = "Registers a new external service provider in the Firefly platform. Required fields include unique code, " +
+                         "name, provider type (PAYMENT_GATEWAY, KYC, CARD_ISSUING, etc.), and status. Configure API endpoints " +
+                         "(production/sandbox URLs), supported capabilities (countries, currencies, languages), SLA commitments, " +
+                         "compliance certifications, contract details, and contact information. Health monitoring can be enabled " +
+                         "by providing a health check URL.",
             responses = {
-                    @ApiResponse(responseCode = "201", description = "Provider created", content = @Content(schema = @Schema(implementation = ProviderDTO.class))),
-                    @ApiResponse(responseCode = "400", description = "Invalid input")
+                    @ApiResponse(
+                        responseCode = "201",
+                        description = "Provider successfully registered - Returns the created provider with generated ID and timestamps",
+                        content = @Content(schema = @Schema(implementation = ProviderDTO.class))
+                    ),
+                    @ApiResponse(
+                        responseCode = "400",
+                        description = "Invalid input - Validation errors in provider data (e.g., duplicate code, invalid URLs)"
+                    ),
+                    @ApiResponse(
+                        responseCode = "409",
+                        description = "Conflict - A provider with the specified code already exists"
+                    )
             }
     )
     public ResponseEntity<Mono<ProviderDTO>> create(
-            @Parameter(description = "Provider to create", required = true)
+            @Parameter(
+                description = "Provider data to register. Must include unique code, name, provider type ID, and status ID. " +
+                             "Optionally include API URLs, capabilities, SLA settings, certifications, and contract details.",
+                required = true
+            )
             @Valid @RequestBody ProviderDTO providerDTO) {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(providerService.create(providerDTO));
     }
 
-    /**
-     * PUT /api/v1/providers/:id : Update an existing provider
-     *
-     * @param id the ID of the provider to update
-     * @param providerDTO the provider to update
-     * @return the ResponseEntity with status 200 (OK) and the updated provider in the body, or status 404 (Not Found)
-     */
     @PutMapping("/{id}")
     @Operation(
             operationId = "updateProvider",
-            summary = "Update an existing provider",
-            description = "Updates an existing provider and returns it",
+            summary = "Update existing provider",
+            description = "Updates provider configuration including API endpoints, capabilities, SLA commitments, certifications, " +
+                         "contract details, contact information, and health monitoring settings. Uses optimistic locking via version field " +
+                         "to prevent concurrent modification conflicts. Changing provider status may affect all tenant relationships " +
+                         "using this provider. Health status and metrics are typically updated automatically by monitoring systems.",
             responses = {
-                    @ApiResponse(responseCode = "200", description = "Provider updated", content = @Content(schema = @Schema(implementation = ProviderDTO.class))),
-                    @ApiResponse(responseCode = "400", description = "Invalid input"),
-                    @ApiResponse(responseCode = "404", description = "Provider not found")
+                    @ApiResponse(
+                        responseCode = "200",
+                        description = "Provider successfully updated - Returns updated provider with new version number",
+                        content = @Content(schema = @Schema(implementation = ProviderDTO.class))
+                    ),
+                    @ApiResponse(
+                        responseCode = "400",
+                        description = "Invalid input - Validation errors or business rule violations"
+                    ),
+                    @ApiResponse(
+                        responseCode = "404",
+                        description = "Provider not found - The specified provider ID does not exist"
+                    ),
+                    @ApiResponse(
+                        responseCode = "409",
+                        description = "Conflict - Version mismatch due to concurrent modification"
+                    )
             }
     )
     public ResponseEntity<Mono<ProviderDTO>> update(
-            @Parameter(description = "ID of the provider to update", required = true)
+            @Parameter(
+                description = "Unique identifier (UUID) of the provider to update",
+                required = true,
+                example = "123e4567-e89b-12d3-a456-426614174000"
+            )
             @PathVariable UUID id,
-            @Parameter(description = "Provider to update", required = true)
+            @Parameter(
+                description = "Updated provider data. Include version field for optimistic locking. " +
+                             "ID in body must match path parameter.",
+                required = true
+            )
             @Valid @RequestBody ProviderDTO providerDTO) {
         return ResponseEntity.ok(providerService.update(id, providerDTO));
     }
