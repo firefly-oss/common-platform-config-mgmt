@@ -52,22 +52,22 @@ Each tenant has:
 Think of a tenant as a **virtual bank** within the Firefly ecosystem:
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                    Firefly Platform                         │
-│                                                             │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐     │
-│  │  Tenant A    │  │  Tenant B    │  │  Tenant C    │     │
-│  │  (Spain)     │  │  (France)    │  │  (Germany)   │     │
-│  │              │  │              │  │              │     │
-│  │ • Customers  │  │ • Customers  │  │ • Customers  │     │
-│  │ • Accounts   │  │ • Accounts   │  │ • Accounts   │     │
-│  │ • Config     │  │ • Config     │  │ • Config     │     │
-│  │ • Branding   │  │ • Branding   │  │ • Branding   │     │
-│  │ • Providers  │  │ • Providers  │  │ • Providers  │     │
-│  └──────────────┘  └──────────────┘  └──────────────┘     │
-│                                                             │
-│  Shared Infrastructure: Compute, Storage, Network           │
-└─────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────┐
+│                    Firefly Platform                     │
+│                                                         │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐   │
+│  │  Tenant A    │  │  Tenant B    │  │  Tenant C    │   │
+│  │  (Spain)     │  │  (France)    │  │  (Germany)   │   │
+│  │              │  │              │  │              │   │
+│  │ • Customers  │  │ • Customers  │  │ • Customers  │   │
+│  │ • Accounts   │  │ • Accounts   │  │ • Accounts   │   │
+│  │ • Config     │  │ • Config     │  │ • Config     │   │
+│  │ • Branding   │  │ • Branding   │  │ • Branding   │   │
+│  │ • Providers  │  │ • Providers  │  │ • Providers  │   │
+│  └──────────────┘  └──────────────┘  └──────────────┘   │
+│                                                         │
+│  Shared Infrastructure: Compute, Storage, Network       │
+└─────────────────────────────────────────────────────────┘
 ```
 
 ### Tenant Components
@@ -405,7 +405,7 @@ public class TenantValidationFilter implements WebFilter {
         String tenantId = exchange.getRequest()
             .getHeaders()
             .getFirst("X-Tenant-ID");
-        
+
         return validateTenant(tenantId)
             .flatMap(tenant -> {
                 exchange.getAttributes().put("tenant", tenant);
@@ -415,4 +415,496 @@ public class TenantValidationFilter implements WebFilter {
 }
 ```
 
+### Isolation Best Practices
+
+#### ✅ DO:
+
+1. **Always Filter by Tenant ID**
+   ```java
+   // Correct
+   accountRepository.findByIdAndTenantId(accountId, tenantId);
+
+   // Wrong - could expose other tenants' data
+   accountRepository.findById(accountId);
+   ```
+
+2. **Validate Tenant Context in All Operations**
+   ```java
+   public Mono<Account> createAccount(Account account) {
+       return getCurrentTenantId()
+           .flatMap(tenantId -> {
+               account.setTenantId(tenantId);
+               return accountRepository.save(account);
+           });
+   }
+   ```
+
+3. **Use Tenant-Aware Logging**
+   ```java
+   log.info("Creating account for tenant: {}, account: {}",
+       tenantId, accountId);
+   ```
+
+4. **Implement Tenant-Specific Rate Limiting**
+   ```java
+   @RateLimiter(
+       name = "tenant-api",
+       keyResolver = TenantKeyResolver.class
+   )
+   public Mono<Response> processRequest(Request request) {
+       // Rate limited per tenant
+   }
+   ```
+
+#### ❌ DON'T:
+
+1. **Never Query Across Tenants**
+   ```java
+   // Wrong - exposes all tenants' data
+   SELECT * FROM accounts;
+
+   // Correct - filtered by tenant
+   SELECT * FROM accounts WHERE tenant_id = :tenantId;
+   ```
+
+2. **Don't Share Sensitive Data**
+   - Never expose one tenant's data to another
+   - Implement strict access controls
+   - Audit all cross-tenant access attempts
+
+3. **Don't Hardcode Tenant Logic**
+   - Use configuration, not code
+   - Keep business logic generic and configurable
+
+---
+
+## Tenant Statuses
+
+### Available Statuses
+
+| Status | Code | Description | Allowed Operations |
+|--------|------|-------------|-------------------|
+| **TRIAL** | `TRIAL` | Evaluation period with limited features | All operations, with feature limits |
+| **ACTIVE** | `ACTIVE` | Fully operational, serving customers | All operations |
+| **SUSPENDED** | `SUSPENDED` | Temporarily disabled (payment issues, compliance) | Read-only, no transactions |
+| **MAINTENANCE** | `MAINTENANCE` | Undergoing maintenance or upgrades | Read-only, no new customers |
+| **INACTIVE** | `INACTIVE` | Not currently in use, data retained | Read-only |
+| **DELETED** | `DELETED` | Soft-deleted, pending permanent removal | No operations |
+
+### Status Management
+
+**Get All Statuses**: `GET /api/v1/tenant-statuses`
+
+**Response**:
+```json
+[
+  {
+    "id": "550e8400-e29b-41d4-a716-446655440001",
+    "code": "ACTIVE",
+    "name": "Active",
+    "description": "Tenant is fully operational"
+  },
+  {
+    "id": "550e8400-e29b-41d4-a716-446655440002",
+    "code": "SUSPENDED",
+    "name": "Suspended",
+    "description": "Tenant is temporarily suspended"
+  }
+]
+```
+
+### Changing Tenant Status
+
+**Endpoint**: `PUT /api/v1/tenants/{id}/status`
+
+**Request Body**:
+```json
+{
+  "statusId": "550e8400-e29b-41d4-a716-446655440002",
+  "reason": "Payment failure - subscription expired",
+  "effectiveDate": "2025-01-15T00:00:00Z"
+}
+```
+
+**Status Change Validation**:
+```java
+public Mono<Tenant> changeStatus(UUID tenantId, UUID newStatusId, String reason) {
+    return tenantRepository.findById(tenantId)
+        .zipWith(tenantStatusRepository.findById(newStatusId))
+        .flatMap(tuple -> {
+            Tenant tenant = tuple.getT1();
+            TenantStatus newStatus = tuple.getT2();
+
+            // Validate status transition
+            if (!isValidTransition(tenant.getStatusId(), newStatusId)) {
+                return Mono.error(new InvalidStatusTransitionException());
+            }
+
+            // Update status
+            tenant.setTenantStatusId(newStatusId);
+
+            // Audit log
+            auditLog.record(
+                tenantId: tenantId,
+                action: "STATUS_CHANGE",
+                oldStatus: tenant.getStatusId(),
+                newStatus: newStatusId,
+                reason: reason
+            );
+
+            return tenantRepository.save(tenant);
+        });
+}
+```
+
+---
+
+## API Reference
+
+### Tenant Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/api/v1/tenants` | List all tenants (paginated) |
+| `GET` | `/api/v1/tenants/{id}` | Get tenant by ID |
+| `GET` | `/api/v1/tenants/code/{code}` | Get tenant by code |
+| `POST` | `/api/v1/tenants` | Create new tenant |
+| `PUT` | `/api/v1/tenants/{id}` | Update tenant |
+| `DELETE` | `/api/v1/tenants/{id}` | Delete tenant (soft delete) |
+| `PUT` | `/api/v1/tenants/{id}/status` | Change tenant status |
+
+### Tenant Status Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/api/v1/tenant-statuses` | List all tenant statuses |
+| `GET` | `/api/v1/tenant-statuses/{id}` | Get status by ID |
+| `GET` | `/api/v1/tenant-statuses/code/{code}` | Get status by code |
+
+### Tenant Branding Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/api/v1/tenant-brandings/tenant/{tenantId}` | Get branding for tenant |
+| `POST` | `/api/v1/tenant-brandings` | Create tenant branding |
+| `PUT` | `/api/v1/tenant-brandings/{id}` | Update tenant branding |
+| `DELETE` | `/api/v1/tenant-brandings/{id}` | Delete tenant branding |
+
+---
+
+## Best Practices
+
+### Tenant Creation
+
+#### ✅ DO:
+
+1. **Validate Unique Tenant Code**
+   ```java
+   public Mono<Tenant> createTenant(TenantDTO dto) {
+       return tenantRepository.findByCode(dto.getCode())
+           .flatMap(existing ->
+               Mono.error(new TenantCodeAlreadyExistsException())
+           )
+           .switchIfEmpty(
+               Mono.defer(() -> {
+                   Tenant tenant = mapper.toEntity(dto);
+                   return tenantRepository.save(tenant);
+               })
+           );
+   }
+   ```
+
+2. **Initialize Default Configuration**
+   ```java
+   public Mono<Tenant> createTenant(TenantDTO dto) {
+       return tenantRepository.save(mapper.toEntity(dto))
+           .flatMap(tenant ->
+               initializeDefaultConfiguration(tenant)
+                   .thenReturn(tenant)
+           );
+   }
+
+   private Mono<Void> initializeDefaultConfiguration(Tenant tenant) {
+       return Mono.when(
+           createDefaultBranding(tenant),
+           createDefaultParameters(tenant),
+           assignDefaultProviders(tenant)
+       );
+   }
+   ```
+
+3. **Set Up Monitoring and Alerting**
+   ```java
+   public Mono<Tenant> createTenant(TenantDTO dto) {
+       return tenantRepository.save(mapper.toEntity(dto))
+           .flatMap(tenant ->
+               setupMonitoring(tenant)
+                   .thenReturn(tenant)
+           );
+   }
+   ```
+
+4. **Create Audit Trail**
+   ```java
+   public Mono<Tenant> createTenant(TenantDTO dto) {
+       return tenantRepository.save(mapper.toEntity(dto))
+           .doOnSuccess(tenant ->
+               auditLog.record(
+                   action: "TENANT_CREATED",
+                   tenantId: tenant.getId(),
+                   createdBy: getCurrentUser(),
+                   details: dto
+               )
+           );
+   }
+   ```
+
+#### ❌ DON'T:
+
+1. **Don't Create Tenants Without Validation**
+   - Always validate tenant code uniqueness
+   - Validate country, timezone, currency, language
+   - Validate contact information
+
+2. **Don't Skip Default Configuration**
+   - Always initialize default branding
+   - Set up default parameters
+   - Assign default providers
+
+3. **Don't Forget Audit Trails**
+   - Log all tenant creation events
+   - Track who created the tenant and when
+   - Store initial configuration
+
+### Tenant Updates
+
+#### ✅ DO:
+
+1. **Validate Changes Before Applying**
+   ```java
+   public Mono<Tenant> updateTenant(UUID id, TenantDTO dto) {
+       return tenantRepository.findById(id)
+           .flatMap(existing ->
+               validateChanges(existing, dto)
+                   .then(applyChanges(existing, dto))
+           );
+   }
+   ```
+
+2. **Track Configuration Changes**
+   ```java
+   public Mono<Tenant> updateTenant(UUID id, TenantDTO dto) {
+       return tenantRepository.findById(id)
+           .flatMap(existing -> {
+               Map<String, Object> changes = detectChanges(existing, dto);
+               return tenantRepository.save(applyChanges(existing, dto))
+                   .doOnSuccess(updated ->
+                       auditLog.record(
+                           action: "TENANT_UPDATED",
+                           tenantId: id,
+                           changes: changes
+                       )
+                   );
+           });
+   }
+   ```
+
+3. **Notify Affected Systems**
+   ```java
+   public Mono<Tenant> updateTenant(UUID id, TenantDTO dto) {
+       return tenantRepository.save(applyChanges(existing, dto))
+           .flatMap(updated ->
+               notifyConfigurationChange(updated)
+                   .thenReturn(updated)
+           );
+   }
+   ```
+
+#### ❌ DON'T:
+
+1. **Don't Allow Changing Immutable Fields**
+   - Tenant ID cannot be changed
+   - Tenant code should not be changed (or require special approval)
+   - Creation timestamp cannot be changed
+
+2. **Don't Update Without Validation**
+   - Validate all field changes
+   - Check for conflicts
+   - Verify user permissions
+
+### Tenant Deletion
+
+#### ✅ DO:
+
+1. **Implement Soft Delete**
+   ```java
+   public Mono<Void> deleteTenant(UUID id) {
+       return tenantRepository.findById(id)
+           .flatMap(tenant -> {
+               tenant.setTenantStatusId(DELETED_STATUS_ID);
+               tenant.setDeletedAt(Instant.now());
+               return tenantRepository.save(tenant);
+           })
+           .then();
+   }
+   ```
+
+2. **Check for Active Customers**
+   ```java
+   public Mono<Void> deleteTenant(UUID id) {
+       return customerRepository.countByTenantId(id)
+           .flatMap(count -> {
+               if (count > 0) {
+                   return Mono.error(
+                       new TenantHasActiveCustomersException(count)
+                   );
+               }
+               return deleteTenant(id);
+           });
+   }
+   ```
+
+3. **Archive Data Before Deletion**
+   ```java
+   public Mono<Void> deleteTenant(UUID id) {
+       return archiveTenantData(id)
+           .then(deleteTenant(id));
+   }
+   ```
+
+4. **Notify Stakeholders**
+   ```java
+   public Mono<Void> deleteTenant(UUID id) {
+       return tenantRepository.findById(id)
+           .flatMap(tenant ->
+               notifyDeletion(tenant)
+                   .then(deleteTenant(id))
+           );
+   }
+   ```
+
+#### ❌ DON'T:
+
+1. **Don't Hard Delete Immediately**
+   - Use soft delete
+   - Retain data for compliance period
+   - Archive before permanent deletion
+
+2. **Don't Delete Without Checks**
+   - Check for active customers
+   - Check for pending transactions
+   - Check for active subscriptions
+
+---
+
+## Use Cases
+
+### Use Case 1: Multi-Brand Bank
+
+**Scenario**: A bank operates three brands targeting different customer segments.
+
+**Implementation**:
+
+```yaml
+Tenant 1: "PremiumBank"
+├── Target: High-net-worth individuals
+├── Branding: Luxury, sophisticated
+├── Products: Premium accounts, wealth management
+└── Providers: Enhanced KYC, international payments
+
+Tenant 2: "StandardBank"
+├── Target: General population
+├── Branding: Professional, trustworthy
+├── Products: Standard accounts, loans
+└── Providers: Standard KYC, domestic payments
+
+Tenant 3: "YouthBank"
+├── Target: Students and young professionals
+├── Branding: Modern, vibrant
+├── Products: No-fee accounts, budgeting tools
+└── Providers: Fast KYC, instant payments
+```
+
+**Benefits**:
+- ✅ Separate branding per segment
+- ✅ Tailored products and pricing
+- ✅ Shared infrastructure (60% cost reduction)
+- ✅ Independent operations and reporting
+
+### Use Case 2: Geographic Expansion
+
+**Scenario**: A neobank expands from Spain to France and Germany.
+
+**Implementation**:
+
+```yaml
+Tenant: "SpainBranch"
+├── Country: Spain
+├── Currency: EUR
+├── Language: Spanish
+├── Providers: Iberpay, Spanish KYC
+└── Compliance: Bank of Spain
+
+Tenant: "FranceBranch"
+├── Country: France
+├── Currency: EUR
+├── Language: French
+├── Providers: SEPA, French KYC
+└── Compliance: ACPR
+
+Tenant: "GermanyBranch"
+├── Country: Germany
+├── Currency: EUR
+├── Language: German
+├── Providers: SEPA, German KYC
+└── Compliance: BaFin
+```
+
+**Benefits**:
+- ✅ Local compliance per country
+- ✅ Localized user experience
+- ✅ Region-specific providers
+- ✅ Centralized management
+
+### Use Case 3: White-Label Banking
+
+**Scenario**: A retail company offers banking to customers under its own brand.
+
+**Implementation**:
+
+```yaml
+Tenant: "RetailBankingBrand"
+├── Branding: Retail company's brand
+├── Providers: BaaS provider (Treezor)
+├── Products: Checking, savings, co-branded cards
+├── Integration: Retail loyalty program
+└── Revenue: Interchange fees, interest income
+```
+
+**Benefits**:
+- ✅ Launch in 3 months
+- ✅ No banking infrastructure needed
+- ✅ Complete brand control
+- ✅ New revenue stream
+
+---
+
+## Summary
+
+Tenants are the foundation of Firefly's multi-tenant architecture, enabling:
+
+- ✅ **Complete Isolation**: Data, configuration, and operations
+- ✅ **Flexible Deployment**: Multi-brand, geographic, white-label
+- ✅ **Cost Efficiency**: Shared infrastructure, independent customization
+- ✅ **Rapid Launch**: New tenants in days, not months
+- ✅ **Compliance**: Region-specific regulatory requirements
+
+For more information, see:
+- [Provider Management](./providers.md)
+- [Parameter Configuration](./parameters.md)
+- [Main Documentation](./README.md)
+
+---
+
+**[⬆ Back to Top](#tenant-management)**
 
