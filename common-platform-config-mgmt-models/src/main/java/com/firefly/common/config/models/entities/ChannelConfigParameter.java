@@ -60,6 +60,9 @@ public class ChannelConfigParameter {
     @Column("channel_config_id")
     private UUID channelConfigId;
 
+    @Column("channel_code")
+    private String channelCode; // e.g., "WEB_BANKING", "MOBILE_BANKING", "ATM"
+
     @Column("parameter_key")
     private String parameterKey; // e.g., "max_transaction_amount", "session_timeout_minutes"
 

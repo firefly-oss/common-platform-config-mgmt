@@ -51,6 +51,11 @@ public class ChannelConfigParameterDTO {
     @Schema(description = "Channel config ID", required = true)
     private UUID channelConfigId;
 
+    @NotBlank(message = "Channel code is required")
+    @Size(max = 50, message = "Channel code must not exceed 50 characters")
+    @Schema(description = "Channel code (WEB_BANKING, MOBILE_BANKING, ATM, BRANCH, CALL_CENTER, API, OPEN_BANKING)", required = true, example = "WEB_BANKING")
+    private String channelCode;
+
     @NotBlank(message = "Parameter key is required")
     @Size(max = 100, message = "Parameter key must not exceed 100 characters")
     @Schema(description = "Parameter key", required = true, example = "max_transaction_amount")

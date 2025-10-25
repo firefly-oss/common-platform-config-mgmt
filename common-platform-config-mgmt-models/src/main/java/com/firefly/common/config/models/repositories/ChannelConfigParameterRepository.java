@@ -70,5 +70,25 @@ public interface ChannelConfigParameterRepository extends R2dbcRepository<Channe
      * Find all sensitive parameters for a specific channel config
      */
     Flux<ChannelConfigParameter> findByChannelConfigIdAndIsSensitiveTrue(UUID channelConfigId);
+
+    /**
+     * Find all parameters for a specific channel code
+     */
+    Flux<ChannelConfigParameter> findByChannelCode(String channelCode);
+
+    /**
+     * Find all active parameters for a specific channel code
+     */
+    Flux<ChannelConfigParameter> findByChannelCodeAndActiveTrue(String channelCode);
+
+    /**
+     * Find a specific parameter by channel code and parameter key
+     */
+    Mono<ChannelConfigParameter> findByChannelCodeAndParameterKey(String channelCode, String parameterKey);
+
+    /**
+     * Find all parameters by channel code and category
+     */
+    Flux<ChannelConfigParameter> findByChannelCodeAndCategory(String channelCode, String category);
 }
 
