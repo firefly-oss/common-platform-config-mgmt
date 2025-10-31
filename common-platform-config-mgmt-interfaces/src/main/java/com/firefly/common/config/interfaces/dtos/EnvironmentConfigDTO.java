@@ -57,9 +57,11 @@ public class EnvironmentConfigDTO {
     @Schema(description = "Configuration key", example = "database.pool.size")
     private String configKey;
 
-    @NotBlank(message = "Config value is required")
-    @Schema(description = "Configuration value", example = "50")
+    @Schema(description = "Configuration value (only for non-secret configs). Required when isSecret=false", example = "50")
     private String configValue;
+
+    @Schema(description = "Reference ID to credential stored in security-vault (only for secret configs). Required when isSecret=true", example = "vault-cred-uuid-67890")
+    private String credentialVaultId;
 
     @Schema(description = "Configuration type (STRING, INTEGER, BOOLEAN, JSON)", example = "INTEGER")
     private String configType;
@@ -67,7 +69,7 @@ public class EnvironmentConfigDTO {
     @Schema(description = "Configuration description")
     private String description;
 
-    @Schema(description = "Whether the value is a secret", example = "false")
+    @Schema(description = "Whether the value is a secret (if true, use credentialVaultId instead of configValue)", example = "false")
     private Boolean isSecret;
 
     @Schema(description = "Configuration category", example = "database")

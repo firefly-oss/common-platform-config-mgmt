@@ -57,6 +57,9 @@ public class EnvironmentConfig {
     @Column("config_value")
     private String configValue;
 
+    @Column("credential_vault_id")
+    private String credentialVaultId;
+
     @Column("config_type")
     private String configType;
 

@@ -61,6 +61,12 @@ paths:
             type: string
             format: uuid
           example: 123e4567-e89b-12d3-a456-426614174000
+        - name: X-Idempotency-Key
+          in: header
+          description: Unique key for idempotent requests. If provided, ensures that identical requests with the same key will only be processed once.
+          required: false
+          schema:
+            type: string
       responses:
         '200':
           description: Webhook configuration successfully retrieved
@@ -144,6 +150,12 @@ paths:
           schema:
             type: string
             format: uuid
+        - name: X-Idempotency-Key
+          in: header
+          description: Unique key for idempotent requests. If provided, ensures that identical requests with the same key will only be processed once.
+          required: false
+          schema:
+            type: string
       responses:
         '204':
           description: Webhook configuration deleted
@@ -171,6 +183,12 @@ paths:
           schema:
             type: string
             format: uuid
+        - name: X-Idempotency-Key
+          in: header
+          description: Unique key for idempotent requests. If provided, ensures that identical requests with the same key will only be processed once.
+          required: false
+          schema:
+            type: string
       responses:
         '200':
           description: Successful operation
@@ -257,6 +275,12 @@ paths:
           schema:
             type: string
             format: uuid
+        - name: X-Idempotency-Key
+          in: header
+          description: Unique key for idempotent requests. If provided, ensures that identical requests with the same key will only be processed once.
+          required: false
+          schema:
+            type: string
       responses:
         '204':
           description: Provider removed from tenant
@@ -278,6 +302,12 @@ paths:
             type: string
             format: uuid
           example: 123e4567-e89b-12d3-a456-426614174000
+        - name: X-Idempotency-Key
+          in: header
+          description: Unique key for idempotent requests. If provided, ensures that identical requests with the same key will only be processed once.
+          required: false
+          schema:
+            type: string
       responses:
         '200':
           description: Tenant successfully retrieved
@@ -364,6 +394,12 @@ paths:
             type: string
             format: uuid
           example: 123e4567-e89b-12d3-a456-426614174000
+        - name: X-Idempotency-Key
+          in: header
+          description: Unique key for idempotent requests. If provided, ensures that identical requests with the same key will only be processed once.
+          required: false
+          schema:
+            type: string
       responses:
         '204':
           description: Tenant successfully deleted - No content returned
@@ -388,6 +424,12 @@ paths:
           schema:
             type: string
             format: uuid
+        - name: X-Idempotency-Key
+          in: header
+          description: Unique key for idempotent requests. If provided, ensures that identical requests with the same key will only be processed once.
+          required: false
+          schema:
+            type: string
       responses:
         '200':
           description: Successful operation
@@ -460,6 +502,12 @@ paths:
           schema:
             type: string
             format: uuid
+        - name: X-Idempotency-Key
+          in: header
+          description: Unique key for idempotent requests. If provided, ensures that identical requests with the same key will only be processed once.
+          required: false
+          schema:
+            type: string
       responses:
         '204':
           description: Tenant status deleted
@@ -479,6 +527,12 @@ paths:
           schema:
             type: string
             format: uuid
+        - name: X-Idempotency-Key
+          in: header
+          description: Unique key for idempotent requests. If provided, ensures that identical requests with the same key will only be processed once.
+          required: false
+          schema:
+            type: string
       responses:
         '200':
           description: Successful operation
@@ -549,6 +603,12 @@ paths:
           schema:
             type: string
             format: uuid
+        - name: X-Idempotency-Key
+          in: header
+          description: Unique key for idempotent requests. If provided, ensures that identical requests with the same key will only be processed once.
+          required: false
+          schema:
+            type: string
       responses:
         '204':
           description: Tenant settings deleted
@@ -568,6 +628,12 @@ paths:
           schema:
             type: string
             format: uuid
+        - name: X-Idempotency-Key
+          in: header
+          description: Unique key for idempotent requests. If provided, ensures that identical requests with the same key will only be processed once.
+          required: false
+          schema:
+            type: string
       responses:
         '200':
           description: Successful operation
@@ -638,6 +704,12 @@ paths:
           schema:
             type: string
             format: uuid
+        - name: X-Idempotency-Key
+          in: header
+          description: Unique key for idempotent requests. If provided, ensures that identical requests with the same key will only be processed once.
+          required: false
+          schema:
+            type: string
       responses:
         '204':
           description: Tenant branding deleted
@@ -659,6 +731,12 @@ paths:
             type: string
             format: uuid
           example: 123e4567-e89b-12d3-a456-426614174000
+        - name: X-Idempotency-Key
+          in: header
+          description: Unique key for idempotent requests. If provided, ensures that identical requests with the same key will only be processed once.
+          required: false
+          schema:
+            type: string
       responses:
         '200':
           description: Provider successfully retrieved
@@ -744,6 +822,12 @@ paths:
           schema:
             type: string
             format: uuid
+        - name: X-Idempotency-Key
+          in: header
+          description: Unique key for idempotent requests. If provided, ensures that identical requests with the same key will only be processed once.
+          required: false
+          schema:
+            type: string
       responses:
         '204':
           description: Provider deleted
@@ -763,6 +847,12 @@ paths:
           schema:
             type: string
             format: uuid
+        - name: X-Idempotency-Key
+          in: header
+          description: Unique key for idempotent requests. If provided, ensures that identical requests with the same key will only be processed once.
+          required: false
+          schema:
+            type: string
       responses:
         '200':
           description: Successful operation
@@ -833,6 +923,12 @@ paths:
           schema:
             type: string
             format: uuid
+        - name: X-Idempotency-Key
+          in: header
+          description: Unique key for idempotent requests. If provided, ensures that identical requests with the same key will only be processed once.
+          required: false
+          schema:
+            type: string
       responses:
         '204':
           description: Provider value mapping deleted
@@ -853,6 +949,12 @@ paths:
           schema:
             type: string
             format: uuid
+        - name: X-Idempotency-Key
+          in: header
+          description: Unique key for idempotent requests. If provided, ensures that identical requests with the same key will only be processed once.
+          required: false
+          schema:
+            type: string
       responses:
         '200':
           description: Successful operation
@@ -925,6 +1027,12 @@ paths:
           schema:
             type: string
             format: uuid
+        - name: X-Idempotency-Key
+          in: header
+          description: Unique key for idempotent requests. If provided, ensures that identical requests with the same key will only be processed once.
+          required: false
+          schema:
+            type: string
       responses:
         '204':
           description: Provider type deleted
@@ -946,6 +1054,12 @@ paths:
             type: string
             format: uuid
           example: 123e4567-e89b-12d3-a456-426614174000
+        - name: X-Idempotency-Key
+          in: header
+          description: Unique key for idempotent requests. If provided, ensures that identical requests with the same key will only be processed once.
+          required: false
+          schema:
+            type: string
       responses:
         '200':
           description: Provider-tenant relationship successfully retrieved
@@ -1024,6 +1138,12 @@ paths:
           schema:
             type: string
             format: uuid
+        - name: X-Idempotency-Key
+          in: header
+          description: Unique key for idempotent requests. If provided, ensures that identical requests with the same key will only be processed once.
+          required: false
+          schema:
+            type: string
       responses:
         '204':
           description: Provider-tenant relationship deleted
@@ -1044,6 +1164,12 @@ paths:
           schema:
             type: string
             format: uuid
+        - name: X-Idempotency-Key
+          in: header
+          description: Unique key for idempotent requests. If provided, ensures that identical requests with the same key will only be processed once.
+          required: false
+          schema:
+            type: string
       responses:
         '200':
           description: Successful operation
@@ -1116,6 +1242,12 @@ paths:
           schema:
             type: string
             format: uuid
+        - name: X-Idempotency-Key
+          in: header
+          description: Unique key for idempotent requests. If provided, ensures that identical requests with the same key will only be processed once.
+          required: false
+          schema:
+            type: string
       responses:
         '204':
           description: Provider status deleted
@@ -1135,6 +1267,12 @@ paths:
           schema:
             type: string
             format: uuid
+        - name: X-Idempotency-Key
+          in: header
+          description: Unique key for idempotent requests. If provided, ensures that identical requests with the same key will only be processed once.
+          required: false
+          schema:
+            type: string
       responses:
         '200':
           description: Successful operation
@@ -1205,6 +1343,12 @@ paths:
           schema:
             type: string
             format: uuid
+        - name: X-Idempotency-Key
+          in: header
+          description: Unique key for idempotent requests. If provided, ensures that identical requests with the same key will only be processed once.
+          required: false
+          schema:
+            type: string
       responses:
         '204':
           description: Provider parameter deleted
@@ -1224,6 +1368,12 @@ paths:
           schema:
             type: string
             format: uuid
+        - name: X-Idempotency-Key
+          in: header
+          description: Unique key for idempotent requests. If provided, ensures that identical requests with the same key will only be processed once.
+          required: false
+          schema:
+            type: string
       responses:
         '200':
           description: Successful operation
@@ -1294,6 +1444,12 @@ paths:
           schema:
             type: string
             format: uuid
+        - name: X-Idempotency-Key
+          in: header
+          description: Unique key for idempotent requests. If provided, ensures that identical requests with the same key will only be processed once.
+          required: false
+          schema:
+            type: string
       responses:
         '204':
           description: Feature flag deleted
@@ -1313,6 +1469,12 @@ paths:
           schema:
             type: string
             format: uuid
+        - name: X-Idempotency-Key
+          in: header
+          description: Unique key for idempotent requests. If provided, ensures that identical requests with the same key will only be processed once.
+          required: false
+          schema:
+            type: string
       responses:
         '200':
           description: Successful operation
@@ -1383,6 +1545,12 @@ paths:
           schema:
             type: string
             format: uuid
+        - name: X-Idempotency-Key
+          in: header
+          description: Unique key for idempotent requests. If provided, ensures that identical requests with the same key will only be processed once.
+          required: false
+          schema:
+            type: string
       responses:
         '204':
           description: Environment configuration deleted
@@ -1403,6 +1571,12 @@ paths:
           schema:
             type: string
             format: uuid
+        - name: X-Idempotency-Key
+          in: header
+          description: Unique key for idempotent requests. If provided, ensures that identical requests with the same key will only be processed once.
+          required: false
+          schema:
+            type: string
       responses:
         '200':
           description: Channel config found
@@ -1475,6 +1649,12 @@ paths:
           schema:
             type: string
             format: uuid
+        - name: X-Idempotency-Key
+          in: header
+          description: Unique key for idempotent requests. If provided, ensures that identical requests with the same key will only be processed once.
+          required: false
+          schema:
+            type: string
       responses:
         '204':
           description: Channel config deleted
@@ -1494,6 +1674,12 @@ paths:
           schema:
             type: string
             format: uuid
+        - name: X-Idempotency-Key
+          in: header
+          description: Unique key for idempotent requests. If provided, ensures that identical requests with the same key will only be processed once.
+          required: false
+          schema:
+            type: string
       responses:
         '200':
           description: Channel config parameter found
@@ -1564,6 +1750,12 @@ paths:
           schema:
             type: string
             format: uuid
+        - name: X-Idempotency-Key
+          in: header
+          description: Unique key for idempotent requests. If provided, ensures that identical requests with the same key will only be processed once.
+          required: false
+          schema:
+            type: string
       responses:
         '204':
           description: Channel config parameter deleted successfully
@@ -7381,6 +7573,12 @@ paths:
           schema:
             type: string
             format: uuid
+        - name: X-Idempotency-Key
+          in: header
+          description: Unique key for idempotent requests. If provided, ensures that identical requests with the same key will only be processed once.
+          required: false
+          schema:
+            type: string
       responses:
         '200':
           description: Successful operation
@@ -7408,6 +7606,12 @@ paths:
           schema:
             type: string
             format: uuid
+        - name: X-Idempotency-Key
+          in: header
+          description: Unique key for idempotent requests. If provided, ensures that identical requests with the same key will only be processed once.
+          required: false
+          schema:
+            type: string
       responses:
         '200':
           description: Successful operation
@@ -9009,8 +9213,12 @@ components:
           example: api_key
         parameterValue:
           type: string
-          description: Value of the parameter
-          example: sk_test_123456
+          description: Value of the parameter (only for non-secret parameters)
+          example: https://api.example.com
+        credentialVaultId:
+          type: string
+          description: Reference ID to credential stored in security-vault (only for secret parameters)
+          example: vault-cred-uuid-12345
         parameterType:
           type: string
           description: Type of the parameter
@@ -9021,7 +9229,7 @@ components:
           example: API key for authentication
         isSecret:
           type: boolean
-          description: Whether the parameter is secret
+          description: Whether the parameter is secret (if true, use credentialVaultId instead of parameterValue)
           default: false
         isRequired:
           type: boolean
@@ -9158,7 +9366,6 @@ components:
     EnvironmentConfigDTO:
       required:
         - configKey
-        - configValue
         - environmentName
       type: object
       properties:
@@ -9183,8 +9390,12 @@ components:
           example: database.pool.size
         configValue:
           type: string
-          description: Configuration value
+          description: Configuration value (only for non-secret configs). Required when isSecret=false
           example: '50'
+        credentialVaultId:
+          type: string
+          description: Reference ID to credential stored in security-vault (only for secret configs). Required when isSecret=true
+          example: vault-cred-uuid-67890
         configType:
           type: string
           description: Configuration type (STRING, INTEGER, BOOLEAN, JSON)
@@ -9194,7 +9405,7 @@ components:
           description: Configuration description
         isSecret:
           type: boolean
-          description: Whether the value is a secret
+          description: Whether the value is a secret (if true, use credentialVaultId instead of configValue)
           example: false
         category:
           type: string

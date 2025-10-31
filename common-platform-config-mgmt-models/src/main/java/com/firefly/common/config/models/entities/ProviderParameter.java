@@ -57,6 +57,9 @@ public class ProviderParameter {
     @Column("parameter_value")
     private String parameterValue;
 
+    @Column("credential_vault_id")
+    private String credentialVaultId;
+
     @Column("parameter_type")
     private String parameterType;
 

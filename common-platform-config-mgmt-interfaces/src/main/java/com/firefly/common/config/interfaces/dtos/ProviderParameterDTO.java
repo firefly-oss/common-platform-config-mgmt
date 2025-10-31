@@ -58,17 +58,20 @@ public class ProviderParameterDTO {
     @Size(min = 1, max = 100, message = "Parameter name must be between 1 and 100 characters")
     @Schema(description = "Name of the parameter", example = "api_key")
     private String parameterName;
-    
-    @Schema(description = "Value of the parameter", example = "sk_test_123456")
+
+    @Schema(description = "Value of the parameter (only for non-secret parameters)", example = "https://api.example.com")
     private String parameterValue;
-    
+
+    @Schema(description = "Reference ID to credential stored in security-vault (only for secret parameters)", example = "vault-cred-uuid-12345")
+    private String credentialVaultId;
+
     @Schema(description = "Type of the parameter", example = "STRING")
     private String parameterType;
-    
+
     @Schema(description = "Description of the parameter", example = "API key for authentication")
     private String description;
-    
-    @Schema(description = "Whether the parameter is secret", defaultValue = "false")
+
+    @Schema(description = "Whether the parameter is secret (if true, use credentialVaultId instead of parameterValue)", defaultValue = "false")
     private Boolean isSecret;
     
     @Schema(description = "Whether the parameter is required", defaultValue = "false")
