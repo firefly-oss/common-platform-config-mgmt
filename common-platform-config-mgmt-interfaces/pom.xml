@@ -24,11 +24,6 @@
             <artifactId>lib-utils</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <dependency>
-            <groupId>com.firefly</groupId>
-            <artifactId>lib-plugin-manager-api</artifactId>
-            <version>${project.version}</version>
-        </dependency>
 
         <!-- Validation -->
         <dependency>
@@ -63,6 +58,18 @@
         <dependency>
             <groupId>com.fasterxml.jackson.datatype</groupId>
             <artifactId>jackson-datatype-jsr310</artifactId>
+        </dependency>
+
+        <!-- Testing -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-params</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
