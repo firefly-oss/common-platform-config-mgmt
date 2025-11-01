@@ -20,6 +20,7 @@ The Firefly Configuration Management Service is the **central configuration hub*
 - **Audit Trail**: Complete change tracking with rollback capability
 - **Webhook Management**: Centralized webhook configuration with retry logic
 - **Custom Branding**: Visual customization per tenant
+- **🔐 Secure Credential Management**: Integration with `common-platform-security-vault` for secure storage of API keys, passwords, and secrets
 
 ## Quick Start
 
@@ -50,6 +51,61 @@ Once running, access the Swagger UI at:
 ```
 http://localhost:8080/swagger-ui.html
 ```
+
+## 🔐 Security & Credential Management
+
+**Important**: This service **does NOT store credentials directly**. All sensitive information (API keys, passwords, secrets) is encrypted and stored securely in the `common-platform-security-vault` microservice using AES-256-GCM encryption.
+
+### How It Works
+
+1. **Configuration Storage**: This service stores only a **credential UUID** (`credentialVaultId`) as a reference
+2. **Credential Retrieval**: Applications retrieve the UUID and then decrypt the actual credential from the vault
+3. **Security Benefits**:
+   - ✅ Credentials encrypted with AES-256-GCM in the vault
+   - ✅ Centralized credential rotation without config changes
+   - ✅ Complete audit trail of all credential access
+   - ✅ Fine-grained access control (IP, service, environment restrictions)
+   - ✅ Compliance with PCI-DSS, SOC2, ISO27001
+
+### Example: Storing a Secret Parameter
+
+```json
+{
+  "providerId": "uuid-stripe-provider",
+  "tenantId": "uuid-acme-bank",
+  "parameterName": "api_key",
+  "isSecret": true,
+  "credentialVaultId": "550e8400-e29b-41d4-a716-446655440000",
+  "parameterValue": null
+}
+```
+
+**Note**: The `credentialVaultId` is the UUID of the credential in the security-vault.
+
+### Example: Consuming a Secret Parameter
+
+```java
+// 1. Get parameter configuration
+ProviderParameterDTO param = configClient.getProviderParameter(providerId, tenantId, "api_key");
+
+// 2. If secret, decrypt from vault
+if (param.getIsSecret()) {
+    UUID credentialId = UUID.fromString(param.getCredentialVaultId());
+
+    AccessRequest accessRequest = AccessRequest.builder()
+        .userId(userId)
+        .serviceName("payment-service")
+        .ipAddress(ipAddress)
+        .environment("production")
+        .reason("Processing payment")
+        .build();
+
+    String apiKey = vaultClient.decryptCredential(credentialId, accessRequest).block();
+    // Use apiKey...
+}
+```
+
+📖 **See the complete guide**: [Security Vault Integration](./docs/SECURITY_VAULT_INTEGRATION.md)
 
 ## Architecture
 
@@ -104,6 +160,10 @@ Comprehensive documentation is available in the [`docs/`](./docs) directory:
 - **[Tenant Management](./docs/tenants.md)** - Managing tenants and their lifecycle
 - **[Provider Management](./docs/providers.md)** - Configuring external providers
 - **[Parameter Configuration](./docs/parameters.md)** - Dynamic parameter management
+
+### Security & Integration
+- **[Security Vault Integration](./docs/SECURITY_VAULT_INTEGRATION.md)** - 🔐 **NEW!** Complete guide for secure credential management with `common-platform-security-vault`
+- **[Secure Configuration Examples](./docs/examples/SecureConfigurationExample.java)** - Code examples for consuming secret parameters
 
 ## Technology Stack
 
