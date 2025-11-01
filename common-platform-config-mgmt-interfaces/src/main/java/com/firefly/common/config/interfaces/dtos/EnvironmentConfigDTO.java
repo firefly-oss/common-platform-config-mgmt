@@ -17,6 +17,7 @@
 
 package com.firefly.common.config.interfaces.dtos;
 
+import com.firefly.common.config.interfaces.validation.ValidSecretConfiguration;
 import com.firefly.core.utils.annotations.FilterableId;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -38,6 +39,10 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Schema(description = "Environment-specific configuration")
+@ValidSecretConfiguration(
+    valueField = "configValue",
+    message = "Invalid secret configuration: when isSecret=true, credentialVaultId is required and configValue must be null; when isSecret=false, configValue is required and credentialVaultId must be null"
+)
 public class EnvironmentConfigDTO {
 
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
