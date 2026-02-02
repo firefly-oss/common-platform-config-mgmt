@@ -140,11 +140,14 @@ common-platform-config-mgmt/
 - **ChannelConfig**: Banking channel configuration (WEB_BANKING, MOBILE_BANKING, ATM, BRANCH, CALL_CENTER, API, OPEN_BANKING)
 - **ChannelConfigParameter**: Dynamic channel parameters using EAV pattern (limits, security, features, availability)
 
-#### Feature & Configuration Management (4 entities)
+### Feature & Configuration Management (4 entities)
 - **FeatureFlag**: Feature toggles with percentage-based rollout and user targeting
 - **EnvironmentConfig**: Environment-specific configuration (DEV, QA, STAGING, PROD)
 - **ConfigurationAudit**: Complete audit trail with rollback capability
 - **WebhookConfig**: Centralized webhook management with authentication and retry logic
+
+#### Plugin Architecture Support (1 entity)
+- **ApiProcessMapping**: Maps API operations to process plugins for dynamic business logic routing
 
 ## Documentation
 
@@ -237,6 +240,14 @@ The service exposes **16 REST controllers** with approximately **80 endpoints**.
 - `/api/v1/environment-configs` - Environment-specific configuration
 - `/api/v1/configuration-audits` - Audit trail (read-only)
 - `/api/v1/webhook-configs` - Webhook configuration
+
+### Plugin Architecture
+- `/api/v1/api-process-mappings` - API-to-Process mapping configuration
+  - `GET /resolve?operationId=X&tenantId=Y` - Resolve process for an operation
+  - `GET /vanilla` - List vanilla (default) mappings
+  - `GET /tenants/{tenantId}/mappings` - Tenant-specific mappings
+  - `GET /processes/{processId}` - Mappings by process
+  - `POST /cache/invalidate` - Cache invalidation
 
 **Each controller provides:**
 - `GET /{id}` - Get by ID
