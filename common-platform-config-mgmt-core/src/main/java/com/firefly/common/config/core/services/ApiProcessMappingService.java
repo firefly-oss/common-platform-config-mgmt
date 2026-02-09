@@ -17,8 +17,8 @@
 package com.firefly.common.config.core.services;
 
 import com.firefly.common.config.interfaces.dtos.ApiProcessMappingDTO;
-import com.firefly.common.core.filters.FilterRequest;
-import com.firefly.common.core.queries.PaginationResponse;
+import org.fireflyframework.core.filters.FilterRequest;
+import org.fireflyframework.core.queries.PaginationResponse;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 

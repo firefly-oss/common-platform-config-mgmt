@@ -19,8 +19,8 @@ package com.firefly.common.config.web.controllers;
 
 import com.firefly.common.config.core.services.TenantBrandingService;
 import com.firefly.common.config.interfaces.dtos.TenantBrandingDTO;
-import com.firefly.common.core.filters.FilterRequest;
-import com.firefly.common.core.queries.PaginationResponse;
+import org.fireflyframework.core.filters.FilterRequest;
+import org.fireflyframework.core.queries.PaginationResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;

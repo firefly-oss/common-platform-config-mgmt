@@ -16,7 +16,6 @@
 
 package com.firefly.common.config.interfaces.dtos;
 
-import com.firefly.core.utils.annotations.FilterableId;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
@@ -26,6 +25,8 @@ import lombok.NoArgsConstructor;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import org.fireflyframework.utils.annotations.FilterableId;
+
 import java.time.OffsetDateTime;
 import java.util.UUID;
 

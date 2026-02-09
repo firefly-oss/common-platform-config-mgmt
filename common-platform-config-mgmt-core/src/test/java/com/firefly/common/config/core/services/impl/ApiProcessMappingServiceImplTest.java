@@ -252,6 +252,8 @@ class ApiProcessMappingServiceImplTest {
             
             when(repository.findBestMatch(eq(testTenantId), eq("createAccount"), any(), any()))
                     .thenReturn(Flux.just(tenantMapping));
+            when(repository.findVanillaMapping(anyString()))
+                    .thenReturn(Mono.empty());
             when(mapper.toDTO(tenantMapping)).thenReturn(dto);
             
             StepVerifier.create(service.resolveMapping(testTenantId, "createAccount", null, null))
@@ -310,6 +312,8 @@ class ApiProcessMappingServiceImplTest {
             
             when(repository.findBestMatch(testTenantId, "createAccount", testProductId, "MOBILE"))
                     .thenReturn(Flux.just(mapping));
+            when(repository.findVanillaMapping(anyString()))
+                    .thenReturn(Mono.empty());
             when(mapper.toDTO(mapping)).thenReturn(dto);
             
             StepVerifier.create(service.resolveMapping(testTenantId, "createAccount", testProductId, "MOBILE"))
