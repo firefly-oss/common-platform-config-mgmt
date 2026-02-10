@@ -1,4 +1,4 @@
-i # 📘 Architecture and Usage Guide - Firefly Config Management
+i # Architecture and Usage Guide - Firefly Config Management
 
 **Version:** 1.0.0  
 **Date:** 2025-10-25  
@@ -6,7 +6,7 @@ i # 📘 Architecture and Usage Guide - Firefly Config Management
 
 ---
 
-## 📑 Table of Contents
+## Table of Contents
 
 1. [Introduction](#introduction)
 2. [System Architecture](#system-architecture)
@@ -18,28 +18,28 @@ i # 📘 Architecture and Usage Guide - Firefly Config Management
 
 ---
 
-## 🎯 Introduction
+## Introduction
 
 Firefly Config Management is the **central configuration system** for the Firefly Core Banking Platform. It manages:
 
-- ✅ **Multi-tenancy**: Complete isolation per tenant
-- ✅ **External Providers**: KYC, Payments, Cards, BaaS, etc.
-- ✅ **Banking Channels**: Web, Mobile, ATM, Branch, Call Center, API
-- ✅ **Feature Flags**: Gradual feature rollout
-- ✅ **Environment Configuration**: DEV, QA, STAGING, PROD
-- ✅ **Complete Audit Trail**: Traceability of all changes
-- ✅ **Webhooks**: Event notifications
+- **Multi-tenancy**: Complete isolation per tenant
+- **External Providers**: KYC, Payments, Cards, BaaS, etc.
+- **Banking Channels**: Web, Mobile, ATM, Branch, Call Center, API
+- **Feature Flags**: Gradual feature rollout
+- **Environment Configuration**: DEV, QA, STAGING, PROD
+- **Complete Audit Trail**: Traceability of all changes
+- **Webhooks**: Event notifications
 
 ---
 
-## 🏗️ System Architecture
+## System Architecture
 
 ### Design Principles
 
 1. **Reactive Programming**: Entire system is non-blocking (Spring WebFlux + R2DBC)
 2. **Multi-tenancy**: Complete data isolation per tenant
 3. **EAV Pattern**: Dynamic configuration without schema changes
-4. **Soft Deletes**: Logical deletion with `active` flag
+4. **Delete Operations**: Standard delete operations (some entities support soft delete via `active` flag, others use hard deletes)
 5. **Optimistic Locking**: Concurrency control with `version` field
 6. **Audit Trail**: Complete change log for compliance
 
@@ -69,7 +69,7 @@ Firefly Config Management is the **central configuration system** for the Firefl
 
 ---
 
-## 🗄️ Detailed Data Model
+## Detailed Data Model
 
 ### 1. Tenant Management (4 entities)
 
@@ -156,35 +156,44 @@ Firefly Config Management is the **central configuration system** for the Firefl
 **Key fields:**
 - `provider_id`: Provider it belongs to
 - `tenant_id`: Specific tenant (null = global)
-- `parameter_key`: Parameter name
-- `parameter_value`: Value (encrypted if `is_sensitive=true`)
+- `parameter_name`: Parameter name
+- `parameter_value`: Value (null if `is_secret=true`, use `credential_vault_id` instead)
 - `parameter_type`: STRING, INTEGER, DECIMAL, BOOLEAN, JSON
-- `scope`: GLOBAL, TENANT_SPECIFIC
+- `is_secret`: Whether the parameter is a secret stored in the vault
+- `credential_vault_id`: Reference to credential in security-vault (for secrets)
 
 **Parameter examples:**
 ```json
 {
-  "provider_id": "uuid-stripe",
-  "tenant_id": null,
-  "parameter_key": "api_version",
-  "parameter_value": "2023-10-16",
-  "parameter_type": "STRING",
-  "scope": "GLOBAL"
+  "providerId": "uuid-stripe",
+  "tenantId": null,
+  "parameterName": "api_version",
+  "parameterValue": "2023-10-16",
+  "parameterType": "STRING",
+  "isSecret": false
 }
 ```
 
 #### 2.3 ProviderValueMapping
 **Purpose**: Value mapping between Firefly and external providers
 
+**Key fields:**
+- `provider_id`: Provider it belongs to
+- `tenant_id`: Specific tenant (null = global)
+- `mapping_type`: Type of mapping (e.g., "TRANSACTION_STATUS")
+- `firefly_value`: Internal Firefly value
+- `provider_value`: External provider value
+- `direction`: Direction of mapping (e.g., "BIDIRECTIONAL")
+
 **Example:**
 ```json
 {
-  "provider_id": "uuid-stripe",
-  "source_field": "transaction_status",
-  "source_value": "succeeded",
-  "target_field": "status",
-  "target_value": "COMPLETED",
-  "mapping_type": "STATUS"
+  "providerId": "uuid-stripe",
+  "tenantId": null,
+  "mappingType": "TRANSACTION_STATUS",
+  "fireflyValue": "COMPLETED",
+  "providerValue": "succeeded",
+  "direction": "BIDIRECTIONAL"
 }
 ```
 
@@ -194,10 +203,11 @@ Firefly Config Management is the **central configuration system** for the Firefl
 **Key fields:**
 - `provider_id`: Provider
 - `tenant_id`: Tenant
-- `priority`: Priority (1 = highest)
+- `priority`: Priority (higher = preferred)
 - `is_primary`: Whether it's the primary provider
-- `is_fallback`: Whether it's a fallback provider
 - `enabled`: Whether it's enabled
+- `auto_failover_enabled`: Whether automatic failover is enabled
+- `fallback_provider_id`: Reference to fallback provider
 
 ---
 
@@ -273,24 +283,26 @@ Firefly Config Management is the **central configuration system** for the Firefl
 **Purpose**: Feature toggles for gradual feature rollout
 
 **Key fields:**
-- `flag_key`: Unique feature identifier
+- `feature_key`: Unique feature identifier
+- `feature_name`: Human-readable feature name
 - `enabled`: Whether it's enabled
 - `rollout_percentage`: User percentage (0-100)
-- `target_user_ids`: Specific user list (JSON)
-- `target_segments`: User segments (JSON)
+- `target_user_segments`: User segments (JSON)
 - `start_date`: Start date
 - `end_date`: End date
+- `environment`: Environment (dev, staging, prod, all)
 
 **Example:**
 ```json
 {
-  "tenant_id": "uuid-acme-bank",
-  "flag_key": "new_dashboard_ui",
+  "tenantId": "uuid-acme-bank",
+  "featureKey": "new_dashboard_ui",
+  "featureName": "New Dashboard UI",
   "enabled": true,
-  "rollout_percentage": 25,
-  "target_segments": ["beta_testers", "premium_users"],
-  "start_date": "2025-10-01T00:00:00",
-  "end_date": "2025-11-01T00:00:00"
+  "rolloutPercentage": 25,
+  "targetUserSegments": "[\"beta_testers\", \"premium_users\"]",
+  "startDate": "2025-10-01T00:00:00",
+  "endDate": "2025-11-01T00:00:00"
 }
 ```
 
@@ -310,12 +322,12 @@ Firefly Config Management is the **central configuration system** for the Firefl
 **Example:**
 ```json
 {
-  "tenant_id": "uuid-acme-bank",
-  "environment_name": "PRODUCTION",
-  "config_key": "database_pool_size",
-  "config_value": "50",
-  "config_type": "INTEGER",
-  "is_sensitive": false
+  "tenantId": "uuid-acme-bank",
+  "environmentName": "PRODUCTION",
+  "configKey": "database_pool_size",
+  "configValue": "50",
+  "configType": "INTEGER",
+  "isSecret": false
 }
 ```
 
@@ -325,12 +337,16 @@ Firefly Config Management is the **central configuration system** for the Firefl
 **Key fields:**
 - `entity_type`: Modified entity type
 - `entity_id`: Entity ID
-- `action`: CREATE, UPDATE, DELETE
+- `action`: CREATE, UPDATE, DELETE, ACTIVATE, DEACTIVATE
 - `field_name`: Modified field
 - `old_value`: Previous value
 - `new_value`: New value
 - `changed_by_user_id`: User who made the change
+- `changed_by_username`: Username or email of user
+- `change_reason`: Business justification
 - `ip_address`: User's IP
+- `change_category`: CONFIGURATION, SECURITY, COMPLIANCE, OPERATIONAL, EMERGENCY
+- `change_severity`: LOW, MEDIUM, HIGH, CRITICAL
 - `rollback_available`: Whether it can be reverted
 
 ---
@@ -341,41 +357,47 @@ Firefly Config Management is the **central configuration system** for the Firefl
 **Purpose**: Centralized webhook configuration
 
 **Key fields:**
+- `webhook_name`: Descriptive name for the webhook
 - `webhook_url`: Destination URL
-- `event_types`: Event types (JSON array)
+- `event_types`: Event types (comma-separated)
 - `http_method`: GET, POST, PUT, PATCH
-- `authentication_type`: NONE, BASIC, BEARER, API_KEY, OAUTH2
-- `retry_strategy`: EXPONENTIAL_BACKOFF, LINEAR, NONE
+- `auth_type`: NONE, BASIC, BEARER, API_KEY, HMAC, OAUTH2
+- `retry_enabled`: Whether retry is enabled
 - `max_retry_attempts`: Maximum retry attempts
+- `retry_delay_seconds`: Delay between retries
+- `retry_backoff_multiplier`: Exponential backoff multiplier
 - `timeout_seconds`: Request timeout
 
 **Example:**
 ```json
 {
-  "tenant_id": "uuid-acme-bank",
-  "webhook_url": "https://api.acmebank.com/webhooks/transactions",
-  "event_types": ["transaction.created", "transaction.completed"],
-  "http_method": "POST",
-  "authentication_type": "BEARER",
-  "authentication_value": "eyJhbGciOiJIUzI1NiIs...",
-  "retry_strategy": "EXPONENTIAL_BACKOFF",
-  "max_retry_attempts": 3,
-  "timeout_seconds": 30
+  "tenantId": "uuid-acme-bank",
+  "webhookName": "Transaction Notifications",
+  "webhookUrl": "https://api.acmebank.com/webhooks/transactions",
+  "eventTypes": "transaction.created,transaction.completed",
+  "httpMethod": "POST",
+  "authType": "BEARER",
+  "authHeaderValue": "eyJhbGciOiJIUzI1NiIs...",
+  "retryEnabled": true,
+  "maxRetryAttempts": 3,
+  "retryDelaySeconds": 60,
+  "retryBackoffMultiplier": 2.0,
+  "timeoutSeconds": 30
 }
 ```
 
 ---
 
-## 🔄 EAV Pattern - Dynamic Configuration
+## EAV Pattern - Dynamic Configuration
 
 ### Why EAV?
 
 The **Entity-Attribute-Value** pattern allows:
 
-1. ✅ **Flexibility**: Add new parameters without schema changes
-2. ✅ **Extensibility**: Each tenant can have unique parameters
-3. ✅ **Versioning**: Easy configuration migration
-4. ✅ **Multi-tenancy**: Global vs tenant-specific configuration
+1. **Flexibility**: Add new parameters without schema changes
+2. **Extensibility**: Each tenant can have unique parameters
+3. **Versioning**: Easy configuration migration
+4. **Multi-tenancy**: Global vs tenant-specific configuration
 
 ### EAV Implementations in the System
 
@@ -389,7 +411,7 @@ The **Entity-Attribute-Value** pattern allows:
                             ↓ 1:N
 ┌─────────────────────────────────────────────────────────────┐
 │              ProviderParameter (Attribute-Value)            │
-│  provider_id, parameter_key, parameter_value, ...           │
+│  provider_id, parameter_name, parameter_value, ...          │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -420,7 +442,7 @@ The **Entity-Attribute-Value** pattern allows:
 
 ---
 
-## 💡 Real-World Usage Examples
+## Real-World Usage Examples
 
 ### Example 1: Configure a New Tenant
 
@@ -555,7 +577,7 @@ Content-Type: application/json
 
 ---
 
-## 🔄 Workflows
+## Workflows
 
 ### Workflow 1: New Tenant Onboarding
 
@@ -566,7 +588,7 @@ Content-Type: application/json
                                                         ↓
 6. Associate Providers (KYC, Payment, Card) → 7. Configure ProviderParameters
                                                         ↓
-8. Create FeatureFlags → 9. Configure EnvironmentConfigs → 10. ✅ Tenant Ready
+8. Create FeatureFlags → 9. Configure EnvironmentConfigs → 10. Tenant Ready
 ```
 
 ### Workflow 2: Activate New Feature
@@ -585,48 +607,48 @@ Content-Type: application/json
 
 ---
 
-## ✅ Best Practices
+## Best Practices
 
 ### 1. Security
-- ✅ Always mark sensitive parameters with `is_sensitive=true`
-- ✅ Encrypt sensitive values before storing
-- ✅ Use HTTPS for all communications
-- ✅ Implement rate limiting per tenant
+- Always mark sensitive parameters with `isSecret=true` and use `credentialVaultId` to reference credentials stored in the security-vault
+- Do not store credential values directly in `parameterValue`
+- Use HTTPS for all communications
+- Implement rate limiting per tenant
 
 ### 2. Performance
-- ✅ Use indexes on frequently searched fields
-- ✅ Implement caching for static configurations
-- ✅ Paginate large query results
-- ✅ Use projections to reduce transferred data
+- Use indexes on frequently searched fields
+- Implement caching for static configurations
+- Paginate large query results
+- Use projections to reduce transferred data
 
 ### 3. Audit
-- ✅ Log all changes in ConfigurationAudit
-- ✅ Include user information and timestamp
-- ✅ Keep previous values for rollback
-- ✅ Implement log retention per compliance
+- Log all changes in ConfigurationAudit
+- Include user information and timestamp
+- Keep previous values for rollback
+- Implement log retention per compliance
 
 ### 4. Multi-tenancy
-- ✅ Always validate tenant_id in requests
-- ✅ Implement data isolation at query level
-- ✅ Use tenant_id in all composite indexes
-- ✅ Validate permissions per tenant
+- Always validate tenant_id in requests
+- Implement data isolation at query level
+- Use tenant_id in all composite indexes
+- Validate permissions per tenant
 
 ### 5. Dynamic Configuration (EAV)
-- ✅ Use ProviderParameter for provider configuration
-- ✅ Use ChannelConfigParameter for channel configuration
-- ✅ Define `parameter_type` correctly (STRING, INTEGER, DECIMAL, BOOLEAN, JSON)
-- ✅ Use `validation_regex` to validate values
-- ✅ Define `default_value` for optional parameters
+- Use ProviderParameter for provider configuration
+- Use ChannelConfigParameter for channel configuration
+- Define `parameter_type` correctly (STRING, INTEGER, DECIMAL, BOOLEAN, JSON)
+- Use `validation_regex` to validate values
+- Define `default_value` for optional parameters
 
 ### 6. Feature Flags
-- ✅ Start with low rollout_percentage (5-10%)
-- ✅ Gradually increase based on metrics
-- ✅ Use target_segments for specific groups
-- ✅ Define start_date and end_date for temporary features
-- ✅ Have rollback plan ready
+- Start with low rollout_percentage (5-10%)
+- Gradually increase based on metrics
+- Use target_segments for specific groups
+- Define start_date and end_date for temporary features
+- Have rollback plan ready
 
 ---
 
-**Document generated on 2025-10-25**  
+**Document generated on 2025-10-25** 
 **For more information, see complete documentation in `/docs`**
 

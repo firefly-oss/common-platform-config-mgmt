@@ -4,8 +4,8 @@
 
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)](https://github.com/firefly-oss/common-platform-config-mgmt)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
-[![Java](https://img.shields.io/badge/java-21-orange.svg)](https://openjdk.org/projects/jdk/21/)
-[![Spring Boot](https://img.shields.io/badge/spring%20boot-3.2.2-green.svg)](https://spring.io/projects/spring-boot)
+[![Java](https://img.shields.io/badge/java-25-orange.svg)](https://openjdk.org/projects/jdk/25/)
+[![Spring Boot](https://img.shields.io/badge/spring%20boot-3.5.10-green.svg)](https://spring.io/projects/spring-boot)
 
 ## Overview
 
@@ -20,13 +20,13 @@ The Firefly Configuration Management Service is the **central configuration hub*
 - **Audit Trail**: Complete change tracking with rollback capability
 - **Webhook Management**: Centralized webhook configuration with retry logic
 - **Custom Branding**: Visual customization per tenant
-- **🔐 Secure Credential Management**: Integration with `common-platform-security-vault` for secure storage of API keys, passwords, and secrets
+- **Secure Credential Management**: Integration with `common-platform-security-vault` for secure storage of API keys, passwords, and secrets
 
 ## Quick Start
 
 ### Prerequisites
 
-- Java 21+
+- Java 25+
 - PostgreSQL 14+
 - Maven 3.8+
 
@@ -52,7 +52,7 @@ Once running, access the Swagger UI at:
 http://localhost:8080/swagger-ui.html
 ```
 
-## 🔐 Security & Credential Management
+## Security & Credential Management
 
 **Important**: This service **does NOT store credentials directly**. All sensitive information (API keys, passwords, secrets) is encrypted and stored securely in the `common-platform-security-vault` microservice using AES-256-GCM encryption.
 
@@ -61,11 +61,11 @@ http://localhost:8080/swagger-ui.html
 1. **Configuration Storage**: This service stores only a **credential UUID** (`credentialVaultId`) as a reference
 2. **Credential Retrieval**: Applications retrieve the UUID and then decrypt the actual credential from the vault
 3. **Security Benefits**:
-   - ✅ Credentials encrypted with AES-256-GCM in the vault
-   - ✅ Centralized credential rotation without config changes
-   - ✅ Complete audit trail of all credential access
-   - ✅ Fine-grained access control (IP, service, environment restrictions)
-   - ✅ Compliance with PCI-DSS, SOC2, ISO27001
+   - Credentials encrypted with AES-256-GCM in the vault
+   - Centralized credential rotation without config changes
+   - Complete audit trail of all credential access
+   - Fine-grained access control (IP, service, environment restrictions)
+   - Compliance with PCI-DSS, SOC2, ISO27001
 
 ### Example: Storing a Secret Parameter
 
@@ -105,7 +105,7 @@ if (param.getIsSecret()) {
 }
 ```
 
-📖 **See the complete guide**: [Security Vault Integration](./docs/SECURITY_VAULT_INTEGRATION.md)
+**See the complete guide**: [Security Vault Integration](./docs/SECURITY_VAULT_INTEGRATION.md)
 
 ## Architecture
 
@@ -165,13 +165,13 @@ Comprehensive documentation is available in the [`docs/`](./docs) directory:
 - **[Parameter Configuration](./docs/parameters.md)** - Dynamic parameter management
 
 ### Security & Integration
-- **[Security Vault Integration](./docs/SECURITY_VAULT_INTEGRATION.md)** - 🔐 **NEW!** Complete guide for secure credential management with `common-platform-security-vault`
+- **[Security Vault Integration](./docs/SECURITY_VAULT_INTEGRATION.md)** - **NEW!** Complete guide for secure credential management with `common-platform-security-vault`
 - **[Secure Configuration Examples](./docs/examples/SecureConfigurationExample.java)** - Code examples for consuming secret parameters
 
 ## Technology Stack
 
-- **Java 21** - Modern Java with latest features
-- **Spring Boot 3.2.2** - Application framework
+- **Java 25** - Modern Java with latest features
+- **Spring Boot 3.5.10** - Application framework
 - **Spring WebFlux** - Reactive web framework
 - **R2DBC** - Reactive database connectivity
 - **PostgreSQL** - Primary database
@@ -183,7 +183,7 @@ Comprehensive documentation is available in the [`docs/`](./docs) directory:
 
 ## Database Schema
 
-The service uses a PostgreSQL database with **16 tables** (plus flyway_schema_history):
+The service uses a PostgreSQL database with **17 tables** (plus flyway_schema_history):
 
 ### Tenant Management (4 tables)
 - `tenants` - Tenant configurations (25 columns)
@@ -209,7 +209,10 @@ The service uses a PostgreSQL database with **16 tables** (plus flyway_schema_hi
 - `configuration_audits` - Complete audit trail (16 columns)
 - `webhook_configs` - Webhook configuration (24 columns)
 
-**Total: 275 columns across 16 tables with 59 indexes, 17 foreign keys, and 13 unique constraints**
+### API Process Management (1 table)
+- `api_process_mappings` - Mappings between API operations and business processes
+
+**Total: 17 tables with indexes, foreign keys, and unique constraints**
 
 Migrations are managed by Flyway and located in `common-platform-config-mgmt-models/src/main/resources/db/migration/`.
 
@@ -254,7 +257,7 @@ The service exposes **16 REST controllers** with approximately **80 endpoints**.
 - `POST /filter` - Filter with pagination and criteria
 - `POST` - Create new entity
 - `PUT /{id}` - Update existing entity
-- `DELETE /{id}` - Soft delete (sets active=false)
+- `DELETE /{id}` - Delete entity
 
 For complete API documentation with request/response schemas, visit the **Swagger UI** at `http://localhost:8080/swagger-ui.html` when the service is running.
 

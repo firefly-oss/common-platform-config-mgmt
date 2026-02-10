@@ -9,14 +9,14 @@ This directory contains unit tests for the interfaces module, specifically for t
 Comprehensive JUnit 5 test suite for the `@ValidSecretConfiguration` annotation and `SecretConfigurationValidator` class.
 
 **Test Coverage:**
-- ✅ Valid secret parameters (isSecret=true with credentialVaultId)
-- ✅ Valid non-secret parameters (isSecret=false with parameterValue)
-- ✅ Invalid secret parameters (missing credentialVaultId)
-- ✅ Invalid secret parameters (has both credentialVaultId and parameterValue)
-- ✅ Invalid non-secret parameters (missing parameterValue)
-- ✅ Invalid non-secret parameters (has credentialVaultId when shouldn't)
-- ✅ Edge cases (null isSecret, blank values, UUID formats)
-- ✅ Both ProviderParameterDTO and EnvironmentConfigDTO
+- Valid secret parameters (isSecret=true with credentialVaultId)
+- Valid non-secret parameters (isSecret=false with parameterValue)
+- Invalid secret parameters (missing credentialVaultId)
+- Invalid secret parameters (has both credentialVaultId and parameterValue)
+- Invalid non-secret parameters (missing parameterValue)
+- Invalid non-secret parameters (has credentialVaultId when shouldn't)
+- Edge cases (null isSecret, blank values, UUID formats)
+- Both ProviderParameterDTO and EnvironmentConfigDTO
 
 **Total Test Cases:** 20+
 
@@ -87,42 +87,42 @@ The tests require the following dependencies (already configured in `pom.xml`):
 
 ### For Secret Parameters/Configs (isSecret=true):
 
-1. ✅ `credentialVaultId` must NOT be null
-2. ✅ `credentialVaultId` must NOT be blank
-3. ✅ `parameterValue`/`configValue` MUST be null
+1. `credentialVaultId` must NOT be null
+2. `credentialVaultId` must NOT be blank
+3. `parameterValue`/`configValue` MUST be null
 
 ### For Non-Secret Parameters/Configs (isSecret=false):
 
-1. ✅ `parameterValue`/`configValue` must NOT be null
-2. ✅ `parameterValue`/`configValue` must NOT be blank
-3. ✅ `credentialVaultId` MUST be null
+1. `parameterValue`/`configValue` must NOT be null
+2. `parameterValue`/`configValue` must NOT be blank
+3. `credentialVaultId` MUST be null
 
 ## Example Test Output
 
 ```
 SecretConfigurationValidator Tests
 ├─ ProviderParameterDTO Validation Tests
-│  ├─ ✅ Should pass validation when isSecret=true with credentialVaultId and null parameterValue
-│  ├─ ✅ Should pass validation when isSecret=false with parameterValue and null credentialVaultId
-│  ├─ ✅ Should fail validation when isSecret=true but credentialVaultId is null
-│  ├─ ✅ Should fail validation when isSecret=true but credentialVaultId is blank
-│  ├─ ✅ Should fail validation when isSecret=true but parameterValue is not null
-│  ├─ ✅ Should fail validation when isSecret=false but parameterValue is null
-│  ├─ ✅ Should fail validation when isSecret=false but parameterValue is blank
-│  ├─ ✅ Should fail validation when isSecret=false but credentialVaultId is not null
-│  └─ ✅ Should pass validation when isSecret is null (treated as false)
+│  ├─ Should pass validation when isSecret=true with credentialVaultId and null parameterValue
+│  ├─ Should pass validation when isSecret=false with parameterValue and null credentialVaultId
+│  ├─ Should fail validation when isSecret=true but credentialVaultId is null
+│  ├─ Should fail validation when isSecret=true but credentialVaultId is blank
+│  ├─ Should fail validation when isSecret=true but parameterValue is not null
+│  ├─ Should fail validation when isSecret=false but parameterValue is null
+│  ├─ Should fail validation when isSecret=false but parameterValue is blank
+│  ├─ Should fail validation when isSecret=false but credentialVaultId is not null
+│  └─ Should pass validation when isSecret is null (treated as false)
 ├─ EnvironmentConfigDTO Validation Tests
-│  ├─ ✅ Should pass validation when isSecret=true with credentialVaultId and null configValue
-│  ├─ ✅ Should pass validation when isSecret=false with configValue and null credentialVaultId
-│  ├─ ✅ Should fail validation when isSecret=true but credentialVaultId is null
-│  ├─ ✅ Should fail validation when isSecret=true but configValue is not null
-│  ├─ ✅ Should fail validation when isSecret=false but configValue is null
-│  ├─ ✅ Should fail validation when isSecret=false but credentialVaultId is not null
-│  └─ ✅ Should pass validation for encryption key stored in vault
+│  ├─ Should pass validation when isSecret=true with credentialVaultId and null configValue
+│  ├─ Should pass validation when isSecret=false with configValue and null credentialVaultId
+│  ├─ Should fail validation when isSecret=true but credentialVaultId is null
+│  ├─ Should fail validation when isSecret=true but configValue is not null
+│  ├─ Should fail validation when isSecret=false but configValue is null
+│  ├─ Should fail validation when isSecret=false but credentialVaultId is not null
+│  └─ Should pass validation for encryption key stored in vault
 └─ Edge Cases and Special Scenarios
-   ├─ ✅ Should handle UUID format in credentialVaultId
-   ├─ ✅ Should validate multiple DTOs independently
-   └─ ✅ Should handle very long credentialVaultId values
+   ├─ Should handle UUID format in credentialVaultId
+   ├─ Should validate multiple DTOs independently
+   └─ Should handle very long credentialVaultId values
 
 Test run finished after 1234 ms
 [        20 tests successful      ]

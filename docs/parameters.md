@@ -4,7 +4,7 @@
 
 ---
 
-## 📋 Table of Contents
+## Table of Contents
 
 - [Overview](#overview)
 - [What are Provider Parameters?](#what-are-provider-parameters)
@@ -40,12 +40,12 @@ Parameters solve critical configuration challenges:
 
 Each parameter has:
 
-- ✅ **Scope**: Global (all tenants) or tenant-specific
-- ✅ **Type Safety**: Strongly typed (STRING, INTEGER, BOOLEAN, JSON, URL, EMAIL)
-- ✅ **Validation**: Regex patterns, min/max values, required/optional
-- ✅ **Security**: Encryption for sensitive values (API keys, secrets)
-- ✅ **Categorization**: Organized by category (connection, authentication, etc.)
-- ✅ **Metadata**: Additional context and documentation
+- **Scope**: Global (all tenants) or tenant-specific
+- **Type Safety**: Strongly typed (STRING, INTEGER, BOOLEAN, JSON, URL, EMAIL)
+- **Validation**: Regex patterns, min/max values, required/optional
+- **Security**: Encryption for sensitive values (API keys, secrets)
+- **Categorization**: Organized by category (connection, authentication, etc.)
+- **Metadata**: Additional context and documentation
 
 ---
 
@@ -141,7 +141,7 @@ Parameters follow a **hierarchical resolution** to determine the effective value
 │  Step 1: Check Tenant-Specific Parameter                    │
 │  Query: providerId = X, tenantId = A, name = "api_timeout" │
 │  Result: Found → "45000"                                    │
-│  ✅ RETURN "45000"                                          │
+│  RETURN "45000"                                          │
 └─────────────────────────────────────────────────────────────┘
 
 ┌─────────────────────────────────────────────────────────────┐
@@ -158,7 +158,7 @@ Parameters follow a **hierarchical resolution** to determine the effective value
 │  Step 2: Check Global Parameter                             │
 │  Query: providerId = X, tenantId = null, name = "api_timeout"│
 │  Result: Found → "30000"                                    │
-│  ✅ RETURN "30000"                                          │
+│  RETURN "30000"                                          │
 └─────────────────────────────────────────────────────────────┘
 
 ┌─────────────────────────────────────────────────────────────┐
@@ -178,7 +178,7 @@ Parameters follow a **hierarchical resolution** to determine the effective value
 ┌─────────────────────────────────────────────────────────────┐
 │  Step 3: Check Default Value                                │
 │  Result: Found → "30000" (from parameter definition)        │
-│  ✅ RETURN "30000"                                          │
+│  RETURN "30000"                                          │
 └─────────────────────────────────────────────────────────────┘
 
 ┌─────────────────────────────────────────────────────────────┐
@@ -202,7 +202,7 @@ Parameters follow a **hierarchical resolution** to determine the effective value
                          ↓
 ┌─────────────────────────────────────────────────────────────┐
 │  Step 4: Parameter is Required                              │
-│  ❌ THROW ConfigurationException                            │
+│  THROW ConfigurationException                            │
 │  "Required parameter 'api_key' not found for tenant D"      │
 └─────────────────────────────────────────────────────────────┘
 ```
@@ -632,7 +632,7 @@ Parameters are organized into **logical categories** for better management:
 }
 ```
 
-**Note**: Secret values are encrypted at rest and masked in API responses.
+**Note**: Secret values are stored in the external `common-platform-security-vault` service. When `isSecret=true`, the `parameterValue` must be null and `credentialVaultId` must contain a valid vault credential UUID reference.
 
 ### Field Descriptions
 
@@ -678,46 +678,11 @@ Parameters are organized into **logical categories** for better management:
 
 ### Retrieving Parameters
 
-**Get All Parameters**: `GET /api/v1/provider-parameters`
-
-**Query Parameters**:
-- `page`: Page number (default: 0)
-- `size`: Page size (default: 20)
-- `sort`: Sort field and direction (e.g., "parameterName,asc")
-- `providerId`: Filter by provider ID
-- `tenantId`: Filter by tenant ID (use "null" for global parameters)
-- `category`: Filter by category
-- `environment`: Filter by environment
-
 **Get Single Parameter**: `GET /api/v1/provider-parameters/{id}`
 
-**Get Parameters by Provider**: `GET /api/v1/provider-parameters/provider/{providerId}`
+**Filter Parameters**: `POST /api/v1/provider-parameters/filter`
 
-**Get Parameters by Provider and Tenant**:
-```
-GET /api/v1/provider-parameters/provider/{providerId}/tenant/{tenantId}
-```
-
-**Get Effective Parameter Value** (with hierarchy resolution):
-```
-GET /api/v1/provider-parameters/provider/{providerId}/tenant/{tenantId}/parameter/{parameterName}/value
-```
-
-**Response**:
-```json
-{
-  "parameterName": "api_timeout",
-  "parameterValue": "45000",
-  "source": "TENANT_SPECIFIC",
-  "parameterId": "550e8400-e29b-41d4-a716-446655440500"
-}
-```
-
-**Source Values**:
-- `TENANT_SPECIFIC`: Value from tenant-specific parameter
-- `GLOBAL`: Value from global parameter
-- `DEFAULT`: Value from default value
-- `NOT_FOUND`: Parameter not found
+Use the filter endpoint with a `FilterRequest` body to search parameters by provider, tenant, category, or other criteria with pagination.
 
 ### Deleting a Parameter
 
@@ -767,40 +732,15 @@ Parameters marked as `isSecret=true` are **automatically encrypted** at rest and
 └─────────────────────────────────────────────────────────────┘
 ```
 
-#### Encryption Implementation
+#### Secret Storage Architecture
 
-```java
-@Entity
-@Table(name = "provider_parameters")
-public class ProviderParameter {
+Secret parameters use the `common-platform-security-vault` integration pattern:
 
-    @Column(name = "parameter_value", nullable = false)
-    @Convert(converter = EncryptedStringConverter.class)
-    private String parameterValue; // Automatically encrypted/decrypted
+- When `isSecret=true`, the `parameterValue` field must be `null`
+- The `credentialVaultId` field stores a UUID reference to the credential in the security-vault
+- Consumer services retrieve the credential UUID from this service, then decrypt the actual value from the vault
 
-    @Column(name = "is_secret", nullable = false)
-    private Boolean isSecret = false;
-}
-
-@Converter
-public class EncryptedStringConverter implements AttributeConverter<String, String> {
-
-    @Autowired
-    private EncryptionService encryptionService;
-
-    @Override
-    public String convertToDatabaseColumn(String attribute) {
-        if (attribute == null) return null;
-        return encryptionService.encrypt(attribute);
-    }
-
-    @Override
-    public String convertToEntityAttribute(String dbData) {
-        if (dbData == null) return null;
-        return encryptionService.decrypt(dbData);
-    }
-}
-```
+This approach ensures credentials are never stored in the configuration database. See the [Security Vault Integration Guide](./SECURITY_VAULT_INTEGRATION.md) for details.
 
 ### API Response Masking
 
@@ -998,42 +938,11 @@ public Mono<String> getRequiredParameter(
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| `GET` | `/api/v1/provider-parameters` | List all parameters (paginated) |
 | `GET` | `/api/v1/provider-parameters/{id}` | Get parameter by ID |
-| `GET` | `/api/v1/provider-parameters/provider/{providerId}` | Get parameters by provider |
-| `GET` | `/api/v1/provider-parameters/provider/{providerId}/tenant/{tenantId}` | Get parameters by provider and tenant |
-| `GET` | `/api/v1/provider-parameters/provider/{providerId}/tenant/{tenantId}/parameter/{parameterName}/value` | Get effective parameter value |
+| `POST` | `/api/v1/provider-parameters/filter` | Filter parameters with pagination and criteria |
 | `POST` | `/api/v1/provider-parameters` | Create new parameter |
 | `PUT` | `/api/v1/provider-parameters/{id}` | Update parameter |
 | `DELETE` | `/api/v1/provider-parameters/{id}` | Delete parameter |
-
-### Bulk Operations
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `POST` | `/api/v1/provider-parameters/bulk` | Create multiple parameters |
-| `PUT` | `/api/v1/provider-parameters/bulk` | Update multiple parameters |
-| `DELETE` | `/api/v1/provider-parameters/bulk` | Delete multiple parameters |
-
-**Example - Bulk Create**:
-```json
-{
-  "parameters": [
-    {
-      "providerId": "550e8400-e29b-41d4-a716-446655440400",
-      "parameterName": "api_timeout",
-      "parameterValue": "30000",
-      "parameterType": "INTEGER"
-    },
-    {
-      "providerId": "550e8400-e29b-41d4-a716-446655440400",
-      "parameterName": "retry_attempts",
-      "parameterValue": "3",
-      "parameterType": "INTEGER"
-    }
-  ]
-}
-```
 
 ---
 
@@ -1041,41 +950,41 @@ public Mono<String> getRequiredParameter(
 
 ### Parameter Naming
 
-#### ✅ DO:
+#### DO:
 
 1. **Use Descriptive Names**
    ```
-   ✅ api_timeout
-   ✅ max_transaction_amount
-   ✅ webhook_secret
+   api_timeout
+   max_transaction_amount
+   webhook_secret
 
-   ❌ timeout
-   ❌ max
-   ❌ secret
+   timeout
+   max
+   secret
    ```
 
 2. **Use Lowercase with Underscores**
    ```
-   ✅ api_timeout
-   ✅ max_retry_attempts
+   api_timeout
+   max_retry_attempts
 
-   ❌ apiTimeout (camelCase)
-   ❌ API_TIMEOUT (UPPERCASE)
-   ❌ api-timeout (kebab-case)
+   apiTimeout (camelCase)
+   API_TIMEOUT (UPPERCASE)
+   api-timeout (kebab-case)
    ```
 
 3. **Group Related Parameters**
    ```
-   ✅ stripe_api_key
-   ✅ stripe_api_secret
-   ✅ stripe_webhook_secret
+   stripe_api_key
+   stripe_api_secret
+   stripe_webhook_secret
 
-   ❌ api_key
-   ❌ secret
-   ❌ webhook
+   api_key
+   secret
+   webhook
    ```
 
-#### ❌ DON'T:
+#### DON'T:
 
 1. **Don't Use Ambiguous Names**
    - Avoid generic names like "value", "data", "config"
@@ -1087,7 +996,7 @@ public Mono<String> getRequiredParameter(
 
 ### Parameter Organization
 
-#### ✅ DO:
+#### DO:
 
 1. **Use Categories**
    ```yaml
@@ -1127,7 +1036,7 @@ public Mono<String> getRequiredParameter(
 
 ### Security
 
-#### ✅ DO:
+#### DO:
 
 1. **Mark Secrets as Secret**
    ```json
@@ -1164,7 +1073,7 @@ public Mono<String> getRequiredParameter(
    }
    ```
 
-#### ❌ DON'T:
+#### DON'T:
 
 1. **Don't Store Secrets in Plain Text**
    - Always use `isSecret=true` for sensitive values
@@ -1180,7 +1089,7 @@ public Mono<String> getRequiredParameter(
 
 ### Validation
 
-#### ✅ DO:
+#### DO:
 
 1. **Validate Input**
    ```json
@@ -1209,7 +1118,7 @@ public Mono<String> getRequiredParameter(
    }
    ```
 
-#### ❌ DON'T:
+#### DON'T:
 
 1. **Don't Skip Validation**
    - Always validate parameter values
@@ -1364,12 +1273,12 @@ public class WebhookConfig {
 
 Provider Parameters enable **flexible, secure, and maintainable configuration** for Firefly:
 
-- ✅ **Hierarchical**: Tenant-specific overrides global defaults
-- ✅ **Type-Safe**: Strongly typed with validation
-- ✅ **Secure**: Automatic encryption for secrets
-- ✅ **Flexible**: Support for simple and complex configurations
-- ✅ **Auditable**: All changes logged for compliance
-- ✅ **Environment-Aware**: Different settings per environment
+- **Hierarchical**: Tenant-specific overrides global defaults
+- **Type-Safe**: Strongly typed with validation
+- **Secure**: Automatic encryption for secrets
+- **Flexible**: Support for simple and complex configurations
+- **Auditable**: All changes logged for compliance
+- **Environment-Aware**: Different settings per environment
 
 For more information, see:
 - [Provider Management](./providers.md)
@@ -1378,5 +1287,5 @@ For more information, see:
 
 ---
 
-**[⬆ Back to Top](#provider-parameter-configuration)**
+**[Back to Top](#provider-parameter-configuration)**
 

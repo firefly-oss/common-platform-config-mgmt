@@ -3,24 +3,24 @@
 **Enterprise-grade multi-tenant configuration management for modern core banking**
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![Java](https://img.shields.io/badge/Java-21-orange.svg)](https://openjdk.org/projects/jdk/21/)
-[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.2.2-brightgreen.svg)](https://spring.io/projects/spring-boot)
+[![Java](https://img.shields.io/badge/Java-25-orange.svg)](https://openjdk.org/projects/jdk/25/)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.10-brightgreen.svg)](https://spring.io/projects/spring-boot)
 
 ---
 
-## ✅ System Status
+## System Status
 
 **Current Version:** 1.0.0
-**Build Status:** ✅ Passing
-**Application Status:** ✅ Running on http://localhost:8080
-**Database:** ✅ PostgreSQL 17.6 with 16 tables
-**Entities:** ✅ 16 entities with complete stack (Entity, DTO, Repository, Mapper, Service, Controller)
-**API Endpoints:** ✅ 80+ REST endpoints with OpenAPI documentation
-**Swagger UI:** ✅ Available at http://localhost:8080/swagger-ui.html
+**Build Status:** Passing
+**Application Status:** Running on http://localhost:8080
+**Database:** PostgreSQL 17.6 with 17 tables
+**Entities:** 17 entities with complete stack (Entity, DTO, Repository, Mapper, Service, Controller)
+**API Endpoints:** 80+ REST endpoints with OpenAPI documentation
+**Swagger UI:** Available at http://localhost:8080/swagger-ui.html
 
 ---
 
-## 📋 Table of Contents
+## Table of Contents
 
 - [System Status](#-system-status)
 - [Documentation Index](#-documentation-index)
@@ -37,7 +37,7 @@
 
 ---
 
-## 📚 Documentation Index
+## Documentation Index
 
 This project has comprehensive documentation covering all aspects of the system:
 
@@ -57,7 +57,7 @@ This project has comprehensive documentation covering all aspects of the system:
 
 ---
 
-## 🎯 Introduction
+## Introduction
 
 The **Firefly Configuration Management Service** is a mission-critical microservice within the Firefly open-source core banking ecosystem. It serves as the **central nervous system** for managing multi-tenant configurations, orchestrating external provider integrations, and enabling comprehensive customization across the entire banking platform.
 
@@ -65,19 +65,19 @@ The **Firefly Configuration Management Service** is a mission-critical microserv
 
 This service addresses the fundamental challenge of operating a multi-tenant banking platform at scale by providing:
 
-#### 🎛️ Centralized Configuration
+#### Centralized Configuration
 Single source of truth for all platform configurations, eliminating configuration drift and ensuring consistency across environments.
 
-#### 🏢 Tenant Isolation
+#### Tenant Isolation
 Complete separation of data, settings, and integrations per tenant, ensuring security, compliance, and operational independence.
 
-#### 🔌 Provider Orchestration
+#### Provider Orchestration
 Dynamic management of external service integrations with support for multiple providers per capability, failover, and load balancing.
 
-#### 🎨 Flexible Customization
+#### Flexible Customization
 Per-tenant branding, parameters, business rules, and workflows without code changes or redeployment.
 
-#### 📊 Operational Excellence
+#### Operational Excellence
 Comprehensive audit trails, versioning, change management, and rollback capabilities for enterprise-grade operations.
 
 ### Why Configuration Management Matters
@@ -93,38 +93,38 @@ In modern banking platforms, configuration management is critical because:
 
 ---
 
-## 🏦 What is Firefly?
+## What is Firefly?
 
 **Firefly** is an open-source, cloud-native core banking platform designed for the next generation of financial services. It enables banks, fintech companies, and financial service providers to build, deploy, and scale digital banking experiences with unprecedented speed and flexibility.
 
 ### Key Capabilities
 
-#### 💳 Complete Banking Infrastructure
+#### Complete Banking Infrastructure
 - **Account Management**: Current accounts, savings accounts, deposits, and specialized accounts
 - **Payment Processing**: Domestic and international payments, SEPA, SWIFT, instant payments
 - **Card Issuing**: Debit cards, credit cards, virtual cards, and card management
 - **Loan Origination**: Personal loans, mortgages, business loans, and servicing
 - **Investment Management**: Wealth management, robo-advisory, and portfolio management
 
-#### 🌍 Multi-Tenant Architecture
+#### Multi-Tenant Architecture
 - **Isolated Environments**: Complete data and configuration isolation per tenant
 - **Shared Infrastructure**: Optimized resource utilization with tenant-specific customization
 - **Horizontal Scalability**: Scale individual tenants independently based on demand
 - **Resource Optimization**: Efficient use of compute, storage, and network resources
 
-#### 🔌 Extensive Integration Ecosystem
+#### Extensive Integration Ecosystem
 - **10+ Provider Types**: KYC, payments, cards, BaaS, compliance, notifications, and more
 - **Plug-and-Play**: Standardized integration patterns for rapid provider onboarding
 - **Redundancy Support**: Primary and backup providers for critical services
 - **Health Monitoring**: Real-time provider health checks and automatic failover
 
-#### 🎨 Complete Customization
+#### Complete Customization
 - **White-Label Branding**: Full visual customization per tenant
 - **Configurable Business Rules**: Fees, limits, workflows without code changes
 - **Flexible Product Catalog**: Tailored banking products per tenant
 - **Custom Workflows**: Tenant-specific approval processes and automation
 
-#### 🔒 Enterprise-Grade Security
+#### Enterprise-Grade Security
 - **End-to-End Encryption**: Data encryption at rest and in transit
 - **Role-Based Access Control**: Granular permissions and access management
 - **Audit Logging**: Comprehensive audit trails for compliance
@@ -132,7 +132,7 @@ In modern banking platforms, configuration management is critical because:
 
 ---
 
-## 🔑 Core Concepts
+## Core Concepts
 
 ### Tenant
 
@@ -170,6 +170,10 @@ Each tenant operates independently with its own:
 - **SUSPENDED**: Temporarily disabled (e.g., payment issues, compliance review)
 - **INACTIVE**: Not currently in use but data retained
 - **EXPIRED**: Subscription has expired
+- **MAINTENANCE**: Undergoing scheduled maintenance or upgrades
+- **DELETED**: Permanently removed
+
+**Note:** The default seed data includes: TRIAL, ACTIVE, SUSPENDED, INACTIVE, and EXPIRED. Additional statuses (MAINTENANCE, DELETED) can be added to the `tenant_statuses` lookup table as needed.
 
 #### Real-World Examples
 
@@ -864,11 +868,12 @@ Environment Config: Production Database
 
 #### Secrets Management
 
-Sensitive configuration values are **encrypted at rest**:
-- **Encryption**: AES-256 encryption for secret values
-- **Access Control**: Only authorized services can decrypt secrets
-- **Audit Trail**: All secret access is logged
-- **Rotation**: Support for secret rotation without downtime
+Sensitive configuration values are managed via **external vault references**:
+- **Vault Integration**: Secret values are stored in `common-platform-security-vault`, not in this service
+- **Reference Pattern**: When `isSecret=true`, the `credentialVaultId` field stores a UUID reference to the vault credential, and `configValue` must be null
+- **Access Control**: Only authorized services can decrypt secrets via the vault
+- **Audit Trail**: All secret access is logged in the vault
+- **Rotation**: Support for secret rotation without modifying configurations
 
 ---
 
@@ -909,14 +914,14 @@ Channel Config: Mobile Banking
 │   ├── Max Transactions/Day: 100
 │   └── Max Transactions/Hour: 20
 ├── Supported Features
-│   ├── Transfers: ✅ Enabled
-│   ├── Payments: ✅ Enabled
-│   ├── Deposits: ❌ Disabled (mobile check deposit coming soon)
-│   ├── Withdrawals: ❌ Disabled (ATM only)
-│   ├── Account Opening: ✅ Enabled
-│   ├── Loan Applications: ✅ Enabled
-│   ├── Card Management: ✅ Enabled
-│   └── Bill Payments: ✅ Enabled
+│   ├── Transfers: Enabled
+│   ├── Payments: Enabled
+│   ├── Deposits: Disabled (mobile check deposit coming soon)
+│   ├── Withdrawals: Disabled (ATM only)
+│   ├── Account Opening: Enabled
+│   ├── Loan Applications: Enabled
+│   ├── Card Management: Enabled
+│   └── Bill Payments: Enabled
 ├── Security Configuration
 │   ├── Requires MFA: true
 │   ├── Requires Biometric: true (Face ID/Touch ID)
@@ -1013,7 +1018,7 @@ This allows the bank to **balance convenience with security** across different c
 
 ---
 
-## 🏗️ Architecture Overview
+## Architecture Overview
 
 ### System Architecture
 
@@ -1079,7 +1084,7 @@ common-platform-config-mgmt/
 │
 ├── common-platform-config-mgmt-core/
 │   ├── Services (Business logic)
-│   ├── Mappers (Entity ↔ DTO conversion)
+│   ├── Mappers (Entity DTO conversion)
 │   ├── Validators (Business rule validation)
 │   └── Purpose: Business logic and orchestration
 │
@@ -1105,11 +1110,11 @@ common-platform-config-mgmt/
 
 ---
 
-## 💻 Technology Stack
+## Technology Stack
 
 ### Core Technologies
 
-#### Java 21 (LTS)
+#### Java 25 (LTS)
 Latest Long-Term Support version with modern language features:
 - **Virtual Threads**: Lightweight concurrency for high throughput (Project Loom)
 - **Pattern Matching**: Cleaner, more expressive code with pattern matching for switch
@@ -1117,7 +1122,7 @@ Latest Long-Term Support version with modern language features:
 - **Sealed Classes**: Controlled inheritance hierarchies for better type safety
 - **Text Blocks**: Multi-line string literals for better readability
 
-#### Spring Boot 3.2.2
+#### Spring Boot 3.5.10
 Enterprise-grade application framework with:
 - **Auto-configuration**: Rapid application setup with sensible defaults
 - **Production-ready**: Built-in metrics, health checks, and monitoring
@@ -1145,7 +1150,7 @@ Reactive database access:
 
 | Technology | Purpose | Benefits |
 |------------|---------|----------|
-| **PostgreSQL 14+** | Primary database | ACID compliance, JSON support, full-text search, scalability |
+| **PostgreSQL 17+** | Primary database | ACID compliance, JSON support, full-text search, scalability |
 | **Flyway** | Database migrations | Version control, repeatable migrations, rollback support |
 | **MapStruct** | Object mapping | Type-safe, compile-time generation, high performance |
 | **Lombok** | Boilerplate reduction | Less code, better readability, maintainability |
@@ -1158,7 +1163,7 @@ Reactive database access:
 
 ---
 
-## 📊 Data Model
+## Data Model
 
 ### Entity Relationship Diagram
 
@@ -1274,34 +1279,36 @@ Reactive database access:
 - **provider_value_mappings**: Value translation rules for provider integration
 - **webhook_configs**: Centralized webhook management with authentication and retry logic
 
-#### Enterprise Features (6 tables)
+#### Enterprise Features (8 tables)
 - **feature_flags**: Feature toggles with rollout percentage and targeting
 - **tenant_settings**: Comprehensive operational settings (rate limiting, security, circuit breakers, compliance)
 - **configuration_audits**: Complete audit trail of all configuration changes with rollback capability
 - **environment_configs**: Environment-specific configurations (dev, staging, production) with secrets management
 - **channel_configs**: Banking channel configurations (Web, Mobile, ATM, Branch, etc.) with features, limits, and security
+- **channel_config_parameters**: Additional parameters for channel configurations
+- **api_process_mappings**: Mappings between API operations and business processes
 
 ### Database Features
 
 - **UUID Primary Keys**: Globally unique identifiers for distributed systems
 - **JSON Columns**: Flexible metadata storage with JSON support
 - **Timestamps**: Created/updated timestamps for audit trails
-- **Soft Deletes**: Logical deletion with retention for compliance
+- **Delete Operations**: Standard delete operations (some controllers implement soft delete via active flag, others perform hard deletes)
 - **Indexes**: Optimized indexes for common query patterns
 - **Constraints**: Foreign keys, unique constraints, check constraints
 
 ---
 
-## 🚀 Quick Start Guide
+## Quick Start Guide
 
 ### Step 1: Prerequisites
 
 Ensure you have the following installed:
 
 ```bash
-# Check Java version (must be 21+)
+# Check Java version (must be 25+)
 java -version
-# Expected: openjdk version "21.0.x"
+# Expected: openjdk version "25.x"
 
 # Check Maven version (must be 3.8+)
 mvn -version
@@ -1415,13 +1422,13 @@ curl http://localhost:8080/actuator/health
 # Access Swagger UI
 open http://localhost:8080/swagger-ui.html
 
-# Or use curl to test API
-curl http://localhost:8080/api/v1/tenants
+# Or use curl to test API (use POST /filter to list entities)
+curl -X POST http://localhost:8080/api/v1/tenants/filter -H "Content-Type: application/json" -d '{}'
 ```
 
 ---
 
-## 🎯 Use Cases
+## Use Cases
 
 ### Use Case 1: Multi-Brand Banking Institution
 
@@ -1484,10 +1491,10 @@ Tenant 2: "DigitalBank"
 ```
 
 **Benefits**:
-- ✅ Single platform, multiple brands
-- ✅ Shared infrastructure reduces costs by 60%
-- ✅ Independent branding and user experiences
-- ✅ Rapid launch of new brands (weeks vs. months)
+- Single platform, multiple brands
+- Shared infrastructure reduces costs by 60%
+- Independent branding and user experiences
+- Rapid launch of new brands (weeks vs. months)
 
 ---
 
@@ -1554,10 +1561,10 @@ Tenant: "GermanyBranch"
 ```
 
 **Benefits**:
-- ✅ Rapid geographic expansion (3 countries in 6 months)
-- ✅ Local compliance without platform changes
-- ✅ Shared core platform, localized experiences
-- ✅ Centralized management, distributed operations
+- Rapid geographic expansion (3 countries in 6 months)
+- Local compliance without platform changes
+- Shared core platform, localized experiences
+- Centralized management, distributed operations
 
 ---
 
@@ -1604,11 +1611,11 @@ Tenant: "RetailBankingBrand"
 ```
 
 **Benefits**:
-- ✅ Launch banking services in 3 months
-- ✅ No banking infrastructure investment
-- ✅ Maintain complete brand control
-- ✅ Increase customer loyalty and lifetime value
-- ✅ New revenue stream from banking services
+- Launch banking services in 3 months
+- No banking infrastructure investment
+- Maintain complete brand control
+- Increase customer loyalty and lifetime value
+- New revenue stream from banking services
 
 ---
 
@@ -1659,11 +1666,11 @@ Value Mappings (handle different provider formats):
 ```
 
 **Benefits**:
-- ✅ 99.99% uptime for critical services
-- ✅ Automatic failover without manual intervention
-- ✅ Cost optimization by using cheaper providers
-- ✅ No code changes when switching providers
-- ✅ Unified interface despite different provider APIs
+- 99.99% uptime for critical services
+- Automatic failover without manual intervention
+- Cost optimization by using cheaper providers
+- No code changes when switching providers
+- Unified interface despite different provider APIs
 
 ---
 
@@ -1708,11 +1715,11 @@ Tenant-Specific Overrides:
 ```
 
 **Benefits**:
-- ✅ Zero-downtime feature deployment
-- ✅ Instant rollback if issues detected
-- ✅ A/B testing capabilities
-- ✅ Tenant-specific feature access
-- ✅ Reduced deployment risk
+- Zero-downtime feature deployment
+- Instant rollback if issues detected
+- A/B testing capabilities
+- Tenant-specific feature access
+- Reduced deployment risk
 
 ---
 
@@ -1763,11 +1770,11 @@ Compliance Benefits:
 ```
 
 **Benefits**:
-- ✅ Complete regulatory compliance
-- ✅ Tamper-proof audit trail
-- ✅ Instant rollback capability
-- ✅ Security breach detection
-- ✅ Accountability and attribution
+- Complete regulatory compliance
+- Tamper-proof audit trail
+- Instant rollback capability
+- Security breach detection
+- Accountability and attribution
 
 ---
 
@@ -1807,20 +1814,23 @@ Configuration: Database Connection
     ├── Is Secret: false
     └── Category: database
 
-Configuration: API Keys (Secrets)
+Configuration: API Keys (Secrets via Vault)
 ├── Development:
 │   ├── Config Key: stripe.api_key
-│   ├── Config Value: sk_test_abc123xyz789 (encrypted)
+│   ├── Config Value: null (stored in vault)
+│   ├── Credential Vault ID: dev-vault-credential-uuid
 │   ├── Is Secret: true
 │   └── Access: Development team only
 ├── Staging:
 │   ├── Config Key: stripe.api_key
-│   ├── Config Value: sk_test_staging_xyz789 (encrypted)
+│   ├── Config Value: null (stored in vault)
+│   ├── Credential Vault ID: staging-vault-credential-uuid
 │   ├── Is Secret: true
 │   └── Access: QA team only
 └── Production:
     ├── Config Key: stripe.api_key
-    ├── Config Value: sk_live_prod_xyz789 (encrypted)
+    ├── Config Value: null (stored in vault)
+    ├── Credential Vault ID: prod-vault-credential-uuid
     ├── Is Secret: true
     └── Access: Operations team only (restricted)
 
@@ -1831,11 +1841,11 @@ Configuration Inheritance:
 ```
 
 **Benefits**:
-- ✅ Environment isolation
-- ✅ Secrets management with encryption
-- ✅ Configuration inheritance
-- ✅ Access control per environment
-- ✅ Prevent production credential leaks
+- Environment isolation
+- Secrets management via vault references
+- Configuration inheritance
+- Access control per environment
+- Prevent production credential leaks
 
 ---
 
@@ -1918,19 +1928,19 @@ Enterprise Tenant Settings:
 ```
 
 **Benefits**:
-- ✅ Tiered service offerings
-- ✅ DDoS protection
-- ✅ Compliance per tenant
-- ✅ Flexible security policies
-- ✅ Resource optimization
+- Tiered service offerings
+- DDoS protection
+- Compliance per tenant
+- Flexible security policies
+- Resource optimization
 
 ---
 
-## ✅ Best Practices
+## Best Practices
 
 ### Tenant Management
 
-#### ✅ DO:
+#### DO:
 
 1. **Implement Complete Data Isolation**
    ```sql
@@ -1938,7 +1948,7 @@ Enterprise Tenant Settings:
    SELECT * FROM accounts WHERE tenant_id = :tenantId;
 
    -- Never query across tenants
-   -- ❌ SELECT * FROM accounts; -- WRONG!
+   -- SELECT * FROM accounts; -- WRONG!
    ```
 
 2. **Validate Tenant Context in All API Requests**
@@ -1974,7 +1984,7 @@ Enterprise Tenant Settings:
    );
    ```
 
-#### ❌ DON'T:
+#### DON'T:
 
 1. **Share Sensitive Data Between Tenants**
    - Never expose one tenant's data to another
@@ -1996,13 +2006,17 @@ Enterprise Tenant Settings:
 
 ### Provider Configuration
 
-#### ✅ DO:
+#### DO:
 
-1. **Encrypt All Sensitive Credentials**
+1. **Store Sensitive Credentials in the Security Vault**
    ```java
-   @Column(name = "parameter_value")
-   @Convert(converter = EncryptedStringConverter.class)
-   private String parameterValue; // Encrypted at rest
+   // Use credentialVaultId to reference secrets stored in common-platform-security-vault
+   ProviderParameterDTO.builder()
+       .parameterName("api_key")
+       .isSecret(true)
+       .credentialVaultId(vaultCredentialUuid.toString())  // Reference to vault
+       .parameterValue(null)  // Must be null for secrets
+       .build();
    ```
 
 2. **Use Environment-Specific Configurations**
@@ -2060,11 +2074,11 @@ Enterprise Tenant Settings:
    );
    ```
 
-#### ❌ DON'T:
+#### DON'T:
 
 1. **Store Credentials in Plain Text**
-   - Always encrypt sensitive data
-   - Use secret management systems (Vault, AWS Secrets Manager)
+   - Always use the vault integration pattern (`isSecret=true` + `credentialVaultId`)
+   - Store credentials in `common-platform-security-vault`, not in `parameterValue`
 
 2. **Use Production Credentials in Development**
    - Use sandbox/test credentials in non-production
@@ -2086,18 +2100,19 @@ Enterprise Tenant Settings:
 
 ### Parameter Management
 
-#### ✅ DO:
+#### DO:
 
 1. **Document All Parameters**
    ```java
-   @ProviderParameter(
-       name = "api_timeout",
-       description = "API request timeout in milliseconds",
-       type = ParameterType.INTEGER,
-       defaultValue = "30000",
-       validationRegex = "^[0-9]+$",
-       category = "connection"
-   )
+   // Use descriptive fields when creating parameters via ProviderParameterDTO
+   ProviderParameterDTO.builder()
+       .parameterName("api_timeout")
+       .description("API request timeout in milliseconds")
+       .parameterType("INTEGER")
+       .defaultValue("30000")
+       .validationRegex("^[0-9]+$")
+       .category("connection")
+       .build();
    ```
 
 2. **Validate Parameter Values Before Saving**
@@ -2172,7 +2187,7 @@ Enterprise Tenant Settings:
    }
    ```
 
-#### ❌ DON'T:
+#### DON'T:
 
 1. **Create Duplicate Parameters**
    - Use unique constraints on (providerId, tenantId, parameterName)
@@ -2182,9 +2197,9 @@ Enterprise Tenant Settings:
    - Always validate parameter values
    - Use type-safe validation
 
-3. **Use Parameters for Secrets**
-   - Use dedicated secret management (Vault, AWS Secrets Manager)
-   - Mark parameters as `isSecret=true` for encryption
+3. **Store Secret Values Directly in Parameters**
+   - Mark parameters as `isSecret=true` and use `credentialVaultId` to reference credentials in `common-platform-security-vault`
+   - Never store actual secret values in `parameterValue` when `isSecret=true`
 
 4. **Change Parameters Without Testing**
    - Test parameter changes in non-production first
@@ -2196,7 +2211,7 @@ Enterprise Tenant Settings:
 
 ---
 
-## 📚 Documentation
+## Documentation
 
 ### Detailed Guides
 
@@ -2222,15 +2237,15 @@ Features:
 
 ---
 
-## 📞 Support
+## Support
 
 ### Community Resources
 
-- 📚 **Documentation**: [docs/](.)
-- 🐛 **Issues**: [GitHub Issues](https://github.com/firefly-oss/common-platform-config-mgmt/issues)
-- 💬 **Community**: [Firefly Community](https://community.firefly-banking.org)
-- 🌐 **Website**: [firefly-banking.org](https://firefly-banking.org)
-- 📧 **Email**: support@firefly-banking.org
+- **Documentation**: [docs/](.)
+- **Issues**: [GitHub Issues](https://github.com/firefly-oss/common-platform-config-mgmt/issues)
+- **Community**: [Firefly Community](https://community.firefly-banking.org)
+- **Website**: [firefly-banking.org](https://firefly-banking.org)
+- **Email**: support@firefly-banking.org
 
 ### Getting Help
 
@@ -2249,16 +2264,16 @@ Features:
 We welcome contributions! See [CONTRIBUTING.md](../CONTRIBUTING.md) for guidelines.
 
 **Ways to contribute:**
-- 🐛 Report bugs
-- 💡 Suggest features
-- 📝 Improve documentation
-- 🔧 Submit pull requests
-- ⭐ Star the repository
-- 📢 Spread the word
+- Report bugs
+- Suggest features
+- Improve documentation
+- Submit pull requests
+- Star the repository
+- Spread the word
 
 ---
 
-## 📄 License
+## License
 
 This project is licensed under the **Apache License 2.0**.
 
@@ -2282,13 +2297,13 @@ limitations under the License.
 
 ---
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
-Built with ❤️ by the **Firefly Open Source Community**
+Built with by the **Firefly Open Source Community**
 
 Special thanks to all contributors who have helped make Firefly better!
 
 ---
 
-**[⬆ Back to Top](#firefly-configuration-management-service)**
+**[Back to Top](#firefly-configuration-management-service)**
 

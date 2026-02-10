@@ -4,7 +4,7 @@
 
 ---
 
-## 📋 Table of Contents
+## Table of Contents
 
 - [Overview](#overview)
 - [What is a Provider?](#what-is-a-provider)
@@ -38,12 +38,12 @@ Providers enable Firefly to:
 
 Each provider has:
 
-- ✅ **Type Classification**: Categorized by capability (KYC, PAYMENT, CARD, etc.)
-- ✅ **Connection Details**: Base URL, API version, authentication
-- ✅ **Status Management**: ACTIVE, INACTIVE, MAINTENANCE, DEPRECATED
-- ✅ **Dynamic Parameters**: Configurable settings per provider and tenant
-- ✅ **Value Mappings**: Translation between Firefly and provider formats
-- ✅ **Multi-Tenant Support**: Shared or dedicated per tenant
+- **Type Classification**: Categorized by capability (KYC, PAYMENT, CARD, etc.)
+- **Connection Details**: Base URL, API version, authentication
+- **Status Management**: ACTIVE, INACTIVE, MAINTENANCE, DEPRECATED
+- **Dynamic Parameters**: Configurable settings per provider and tenant
+- **Value Mappings**: Translation between Firefly and provider formats
+- **Multi-Tenant Support**: Shared or dedicated per tenant
 
 ---
 
@@ -494,7 +494,7 @@ Firefly supports **10 distinct provider types**, each serving a specific purpose
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| `code` | String | Yes | Unique provider identifier (2-20 chars, uppercase) |
+| `code` | String | Yes | Unique provider identifier (2-50 chars) |
 | `name` | String | Yes | Human-readable provider name |
 | `description` | Text | No | Detailed description of the provider |
 | `providerTypeId` | UUID | Yes | Reference to provider type (KYC, PAYMENT, etc.) |
@@ -522,21 +522,11 @@ Firefly supports **10 distinct provider types**, each serving a specific purpose
 
 ### Retrieving Providers
 
-**Get All Providers**: `GET /api/v1/providers`
-
-**Query Parameters**:
-- `page`: Page number (default: 0)
-- `size`: Page size (default: 20)
-- `sort`: Sort field and direction (e.g., "name,asc")
-- `type`: Filter by provider type ID
-- `status`: Filter by provider status ID
-- `code`: Filter by provider code
-
 **Get Single Provider**: `GET /api/v1/providers/{id}`
 
-**Get Provider by Code**: `GET /api/v1/providers/code/{code}`
+**Filter Providers**: `POST /api/v1/providers/filter`
 
-**Get Providers by Type**: `GET /api/v1/providers/type/{typeId}`
+Use the filter endpoint with a `FilterRequest` body to search providers with pagination and criteria.
 
 ### Deleting a Provider
 
@@ -558,8 +548,8 @@ Firefly supports **10 distinct provider types**, each serving a specific purpose
   "providerId": "550e8400-e29b-41d4-a716-446655440400",
   "tenantId": "550e8400-e29b-41d4-a716-446655440000",
   "isPrimary": true,
-  "priority": 1,
-  "isActive": true,
+  "priority": 10,
+  "enabled": true,
   "metadata": "{\"contract_id\":\"CONTRACT-12345\",\"start_date\":\"2025-01-01\"}"
 }
 ```
@@ -571,8 +561,11 @@ Firefly supports **10 distinct provider types**, each serving a specific purpose
 | `providerId` | UUID | Yes | Provider to associate |
 | `tenantId` | UUID | Yes | Tenant to associate with |
 | `isPrimary` | Boolean | No | Whether this is the primary provider for this capability |
-| `priority` | Integer | No | Priority for failover (1 = highest priority) |
-| `isActive` | Boolean | No | Whether association is active |
+| `priority` | Integer | No | Priority for provider selection (higher = preferred) |
+| `enabled` | Boolean | No | Whether this provider is enabled for the tenant |
+| `autoFailoverEnabled` | Boolean | No | Whether automatic failover is enabled |
+| `fallbackProviderId` | UUID | No | Reference to fallback provider |
+| `billingModel` | String | No | Billing model (TRANSACTION_BASED, VOLUME_BASED, FLAT_FEE, HYBRID) |
 | `metadata` | JSON | No | Additional metadata (contract details, etc.) |
 
 ### Provider Priority and Failover
@@ -606,16 +599,11 @@ Payment Providers for Tenant A:
 
 ### Getting Provider-Tenant Associations
 
-**Get All Associations**: `GET /api/v1/provider-tenants`
+**Get Single Association**: `GET /api/v1/provider-tenants/{id}`
 
-**Get Associations for Tenant**: `GET /api/v1/provider-tenants/tenant/{tenantId}`
+**Filter Associations**: `POST /api/v1/provider-tenants/filter`
 
-**Get Associations for Provider**: `GET /api/v1/provider-tenants/provider/{providerId}`
-
-**Get Primary Provider for Tenant and Type**:
-```
-GET /api/v1/provider-tenants/tenant/{tenantId}/type/{typeId}/primary
-```
+Use the filter endpoint with a `FilterRequest` body to search associations by tenant, provider, or other criteria with pagination.
 
 ### Updating an Association
 
@@ -672,16 +660,18 @@ GET /api/v1/provider-tenants/tenant/{tenantId}/type/{typeId}/primary
 
 ### Changing Provider Status
 
-**Endpoint**: `PUT /api/v1/providers/{id}/status`
+To change a provider's status, update the provider's `providerStatusId` field using the standard update endpoint.
+
+**Endpoint**: `PUT /api/v1/providers/{id}`
 
 **Request Body**:
 ```json
 {
-  "statusId": "550e8400-e29b-41d4-a716-446655440301",
-  "reason": "Provider API experiencing issues",
-  "effectiveDate": "2025-01-15T00:00:00Z"
+  "providerStatusId": "550e8400-e29b-41d4-a716-446655440301"
 }
 ```
+
+**Note**: There is no dedicated status change endpoint. Use the standard provider update endpoint and set the `providerStatusId` field to the desired status.
 
 ---
 
@@ -691,40 +681,38 @@ GET /api/v1/provider-tenants/tenant/{tenantId}/type/{typeId}/primary
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| `GET` | `/api/v1/providers` | List all providers (paginated) |
 | `GET` | `/api/v1/providers/{id}` | Get provider by ID |
-| `GET` | `/api/v1/providers/code/{code}` | Get provider by code |
-| `GET` | `/api/v1/providers/type/{typeId}` | Get providers by type |
+| `POST` | `/api/v1/providers/filter` | Filter providers with pagination and criteria |
 | `POST` | `/api/v1/providers` | Create new provider |
 | `PUT` | `/api/v1/providers/{id}` | Update provider |
 | `DELETE` | `/api/v1/providers/{id}` | Delete provider |
-| `PUT` | `/api/v1/providers/{id}/status` | Change provider status |
 
 ### Provider Type Endpoints
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| `GET` | `/api/v1/provider-types` | List all provider types |
 | `GET` | `/api/v1/provider-types/{id}` | Get type by ID |
-| `GET` | `/api/v1/provider-types/code/{code}` | Get type by code |
+| `POST` | `/api/v1/provider-types/filter` | Filter provider types |
+| `POST` | `/api/v1/provider-types` | Create provider type |
+| `PUT` | `/api/v1/provider-types/{id}` | Update provider type |
+| `DELETE` | `/api/v1/provider-types/{id}` | Delete provider type |
 
 ### Provider Status Endpoints
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| `GET` | `/api/v1/provider-statuses` | List all provider statuses |
 | `GET` | `/api/v1/provider-statuses/{id}` | Get status by ID |
-| `GET` | `/api/v1/provider-statuses/code/{code}` | Get status by code |
+| `POST` | `/api/v1/provider-statuses/filter` | Filter provider statuses |
+| `POST` | `/api/v1/provider-statuses` | Create provider status |
+| `PUT` | `/api/v1/provider-statuses/{id}` | Update provider status |
+| `DELETE` | `/api/v1/provider-statuses/{id}` | Delete provider status |
 
 ### Provider-Tenant Association Endpoints
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| `GET` | `/api/v1/provider-tenants` | List all associations |
 | `GET` | `/api/v1/provider-tenants/{id}` | Get association by ID |
-| `GET` | `/api/v1/provider-tenants/tenant/{tenantId}` | Get associations for tenant |
-| `GET` | `/api/v1/provider-tenants/provider/{providerId}` | Get associations for provider |
-| `GET` | `/api/v1/provider-tenants/tenant/{tenantId}/type/{typeId}/primary` | Get primary provider |
+| `POST` | `/api/v1/provider-tenants/filter` | Filter associations with criteria |
 | `POST` | `/api/v1/provider-tenants` | Create association |
 | `PUT` | `/api/v1/provider-tenants/{id}` | Update association |
 | `DELETE` | `/api/v1/provider-tenants/{id}` | Delete association |
@@ -735,7 +723,7 @@ GET /api/v1/provider-tenants/tenant/{tenantId}/type/{typeId}/primary
 
 ### Provider Selection
 
-#### ✅ DO:
+#### DO:
 
 1. **Evaluate Multiple Providers**
    - Compare features, pricing, SLAs
@@ -774,7 +762,7 @@ GET /api/v1/provider-tenants/tenant/{tenantId}/type/{typeId}/primary
        .build();
    ```
 
-#### ❌ DON'T:
+#### DON'T:
 
 1. **Don't Use Single Provider for Critical Services**
    - Always have backup providers
@@ -792,7 +780,7 @@ GET /api/v1/provider-tenants/tenant/{tenantId}/type/{typeId}/primary
 
 ### Provider Integration
 
-#### ✅ DO:
+#### DO:
 
 1. **Implement Circuit Breakers**
    ```java
@@ -884,7 +872,7 @@ GET /api/v1/provider-tenants/tenant/{tenantId}/type/{typeId}/primary
    }
    ```
 
-#### ❌ DON'T:
+#### DON'T:
 
 1. **Don't Hardcode Provider Logic**
    - Use configuration and parameters
@@ -902,13 +890,17 @@ GET /api/v1/provider-tenants/tenant/{tenantId}/type/{typeId}/primary
 
 ### Provider Security
 
-#### ✅ DO:
+#### DO:
 
-1. **Encrypt Sensitive Parameters**
+1. **Store Sensitive Parameters in the Security Vault**
    ```java
-   @Column(name = "parameter_value")
-   @Convert(converter = EncryptedStringConverter.class)
-   private String parameterValue; // Encrypted at rest
+   // Use credentialVaultId to reference secrets stored in common-platform-security-vault
+   ProviderParameterDTO.builder()
+       .parameterName("api_key")
+       .isSecret(true)
+       .credentialVaultId(vaultCredentialUuid.toString())  // Reference to vault
+       .parameterValue(null)  // Must be null for secrets
+       .build();
    ```
 
 2. **Use Environment-Specific Credentials**
@@ -953,7 +945,7 @@ GET /api/v1/provider-tenants/tenant/{tenantId}/type/{typeId}/primary
    }
    ```
 
-#### ❌ DON'T:
+#### DON'T:
 
 1. **Don't Store Credentials in Plain Text**
    - Always encrypt sensitive data
@@ -1057,11 +1049,11 @@ Result: 70% cost reduction on KYC
 
 Providers are the foundation of Firefly's integration ecosystem, enabling:
 
-- ✅ **Best-of-Breed**: Use specialized providers for each capability
-- ✅ **Flexibility**: Switch providers without platform changes
-- ✅ **Redundancy**: Multiple providers for high availability
-- ✅ **Cost Optimization**: Choose cost-effective providers
-- ✅ **Compliance**: Certified providers for regulated activities
+- **Best-of-Breed**: Use specialized providers for each capability
+- **Flexibility**: Switch providers without platform changes
+- **Redundancy**: Multiple providers for high availability
+- **Cost Optimization**: Choose cost-effective providers
+- **Compliance**: Certified providers for regulated activities
 
 For more information, see:
 - [Parameter Configuration](./parameters.md)
@@ -1070,5 +1062,5 @@ For more information, see:
 
 ---
 
-**[⬆ Back to Top](#provider-management)**
+**[Back to Top](#provider-management)**
 

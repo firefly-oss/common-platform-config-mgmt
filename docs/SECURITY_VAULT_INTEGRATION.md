@@ -21,12 +21,12 @@ This configuration management service **DOES NOT store credentials directly**. I
 
 ### Why This Architecture?
 
-✅ **Separation of Concerns**: Config management vs. Secret management  
-✅ **Enhanced Security**: Credentials are encrypted with AES-256-GCM in the vault  
-✅ **Credential Rotation**: Change credentials without modifying configurations  
-✅ **Centralized Auditing**: All credential access is logged in the vault  
-✅ **Regulatory Compliance**: Facilitates compliance with PCI-DSS, SOC2, ISO27001  
-✅ **Access Control**: Fine-grained access control with IP, service, and environment restrictions
+**Separation of Concerns**: Config management vs. Secret management  
+**Enhanced Security**: Credentials are encrypted with AES-256-GCM in the vault  
+**Credential Rotation**: Change credentials without modifying configurations  
+**Centralized Auditing**: All credential access is logged in the vault  
+**Regulatory Compliance**: Facilitates compliance with PCI-DSS, SOC2, ISO27001  
+**Access Control**: Fine-grained access control with IP, service, and environment restrictions
 
 ---
 
@@ -346,17 +346,17 @@ configClient.updateProviderParameter(param.getId(), param).block();
 The `credentialVaultId` field stores the **UUID** of the credential in the vault:
 
 ```
-✅ CORRECT: "550e8400-e29b-41d4-a716-446655440000"
-❌ WRONG:   "vault-cred-stripe-api-key-prod"
+CORRECT: "550e8400-e29b-41d4-a716-446655440000"
+WRONG:   "vault-cred-stripe-api-key-prod"
 ```
 
 ### 2. Never Log Credentials
 
 ```java
-// ❌ BAD
+// BAD
 log.info("API Key: {}", apiKey);
 
-// ✅ GOOD
+// GOOD
 log.info("API Key retrieved successfully");
 ```
 
@@ -431,7 +431,9 @@ return vaultClient.decryptCredential(credentialId, accessRequest)
 
 - `POST /api/v1/provider-parameters` - Create provider parameter
 - `GET /api/v1/provider-parameters/{id}` - Get provider parameter
+- `POST /api/v1/provider-parameters/filter` - Filter/search provider parameters
 - `PUT /api/v1/provider-parameters/{id}` - Update provider parameter
+- `DELETE /api/v1/provider-parameters/{id}` - Delete provider parameter
 
 ---
 

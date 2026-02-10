@@ -4,7 +4,7 @@
 
 ---
 
-## 📋 Table of Contents
+## Table of Contents
 
 - [Overview](#overview)
 - [What is a Tenant?](#what-is-a-tenant)
@@ -36,12 +36,12 @@ Tenants enable Firefly to support multiple banking operations from a single plat
 
 Each tenant has:
 
-- ✅ **Complete Data Isolation**: Customer data never crosses tenant boundaries
-- ✅ **Independent Configuration**: Business rules, limits, fees per tenant
-- ✅ **Custom Branding**: Unique visual identity and user experience
-- ✅ **Specific Providers**: Dedicated or shared external service providers
-- ✅ **Separate Compliance**: Region-specific regulatory requirements
-- ✅ **Isolated Operations**: Independent monitoring, logging, and alerting
+- **Complete Data Isolation**: Customer data never crosses tenant boundaries
+- **Independent Configuration**: Business rules, limits, fees per tenant
+- **Custom Branding**: Unique visual identity and user experience
+- **Specific Providers**: Dedicated or shared external service providers
+- **Separate Compliance**: Region-specific regulatory requirements
+- **Isolated Operations**: Independent monitoring, logging, and alerting
 
 ---
 
@@ -196,7 +196,7 @@ Providers:
      │ delete()
      ▼
 ┌──────────┐
-│ DELETED  │  Soft-deleted, pending permanent removal
+│ DELETED  │  Deleted (permanently removed)
 └──────────┘
 ```
 
@@ -277,7 +277,7 @@ Providers:
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| `code` | String | Yes | Unique tenant identifier (2-10 chars, uppercase) |
+| `code` | String | Yes | Unique tenant identifier (2-50 chars) |
 | `name` | String | Yes | Human-readable tenant name |
 | `description` | Text | No | Detailed description of the tenant |
 | `tenantStatusId` | UUID | Yes | Reference to tenant status (TRIAL, ACTIVE, etc.) |
@@ -291,7 +291,7 @@ Providers:
 | `technicalContactName` | String | Yes | Technical lead name |
 | `technicalContactEmail` | Email | Yes | Technical lead email |
 | `technicalContactPhone` | String | No | Technical lead phone |
-| `subscriptionTier` | Enum | Yes | TRIAL, BASIC, STANDARD, PREMIUM, ENTERPRISE |
+| `subscriptionTier` | String | No | Subscription tier level (e.g., ENTERPRISE) |
 | `subscriptionStartDate` | DateTime | Yes | Subscription start date |
 | `subscriptionEndDate` | DateTime | No | Subscription end date (null = no expiration) |
 | `isTrial` | Boolean | No | Whether tenant is in trial period |
@@ -314,27 +314,17 @@ Providers:
 
 ### Retrieving Tenants
 
-**Get All Tenants**: `GET /api/v1/tenants`
-
-**Query Parameters**:
-- `page`: Page number (default: 0)
-- `size`: Page size (default: 20)
-- `sort`: Sort field and direction (e.g., "name,asc")
-- `status`: Filter by status code (e.g., "ACTIVE")
-- `country`: Filter by country ID
-- `subscriptionTier`: Filter by subscription tier
-
 **Get Single Tenant**: `GET /api/v1/tenants/{id}`
 
-**Get Tenant by Code**: `GET /api/v1/tenants/code/{code}`
+**Filter Tenants**: `POST /api/v1/tenants/filter`
+
+Use the filter endpoint with a `FilterRequest` body to search tenants with pagination and criteria.
 
 ### Deleting a Tenant
 
 **Endpoint**: `DELETE /api/v1/tenants/{id}`
 
-**Note**: This is a **soft delete**. The tenant is marked as DELETED but data is retained for compliance and audit purposes.
-
-**Hard Delete**: Requires manual database operation after retention period expires.
+**Note**: This deletes the tenant. Returns HTTP 204 (No Content) on success.
 
 ---
 
@@ -417,7 +407,7 @@ public class TenantValidationFilter implements WebFilter {
 
 ### Isolation Best Practices
 
-#### ✅ DO:
+#### DO:
 
 1. **Always Filter by Tenant ID**
    ```java
@@ -456,7 +446,7 @@ public class TenantValidationFilter implements WebFilter {
    }
    ```
 
-#### ❌ DON'T:
+#### DON'T:
 
 1. **Never Query Across Tenants**
    ```java
@@ -489,7 +479,7 @@ public class TenantValidationFilter implements WebFilter {
 | **SUSPENDED** | `SUSPENDED` | Temporarily disabled (payment issues, compliance) | Read-only, no transactions |
 | **MAINTENANCE** | `MAINTENANCE` | Undergoing maintenance or upgrades | Read-only, no new customers |
 | **INACTIVE** | `INACTIVE` | Not currently in use, data retained | Read-only |
-| **DELETED** | `DELETED` | Soft-deleted, pending permanent removal | No operations |
+| **DELETED** | `DELETED` | Deleted (permanently removed) | No operations |
 
 ### Status Management
 
@@ -515,46 +505,18 @@ public class TenantValidationFilter implements WebFilter {
 
 ### Changing Tenant Status
 
-**Endpoint**: `PUT /api/v1/tenants/{id}/status`
+To change a tenant's status, update the tenant's `tenantStatusId` field using the standard update endpoint.
+
+**Endpoint**: `PUT /api/v1/tenants/{id}`
 
 **Request Body**:
 ```json
 {
-  "statusId": "550e8400-e29b-41d4-a716-446655440002",
-  "reason": "Payment failure - subscription expired",
-  "effectiveDate": "2025-01-15T00:00:00Z"
+  "tenantStatusId": "550e8400-e29b-41d4-a716-446655440002"
 }
 ```
 
-**Status Change Validation**:
-```java
-public Mono<Tenant> changeStatus(UUID tenantId, UUID newStatusId, String reason) {
-    return tenantRepository.findById(tenantId)
-        .zipWith(tenantStatusRepository.findById(newStatusId))
-        .flatMap(tuple -> {
-            Tenant tenant = tuple.getT1();
-            TenantStatus newStatus = tuple.getT2();
-
-            // Validate status transition
-            if (!isValidTransition(tenant.getStatusId(), newStatusId)) {
-                return Mono.error(new InvalidStatusTransitionException());
-            }
-
-            // Update status
-            tenant.setTenantStatusId(newStatusId);
-
-            // Audit log
-            auditLog.record(
-                tenantId: tenantId,
-                action: "STATUS_CHANGE",
-                oldStatus: tenant.getStatusId(),
-                newStatus: newStatusId,
-                reason: reason
-            );
-
-            return tenantRepository.save(tenant);
-        });
-}
+**Note**: There is no dedicated status change endpoint. Use the standard tenant update endpoint and set the `tenantStatusId` field to the desired status.
 ```
 
 ---
@@ -565,27 +527,34 @@ public Mono<Tenant> changeStatus(UUID tenantId, UUID newStatusId, String reason)
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| `GET` | `/api/v1/tenants` | List all tenants (paginated) |
 | `GET` | `/api/v1/tenants/{id}` | Get tenant by ID |
-| `GET` | `/api/v1/tenants/code/{code}` | Get tenant by code |
+| `POST` | `/api/v1/tenants/filter` | Filter tenants with pagination and criteria |
 | `POST` | `/api/v1/tenants` | Create new tenant |
 | `PUT` | `/api/v1/tenants/{id}` | Update tenant |
-| `DELETE` | `/api/v1/tenants/{id}` | Delete tenant (soft delete) |
-| `PUT` | `/api/v1/tenants/{id}/status` | Change tenant status |
+| `DELETE` | `/api/v1/tenants/{id}` | Delete tenant |
+| `POST` | `/api/v1/tenants/{tenantId}/providers/filter` | Filter tenant's provider relationships |
+| `POST` | `/api/v1/tenants/{tenantId}/providers` | Associate provider with tenant |
+| `GET` | `/api/v1/tenants/{tenantId}/providers/{id}` | Get tenant-provider relationship |
+| `PUT` | `/api/v1/tenants/{tenantId}/providers/{id}` | Update tenant-provider relationship |
+| `DELETE` | `/api/v1/tenants/{tenantId}/providers/{id}` | Remove provider from tenant |
 
 ### Tenant Status Endpoints
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| `GET` | `/api/v1/tenant-statuses` | List all tenant statuses |
 | `GET` | `/api/v1/tenant-statuses/{id}` | Get status by ID |
-| `GET` | `/api/v1/tenant-statuses/code/{code}` | Get status by code |
+| `POST` | `/api/v1/tenant-statuses/filter` | Filter tenant statuses |
+| `POST` | `/api/v1/tenant-statuses` | Create tenant status |
+| `PUT` | `/api/v1/tenant-statuses/{id}` | Update tenant status |
+| `DELETE` | `/api/v1/tenant-statuses/{id}` | Delete tenant status |
 
 ### Tenant Branding Endpoints
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
+| `GET` | `/api/v1/tenant-brandings/{id}` | Get branding by ID |
 | `GET` | `/api/v1/tenant-brandings/tenant/{tenantId}` | Get branding for tenant |
+| `POST` | `/api/v1/tenant-brandings/filter` | Filter tenant brandings |
 | `POST` | `/api/v1/tenant-brandings` | Create tenant branding |
 | `PUT` | `/api/v1/tenant-brandings/{id}` | Update tenant branding |
 | `DELETE` | `/api/v1/tenant-brandings/{id}` | Delete tenant branding |
@@ -596,7 +565,7 @@ public Mono<Tenant> changeStatus(UUID tenantId, UUID newStatusId, String reason)
 
 ### Tenant Creation
 
-#### ✅ DO:
+#### DO:
 
 1. **Validate Unique Tenant Code**
    ```java
@@ -659,7 +628,7 @@ public Mono<Tenant> changeStatus(UUID tenantId, UUID newStatusId, String reason)
    }
    ```
 
-#### ❌ DON'T:
+#### DON'T:
 
 1. **Don't Create Tenants Without Validation**
    - Always validate tenant code uniqueness
@@ -678,7 +647,7 @@ public Mono<Tenant> changeStatus(UUID tenantId, UUID newStatusId, String reason)
 
 ### Tenant Updates
 
-#### ✅ DO:
+#### DO:
 
 1. **Validate Changes Before Applying**
    ```java
@@ -720,7 +689,7 @@ public Mono<Tenant> changeStatus(UUID tenantId, UUID newStatusId, String reason)
    }
    ```
 
-#### ❌ DON'T:
+#### DON'T:
 
 1. **Don't Allow Changing Immutable Fields**
    - Tenant ID cannot be changed
@@ -734,18 +703,15 @@ public Mono<Tenant> changeStatus(UUID tenantId, UUID newStatusId, String reason)
 
 ### Tenant Deletion
 
-#### ✅ DO:
+#### DO:
 
-1. **Implement Soft Delete**
+1. **Handle Deletion Carefully**
    ```java
+   // The DELETE endpoint permanently removes the tenant and associated resources.
+   // Consider updating the tenant status to INACTIVE first for a grace period,
+   // then permanently delete via the DELETE endpoint.
    public Mono<Void> deleteTenant(UUID id) {
-       return tenantRepository.findById(id)
-           .flatMap(tenant -> {
-               tenant.setTenantStatusId(DELETED_STATUS_ID);
-               tenant.setDeletedAt(Instant.now());
-               return tenantRepository.save(tenant);
-           })
-           .then();
+       return tenantService.delete(id);
    }
    ```
 
@@ -783,12 +749,12 @@ public Mono<Tenant> changeStatus(UUID tenantId, UUID newStatusId, String reason)
    }
    ```
 
-#### ❌ DON'T:
+#### DON'T:
 
-1. **Don't Hard Delete Immediately**
-   - Use soft delete
-   - Retain data for compliance period
-   - Archive before permanent deletion
+1. **Don't Delete Without Precautions**
+   - Archive data before permanent deletion
+   - Retain data for compliance period if required
+   - Consider setting status to INACTIVE before permanently deleting
 
 2. **Don't Delete Without Checks**
    - Check for active customers
@@ -826,10 +792,10 @@ Tenant 3: "YouthBank"
 ```
 
 **Benefits**:
-- ✅ Separate branding per segment
-- ✅ Tailored products and pricing
-- ✅ Shared infrastructure (60% cost reduction)
-- ✅ Independent operations and reporting
+- Separate branding per segment
+- Tailored products and pricing
+- Shared infrastructure (60% cost reduction)
+- Independent operations and reporting
 
 ### Use Case 2: Geographic Expansion
 
@@ -861,10 +827,10 @@ Tenant: "GermanyBranch"
 ```
 
 **Benefits**:
-- ✅ Local compliance per country
-- ✅ Localized user experience
-- ✅ Region-specific providers
-- ✅ Centralized management
+- Local compliance per country
+- Localized user experience
+- Region-specific providers
+- Centralized management
 
 ### Use Case 3: White-Label Banking
 
@@ -882,10 +848,10 @@ Tenant: "RetailBankingBrand"
 ```
 
 **Benefits**:
-- ✅ Launch in 3 months
-- ✅ No banking infrastructure needed
-- ✅ Complete brand control
-- ✅ New revenue stream
+- Launch in 3 months
+- No banking infrastructure needed
+- Complete brand control
+- New revenue stream
 
 ---
 
@@ -893,11 +859,11 @@ Tenant: "RetailBankingBrand"
 
 Tenants are the foundation of Firefly's multi-tenant architecture, enabling:
 
-- ✅ **Complete Isolation**: Data, configuration, and operations
-- ✅ **Flexible Deployment**: Multi-brand, geographic, white-label
-- ✅ **Cost Efficiency**: Shared infrastructure, independent customization
-- ✅ **Rapid Launch**: New tenants in days, not months
-- ✅ **Compliance**: Region-specific regulatory requirements
+- **Complete Isolation**: Data, configuration, and operations
+- **Flexible Deployment**: Multi-brand, geographic, white-label
+- **Cost Efficiency**: Shared infrastructure, independent customization
+- **Rapid Launch**: New tenants in days, not months
+- **Compliance**: Region-specific regulatory requirements
 
 For more information, see:
 - [Provider Management](./providers.md)
@@ -906,5 +872,5 @@ For more information, see:
 
 ---
 
-**[⬆ Back to Top](#tenant-management)**
+**[Back to Top](#tenant-management)**
 
