@@ -18,7 +18,7 @@
 -- V3: Add Credential Vault Integration
 -- =====================================================
 -- This migration adds support for integrating with the
--- common-platform-security-vault microservice.
+-- core-common-security-vault microservice.
 -- Instead of storing credentials directly, we now store
 -- a reference ID to credentials managed by the vault.
 -- =====================================================
@@ -38,7 +38,7 @@ WHERE credential_vault_id IS NOT NULL;
 
 -- Add comment to clarify usage
 COMMENT ON COLUMN provider_parameters.credential_vault_id IS 
-'Reference ID to credential stored in common-platform-security-vault. Use this field when is_secret=true instead of parameter_value.';
+'Reference ID to credential stored in core-common-security-vault. Use this field when is_secret=true instead of parameter_value.';
 
 COMMENT ON COLUMN provider_parameters.parameter_value IS 
 'Direct value for non-secret parameters. For secret parameters (is_secret=true), use credential_vault_id instead.';
@@ -58,7 +58,7 @@ WHERE credential_vault_id IS NOT NULL;
 
 -- Add comment to clarify usage
 COMMENT ON COLUMN environment_configs.credential_vault_id IS 
-'Reference ID to credential stored in common-platform-security-vault. Use this field when is_secret=true instead of config_value.';
+'Reference ID to credential stored in core-common-security-vault. Use this field when is_secret=true instead of config_value.';
 
 COMMENT ON COLUMN environment_configs.config_value IS 
 'Direct value for non-secret configurations. For secret configurations (is_secret=true), use credential_vault_id instead.';

@@ -1,6 +1,6 @@
 openapi: 3.0.1
 info:
-  title: common-platform-config-mgmt
+  title: core-common-config-mgmt
   description: Common Platform Config Management Core Application
   contact:
     name: Firefly Software Solutions Inc

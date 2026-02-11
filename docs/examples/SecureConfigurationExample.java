@@ -22,7 +22,7 @@ import java.util.UUID;
  * 
  * IMPORTANT: These examples assume you have:
  * 1. ConfigManagementClient - client for this service
- * 2. SecurityVaultClient - client for common-platform-security-vault
+ * 2. SecurityVaultClient - client for core-common-security-vault
  */
 @Slf4j
 @Service

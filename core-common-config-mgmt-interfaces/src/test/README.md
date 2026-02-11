@@ -1,4 +1,4 @@
-# Tests for common-platform-config-mgmt-interfaces
+# Tests for core-common-config-mgmt-interfaces
 
 This directory contains unit tests for the interfaces module, specifically for the validation logic.
 
@@ -26,13 +26,13 @@ Comprehensive JUnit 5 test suite for the `@ValidSecretConfiguration` annotation 
 
 ```bash
 # Run all tests in the interfaces module
-mvn test -pl common-platform-config-mgmt-interfaces
+mvn test -pl core-common-config-mgmt-interfaces
 
 # Run only the validator tests
-mvn test -Dtest=SecretConfigurationValidatorTest -pl common-platform-config-mgmt-interfaces
+mvn test -Dtest=SecretConfigurationValidatorTest -pl core-common-config-mgmt-interfaces
 
 # Run tests with verbose output
-mvn test -Dtest=SecretConfigurationValidatorTest -pl common-platform-config-mgmt-interfaces -X
+mvn test -Dtest=SecretConfigurationValidatorTest -pl core-common-config-mgmt-interfaces -X
 ```
 
 ### Option 2: Using IDE

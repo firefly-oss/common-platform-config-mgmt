@@ -1,6 +1,6 @@
 # Security Vault Integration Guide
 
-**Integration with common-platform-security-vault for secure credential management**
+**Integration with core-common-security-vault for secure credential management**
 
 ## Table of Contents
 
@@ -17,7 +17,7 @@
 
 ## Overview
 
-This configuration management service **DOES NOT store credentials directly**. Instead, it stores **references** (credential IDs) to credentials that are securely managed by the `common-platform-security-vault` microservice.
+This configuration management service **DOES NOT store credentials directly**. Instead, it stores **references** (credential IDs) to credentials that are securely managed by the `core-common-security-vault` microservice.
 
 ### Why This Architecture?
 
@@ -41,7 +41,7 @@ This configuration management service **DOES NOT store credentials directly**. I
                  │ 1. Get configuration
                  ↓
 ┌─────────────────────────────────────────────────────────────────┐
-│         common-platform-config-mgmt (THIS SERVICE)              │
+│         core-common-config-mgmt (THIS SERVICE)              │
 │                                                                  │
 │  ┌──────────────────────────────────────────────────────────┐  │
 │  │ ProviderParameter / EnvironmentConfig                    │  │
@@ -70,7 +70,7 @@ This configuration management service **DOES NOT store credentials directly**. I
                  │    POST /api/v1/credentials/{id}/decrypt
                  ↓
 ┌─────────────────────────────────────────────────────────────────┐
-│         common-platform-security-vault                           │
+│         core-common-security-vault                           │
 │                                                                  │
 │  ┌──────────────────────────────────────────────────────────┐  │
 │  │ Credential                                                │  │
@@ -439,7 +439,7 @@ return vaultClient.decryptCredential(credentialId, accessRequest)
 
 ## Additional Resources
 
-- [Security Vault README](../../common-platform-security-vault/README.md)
+- [Security Vault README](../../core-common-security-vault/README.md)
 - [Security Vault API Documentation](http://localhost:8081/swagger-ui.html)
 - [Config Management API Documentation](http://localhost:8080/swagger-ui.html)
 

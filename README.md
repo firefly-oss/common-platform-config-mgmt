@@ -2,7 +2,7 @@
 
 **Enterprise-grade multi-tenant configuration management for the Firefly open-source core banking platform**
 
-[![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)](https://github.com/firefly-oss/common-platform-config-mgmt)
+[![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)](https://github.com/firefly-oss/core-common-config-mgmt)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 [![Java](https://img.shields.io/badge/java-25-orange.svg)](https://openjdk.org/projects/jdk/25/)
 [![Spring Boot](https://img.shields.io/badge/spring%20boot-3.5.10-green.svg)](https://spring.io/projects/spring-boot)
@@ -20,7 +20,7 @@ The Firefly Configuration Management Service is the **central configuration hub*
 - **Audit Trail**: Complete change tracking with rollback capability
 - **Webhook Management**: Centralized webhook configuration with retry logic
 - **Custom Branding**: Visual customization per tenant
-- **Secure Credential Management**: Integration with `common-platform-security-vault` for secure storage of API keys, passwords, and secrets
+- **Secure Credential Management**: Integration with `core-common-security-vault` for secure storage of API keys, passwords, and secrets
 
 ## Quick Start
 
@@ -34,14 +34,14 @@ The Firefly Configuration Management Service is the **central configuration hub*
 
 ```bash
 # Clone the repository
-git clone https://github.com/firefly-oss/common-platform-config-mgmt.git
-cd common-platform-config-mgmt
+git clone https://github.com/firefly-oss/core-common-config-mgmt.git
+cd core-common-config-mgmt
 
 # Build the project
 mvn clean install
 
 # Run the service
-cd common-platform-config-mgmt-web
+cd core-common-config-mgmt-web
 mvn spring-boot:run
 ```
 
@@ -54,7 +54,7 @@ http://localhost:8080/swagger-ui.html
 
 ## Security & Credential Management
 
-**Important**: This service **does NOT store credentials directly**. All sensitive information (API keys, passwords, secrets) is encrypted and stored securely in the `common-platform-security-vault` microservice using AES-256-GCM encryption.
+**Important**: This service **does NOT store credentials directly**. All sensitive information (API keys, passwords, secrets) is encrypted and stored securely in the `core-common-security-vault` microservice using AES-256-GCM encryption.
 
 ### How It Works
 
@@ -112,12 +112,12 @@ if (param.getIsSecret()) {
 ### Module Structure
 
 ```
-common-platform-config-mgmt/
-├── common-platform-config-mgmt-models/      # Entities, repositories, database migrations
-├── common-platform-config-mgmt-interfaces/  # DTOs and API contracts
-├── common-platform-config-mgmt-core/        # Business logic and services
-├── common-platform-config-mgmt-web/         # REST API controllers
-└── common-platform-config-mgmt-sdk/         # Auto-generated Java client
+core-common-config-mgmt/
+├── core-common-config-mgmt-models/      # Entities, repositories, database migrations
+├── core-common-config-mgmt-interfaces/  # DTOs and API contracts
+├── core-common-config-mgmt-core/        # Business logic and services
+├── core-common-config-mgmt-web/         # REST API controllers
+└── core-common-config-mgmt-sdk/         # Auto-generated Java client
 ```
 
 ### Key Entities (16 Total)
@@ -165,7 +165,7 @@ Comprehensive documentation is available in the [`docs/`](./docs) directory:
 - **[Parameter Configuration](./docs/parameters.md)** - Dynamic parameter management
 
 ### Security & Integration
-- **[Security Vault Integration](./docs/SECURITY_VAULT_INTEGRATION.md)** - **NEW!** Complete guide for secure credential management with `common-platform-security-vault`
+- **[Security Vault Integration](./docs/SECURITY_VAULT_INTEGRATION.md)** - **NEW!** Complete guide for secure credential management with `core-common-security-vault`
 - **[Secure Configuration Examples](./docs/examples/SecureConfigurationExample.java)** - Code examples for consuming secret parameters
 
 ## Technology Stack
@@ -214,7 +214,7 @@ The service uses a PostgreSQL database with **17 tables** (plus flyway_schema_hi
 
 **Total: 17 tables with indexes, foreign keys, and unique constraints**
 
-Migrations are managed by Flyway and located in `common-platform-config-mgmt-models/src/main/resources/db/migration/`.
+Migrations are managed by Flyway and located in `core-common-config-mgmt-models/src/main/resources/db/migration/`.
 
 ## API Endpoints
 
@@ -278,7 +278,7 @@ This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENS
 ## Support
 
 - **Documentation**: [docs/](./docs)
-- **Issues**: [GitHub Issues](https://github.com/firefly-oss/common-platform-config-mgmt/issues)
+- **Issues**: [GitHub Issues](https://github.com/firefly-oss/core-common-config-mgmt/issues)
 - **Community**: [Firefly Community](https://community.firefly-banking.org)
 - **Website**: [firefly-banking.org](https://firefly-banking.org)
 

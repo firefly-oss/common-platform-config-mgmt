@@ -869,7 +869,7 @@ Environment Config: Production Database
 #### Secrets Management
 
 Sensitive configuration values are managed via **external vault references**:
-- **Vault Integration**: Secret values are stored in `common-platform-security-vault`, not in this service
+- **Vault Integration**: Secret values are stored in `core-common-security-vault`, not in this service
 - **Reference Pattern**: When `isSecret=true`, the `credentialVaultId` field stores a UUID reference to the vault credential, and `configValue` must be null
 - **Access Control**: Only authorized services can decrypt secrets via the vault
 - **Audit Trail**: All secret access is logged in the vault
@@ -1069,32 +1069,32 @@ The Configuration Management Service follows a **layered architecture** with cle
 The service follows a **multi-module Maven project** structure for clear separation of concerns:
 
 ```
-common-platform-config-mgmt/
+core-common-config-mgmt/
 │
-├── common-platform-config-mgmt-models/
+├── core-common-config-mgmt-models/
 │   ├── Entities (JPA/R2DBC entities)
 │   ├── Repositories (Data access layer)
 │   ├── Migrations (Flyway SQL scripts)
 │   └── Purpose: Data model and persistence
 │
-├── common-platform-config-mgmt-interfaces/
+├── core-common-config-mgmt-interfaces/
 │   ├── DTOs (Data Transfer Objects)
 │   ├── API Contracts (Request/Response models)
 │   └── Purpose: API contracts and data transfer
 │
-├── common-platform-config-mgmt-core/
+├── core-common-config-mgmt-core/
 │   ├── Services (Business logic)
 │   ├── Mappers (Entity DTO conversion)
 │   ├── Validators (Business rule validation)
 │   └── Purpose: Business logic and orchestration
 │
-├── common-platform-config-mgmt-web/
+├── core-common-config-mgmt-web/
 │   ├── Controllers (REST endpoints)
 │   ├── Configuration (Spring configuration)
 │   ├── Exception Handlers (Error handling)
 │   └── Purpose: HTTP API and web layer
 │
-└── common-platform-config-mgmt-sdk/
+└── core-common-config-mgmt-sdk/
     ├── Generated Client (Auto-generated from OpenAPI)
     └── Purpose: Client library for consumers
 ```
@@ -1340,7 +1340,7 @@ GRANT ALL ON SCHEMA public TO firefly_user;
 
 ### Step 3: Configuration
 
-Create or edit `common-platform-config-mgmt-web/src/main/resources/application.yml`:
+Create or edit `core-common-config-mgmt-web/src/main/resources/application.yml`:
 
 ```yaml
 spring:
@@ -1393,21 +1393,21 @@ management:
 
 ```bash
 # Clone repository
-git clone https://github.com/firefly-oss/common-platform-config-mgmt.git
-cd common-platform-config-mgmt
+git clone https://github.com/firefly-oss/core-common-config-mgmt.git
+cd core-common-config-mgmt
 
 # Build project (skip tests for faster build)
 mvn clean install -DskipTests
 
 # Run database migrations (automatic on startup)
-# Migrations are in: common-platform-config-mgmt-models/src/main/resources/db/migration
+# Migrations are in: core-common-config-mgmt-models/src/main/resources/db/migration
 
 # Run service
-cd common-platform-config-mgmt-web
+cd core-common-config-mgmt-web
 mvn spring-boot:run
 
 # Or run the JAR directly
-java -jar target/common-platform-config-mgmt-web-1.0.0-SNAPSHOT.jar
+java -jar target/core-common-config-mgmt-web-1.0.0-SNAPSHOT.jar
 ```
 
 ### Step 5: Verify Installation
@@ -2010,7 +2010,7 @@ Enterprise Tenant Settings:
 
 1. **Store Sensitive Credentials in the Security Vault**
    ```java
-   // Use credentialVaultId to reference secrets stored in common-platform-security-vault
+   // Use credentialVaultId to reference secrets stored in core-common-security-vault
    ProviderParameterDTO.builder()
        .parameterName("api_key")
        .isSecret(true)
@@ -2078,7 +2078,7 @@ Enterprise Tenant Settings:
 
 1. **Store Credentials in Plain Text**
    - Always use the vault integration pattern (`isSecret=true` + `credentialVaultId`)
-   - Store credentials in `common-platform-security-vault`, not in `parameterValue`
+   - Store credentials in `core-common-security-vault`, not in `parameterValue`
 
 2. **Use Production Credentials in Development**
    - Use sandbox/test credentials in non-production
@@ -2198,7 +2198,7 @@ Enterprise Tenant Settings:
    - Use type-safe validation
 
 3. **Store Secret Values Directly in Parameters**
-   - Mark parameters as `isSecret=true` and use `credentialVaultId` to reference credentials in `common-platform-security-vault`
+   - Mark parameters as `isSecret=true` and use `credentialVaultId` to reference credentials in `core-common-security-vault`
    - Never store actual secret values in `parameterValue` when `isSecret=true`
 
 4. **Change Parameters Without Testing**
@@ -2242,7 +2242,7 @@ Features:
 ### Community Resources
 
 - **Documentation**: [docs/](.)
-- **Issues**: [GitHub Issues](https://github.com/firefly-oss/common-platform-config-mgmt/issues)
+- **Issues**: [GitHub Issues](https://github.com/firefly-oss/core-common-config-mgmt/issues)
 - **Community**: [Firefly Community](https://community.firefly-banking.org)
 - **Website**: [firefly-banking.org](https://firefly-banking.org)
 - **Email**: support@firefly-banking.org

@@ -894,7 +894,7 @@ To change a provider's status, update the provider's `providerStatusId` field us
 
 1. **Store Sensitive Parameters in the Security Vault**
    ```java
-   // Use credentialVaultId to reference secrets stored in common-platform-security-vault
+   // Use credentialVaultId to reference secrets stored in core-common-security-vault
    ProviderParameterDTO.builder()
        .parameterName("api_key")
        .isSecret(true)

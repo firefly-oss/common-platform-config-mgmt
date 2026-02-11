@@ -632,7 +632,7 @@ Parameters are organized into **logical categories** for better management:
 }
 ```
 
-**Note**: Secret values are stored in the external `common-platform-security-vault` service. When `isSecret=true`, the `parameterValue` must be null and `credentialVaultId` must contain a valid vault credential UUID reference.
+**Note**: Secret values are stored in the external `core-common-security-vault` service. When `isSecret=true`, the `parameterValue` must be null and `credentialVaultId` must contain a valid vault credential UUID reference.
 
 ### Field Descriptions
 
@@ -734,7 +734,7 @@ Parameters marked as `isSecret=true` are **automatically encrypted** at rest and
 
 #### Secret Storage Architecture
 
-Secret parameters use the `common-platform-security-vault` integration pattern:
+Secret parameters use the `core-common-security-vault` integration pattern:
 
 - When `isSecret=true`, the `parameterValue` field must be `null`
 - The `credentialVaultId` field stores a UUID reference to the credential in the security-vault

@@ -5,11 +5,11 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.firefly</groupId>
-        <artifactId>common-platform-config-mgmt</artifactId>
+        <artifactId>core-common-config-mgmt</artifactId>
         <version>1.0.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>common-platform-config-mgmt-web</artifactId>
+    <artifactId>core-common-config-mgmt-web</artifactId>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -19,11 +19,11 @@
     <!-- Internal modules -->
     <dependency>
         <groupId>com.firefly</groupId>
-        <artifactId>common-platform-config-mgmt-core</artifactId>
+        <artifactId>core-common-config-mgmt-core</artifactId>
     </dependency>
     <dependency>
         <groupId>com.firefly</groupId>
-        <artifactId>common-platform-config-mgmt-interfaces</artifactId>
+        <artifactId>core-common-config-mgmt-interfaces</artifactId>
     </dependency>
 
     <!-- Common Libraries -->
